@@ -6,8 +6,10 @@ import {
   getClassrooms, saveClassroom, deleteClassroom,
   getNECCEntries, saveNECCEntry, deleteNECCEntry,
   getLinkedEvents, saveLinkedEvent, deleteLinkedEvent,
+  getDirectory, type DirectoryData,
 } from "@/lib/store";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
+import { DirectoryEditor } from "@/components/DirectoryEditor";
 import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -171,6 +173,7 @@ export default function AdminPage() {
   const [classrooms, setClassrooms] = useState<ClassroomEntry[]>([]);
   const [neccEntries, setNeccEntries] = useState<NECCEntry[]>([]);
   const [linkedEvents, setLinkedEvents] = useState<LinkedEvent[]>([]);
+  const [directoryData, setDirectoryData] = useState<DirectoryData>(getDirectory());
 
   // CRUD form state
   const [classForm, setClassForm] = useState({ className: "", dateTime: "", location: "" });
@@ -182,6 +185,7 @@ export default function AdminPage() {
     setClassrooms(getClassrooms());
     setNeccEntries(getNECCEntries());
     setLinkedEvents(getLinkedEvents());
+    setDirectoryData(getDirectory());
   }, []);
 
   useEffect(() => { reload(); }, [reload]);
@@ -200,7 +204,7 @@ export default function AdminPage() {
 
   return (
     <div className="flex min-h-screen">
-      <DirectorySidebar className="w-64 min-h-screen flex-shrink-0 rounded-none" />
+      <DirectorySidebar className="w-64 min-h-screen flex-shrink-0 rounded-none" directoryData={directoryData} />
       
       <div className="flex-1 p-4 overflow-auto">
         <div className="bg-primary px-4 py-2 rounded mb-4">
@@ -215,8 +219,9 @@ export default function AdminPage() {
             ))}
           </div>
 
-          {/* Right column: CRUD tables + Trainer Status */}
+          {/* Right column: Directory + CRUD tables + Trainer Status */}
           <div className="space-y-4">
+            <DirectoryEditor data={directoryData} onChange={setDirectoryData} />
             <TrainerStatusPanel
               statuses={trainerStatuses}
               editable
