@@ -31,6 +31,30 @@ function SimEditor({ simId, name, timeSlots }: { simId: string; name: string; ti
     setEntries(prev => prev.map((e, i) => i === index ? { ...e, [field]: value } : e));
   };
 
+  const handlePaste = (startIndex: number, field: keyof SimSlot, e: React.ClipboardEvent) => {
+    const pasteData = e.clipboardData.getData('text');
+    // Split by newlines (rows from spreadsheet) and tabs (columns)
+    const rows = pasteData.split(/\r?\n/).filter(r => r.length > 0);
+    if (rows.length <= 1 && !pasteData.includes('\t')) return; // single value, let default handle it
+    e.preventDefault();
+    
+    setEntries(prev => {
+      const updated = [...prev];
+      const fields: (keyof SimSlot)[] = field === 'unit' ? ['unit', 'crew'] : field === 'crew' ? ['crew'] : [field];
+      rows.forEach((row, ri) => {
+        const idx = startIndex + ri;
+        if (idx >= updated.length) return;
+        const cols = row.split('\t');
+        fields.forEach((f, ci) => {
+          if (ci < cols.length) {
+            updated[idx] = { ...updated[idx], [f]: cols[ci].trim() };
+          }
+        });
+      });
+      return updated;
+    });
+  };
+
   const handleSave = () => {
     const ts = saveSimEntries(simId, entries);
     setLastSaved(ts);
@@ -51,15 +75,21 @@ function SimEditor({ simId, name, timeSlots }: { simId: string; name: string; ti
         </div>
         {entries.map((entry, i) => (
           <div key={i} className="grid grid-cols-4 gap-2 items-center">
-            <span className="text-xs font-mono bg-muted px-2 py-1.5 rounded">{entry.time}</span>
+            <Input
+              value={entry.time}
+              onChange={(e) => updateField(i, "time", e.target.value)}
+              className="h-8 text-xs font-mono"
+            />
             <Input
               value={entry.unit}
               onChange={(e) => updateField(i, "unit", e.target.value)}
+              onPaste={(e) => handlePaste(i, "unit", e)}
               className="h-8 text-xs"
             />
             <Input
               value={entry.crew}
               onChange={(e) => updateField(i, "crew", e.target.value)}
+              onPaste={(e) => handlePaste(i, "crew", e)}
               className="h-8 text-xs"
             />
             <Input
