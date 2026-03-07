@@ -173,6 +173,7 @@ export default function AdminPage() {
   const [classrooms, setClassrooms] = useState<ClassroomEntry[]>([]);
   const [neccEntries, setNeccEntries] = useState<NECCEntry[]>([]);
   const [linkedEvents, setLinkedEvents] = useState<LinkedEvent[]>([]);
+  const [directoryData, setDirectoryData] = useState<DirectoryData>(getDirectory());
 
   // CRUD form state
   const [classForm, setClassForm] = useState({ className: "", dateTime: "", location: "" });
@@ -184,6 +185,7 @@ export default function AdminPage() {
     setClassrooms(getClassrooms());
     setNeccEntries(getNECCEntries());
     setLinkedEvents(getLinkedEvents());
+    setDirectoryData(getDirectory());
   }, []);
 
   useEffect(() => { reload(); }, [reload]);
