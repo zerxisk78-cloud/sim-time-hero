@@ -6,8 +6,11 @@ import {
   getClassrooms, saveClassroom, deleteClassroom,
   getNECCEntries, saveNECCEntry, deleteNECCEntry,
   getLinkedEvents, saveLinkedEvent, deleteLinkedEvent,
+  getDirectory, type DirectoryData,
 } from "@/lib/store";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
+import { DirectoryEditor } from "@/components/DirectoryEditor";
+import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
 import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
