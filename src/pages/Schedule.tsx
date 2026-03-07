@@ -7,6 +7,13 @@ import { SimScheduleTable } from "@/components/SimScheduleTable";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent } from "@/lib/types";
 
+// Groups of simulator IDs to rotate through every 10 seconds
+const SIM_GROUPS = [
+  ['mcat', 'ah1z-ffs', 'ah1z-ftd'],
+  ['ah1z-cpt', 'uh1y-ftd', 'uh1y-ffs'],
+  ['uh1y-cpt', 'mv22-13', 'mv22-14', 'mv22-ptt'],
+];
+
 export default function SchedulePage() {
   const [simData, setSimData] = useState<Record<string, SimSlot[]>>({});
   const [statuses, setStatuses] = useState<TrainerStatus[]>([]);
@@ -14,6 +21,7 @@ export default function SchedulePage() {
   const [neccEntries, setNeccEntries] = useState<NECCEntry[]>([]);
   const [linkedEvents, setLinkedEvents] = useState<LinkedEvent[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [activeGroup, setActiveGroup] = useState(0);
 
   const loadData = () => {
     const data: Record<string, SimSlot[]> = {};
@@ -32,6 +40,17 @@ export default function SchedulePage() {
     return () => clearInterval(interval);
   }, []);
 
+  // Rotate simulator groups every 10 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveGroup(prev => (prev + 1) % SIM_GROUPS.length);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const visibleSimIds = SIM_GROUPS[activeGroup];
+  const visibleSims = SIMULATORS.filter(s => visibleSimIds.includes(s.id));
+
   return (
     <div className="flex min-h-screen">
       <DirectorySidebar className="w-64 min-h-screen flex-shrink-0 rounded-none" />
@@ -46,8 +65,18 @@ export default function SchedulePage() {
           </p>
         </div>
 
+        {/* Group indicator dots */}
+        <div className="flex justify-center gap-2 mb-4">
+          {SIM_GROUPS.map((_, i) => (
+            <div
+              key={i}
+              className={`w-3 h-3 rounded-full transition-colors ${i === activeGroup ? 'bg-primary' : 'bg-muted'}`}
+            />
+          ))}
+        </div>
+
         <div className="max-w-2xl mx-auto space-y-2">
-          {SIMULATORS.map(sim => (
+          {visibleSims.map(sim => (
             <SimScheduleTable key={sim.id} name={sim.name} entries={simData[sim.id] || []} />
           ))}
           <p className="text-xs text-muted-foreground mt-4">*NB = No brief</p>

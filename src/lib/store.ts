@@ -105,3 +105,63 @@ export function updateLinkedEvent(id: string, entry: Partial<LinkedEvent>): void
 export function deleteLinkedEvent(id: string): void {
   setItem('linked', getLinkedEvents().filter(e => e.id !== id));
 }
+
+// Directory
+export interface DirectoryContact {
+  title: string;
+  name?: string;
+  callsign?: string;
+  office?: string;
+  room?: string;
+}
+
+export interface DirectorySection {
+  heading: string;
+  contacts: DirectoryContact[];
+}
+
+export interface DirectoryData {
+  info: { line1: string; line2: string; phone: string };
+  sections: DirectorySection[];
+}
+
+const DEFAULT_DIRECTORY: DirectoryData = {
+  info: { line1: "MCAS Camp Pendleton Bldg 2394", line2: "Camp Pendleton", phone: "760-725-0778" },
+  sections: [
+    {
+      heading: "1st Floor",
+      contacts: [
+        { title: "OIC - (AH-1Z FLSE)", name: 'Maj B. Hough', callsign: '"Monk"', office: "(760) 725-8048", room: "108" },
+        { title: "MV-22 FLSE", name: 'Maj B. Holloway', callsign: '"Cherry Boi"', office: "(760) 763-5107", room: "110" },
+        { title: "UH-1Y FLSE", name: 'Maj A. Snell', callsign: '"Tipper"', office: "(760) 763-5107", room: "110" },
+        { title: "Crew Chief Training", name: "SSgt. W. Kyllo", office: "(760) 763-5107", room: "110" },
+        { title: "COMS COR", name: "Rob McChesney", office: "(760) 725-8047", room: "107" },
+      ],
+    },
+    {
+      heading: "2nd Floor",
+      contacts: [
+        { title: "MATSS Operations", office: "(760) 725-8278", room: "225" },
+        { title: "NiteLab Admin", office: "(760) 763-8339", room: "224" },
+        { title: "NiteLab", room: "215" },
+        { title: "Electronic Classroom", room: "227" },
+        { title: "CSI Office", room: "206" },
+        { title: "Student Check-In", room: "220" },
+      ],
+    },
+    {
+      heading: "Building 23194",
+      contacts: [
+        { title: "H1 CICC Office", name: "Jared Tape", office: "(760) 725-0036" },
+      ],
+    },
+  ],
+};
+
+export function getDirectory(): DirectoryData {
+  return getItem<DirectoryData>('directory', DEFAULT_DIRECTORY);
+}
+
+export function saveDirectory(data: DirectoryData): void {
+  setItem('directory', data);
+}
