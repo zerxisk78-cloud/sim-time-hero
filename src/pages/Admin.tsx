@@ -11,7 +11,6 @@ import {
 import { DirectorySidebar } from "@/components/DirectorySidebar";
 import { DirectoryEditor } from "@/components/DirectoryEditor";
 import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
-import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
