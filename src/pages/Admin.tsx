@@ -204,7 +204,7 @@ export default function AdminPage() {
 
   return (
     <div className="flex min-h-screen">
-      <DirectorySidebar className="w-64 min-h-screen flex-shrink-0 rounded-none" />
+      <DirectorySidebar className="w-64 min-h-screen flex-shrink-0 rounded-none" directoryData={directoryData} />
       
       <div className="flex-1 p-4 overflow-auto">
         <div className="bg-primary px-4 py-2 rounded mb-4">
@@ -219,8 +219,9 @@ export default function AdminPage() {
             ))}
           </div>
 
-          {/* Right column: CRUD tables + Trainer Status */}
+          {/* Right column: Directory + CRUD tables + Trainer Status */}
           <div className="space-y-4">
+            <DirectoryEditor data={directoryData} onChange={setDirectoryData} />
             <TrainerStatusPanel
               statuses={trainerStatuses}
               editable
