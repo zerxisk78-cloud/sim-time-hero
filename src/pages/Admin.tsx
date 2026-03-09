@@ -180,7 +180,7 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
         </div>
         <div className="flex items-center gap-3 px-4 pb-3">
           <Button onClick={addRow} size="sm" variant="outline" className="text-xs h-7">+ Add Row</Button>
-          <Button onClick={handleSave} size="sm" className="text-xs h-7">Save {name}</Button>
+          <Button onClick={handleSave} size="sm" className="text-xs h-7">Save {displayName}</Button>
           {lastSaved && <span className="text-xs text-muted-foreground">Last saved: {lastSaved}</span>}
         </div>
       </CardContent>
