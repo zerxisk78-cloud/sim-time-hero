@@ -9,6 +9,7 @@ import {
   getDirectory, type DirectoryData,
   getVisibility, saveVisibility,
   getDisplayName, saveNameOverride,
+  getExtraSims, saveExtraSims, type ExtraSim,
 } from "@/lib/store";
 import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
