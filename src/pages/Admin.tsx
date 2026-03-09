@@ -424,6 +424,44 @@ export default function AdminPage() {
             {SIMULATORS.map(sim => (
               <SimEditor key={sim.id} simId={sim.id} name={sim.name} timeSlots={sim.timeSlots} />
             ))}
+            
+            {/* Extra custom trainer boxes */}
+            {extraSims.map(sim => (
+              <div key={sim.id} className="relative">
+                <SimEditor simId={sim.id} name={sim.name} timeSlots={[]} />
+                <button
+                  onClick={() => {
+                    const updated = extraSims.filter(s => s.id !== sim.id);
+                    setExtraSims(updated);
+                    saveExtraSims(updated);
+                    localStorage.removeItem(`matss_sim_${sim.id}`);
+                    toast.info(`Removed ${sim.name}`);
+                  }}
+                  className="absolute top-2 right-2 p-1 bg-destructive/80 text-destructive-foreground rounded hover:bg-destructive"
+                  title="Remove trainer box"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+            
+            {/* Add new trainer box button */}
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                const name = prompt("Enter trainer name:");
+                if (name?.trim()) {
+                  const id = `custom-${Date.now()}`;
+                  const updated = [...extraSims, { id, name: name.trim() }];
+                  setExtraSims(updated);
+                  saveExtraSims(updated);
+                  toast.success(`Added ${name.trim()}`);
+                }
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" /> Add Trainer Box
+            </Button>
           </div>
 
           {/* Right column: Trainer groups + Visibility + CRUD tables */}
