@@ -7,6 +7,7 @@ import { SimScheduleTable } from "@/components/SimScheduleTable";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
 import egaImage from "@/assets/usmc-ega.png";
+import usmcFlag from "@/assets/usmc-flag.png";
 import { FlyingAircraft } from "@/components/FlyingAircraft";
 
 // Groups of simulator IDs to rotate through every 10 seconds
@@ -59,7 +60,11 @@ export default function SchedulePage() {
   const visibleSims = SIMULATORS.filter(s => visibleSimIds.includes(s.id));
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen relative">
+      <div
+        className="absolute inset-0 z-0 opacity-10 bg-center bg-no-repeat bg-contain pointer-events-none"
+        style={{ backgroundImage: `url(${usmcFlag})` }}
+      />
       <FlyingAircraft />
       <DirectorySidebar className="w-64 min-h-screen flex-shrink-0 rounded-none" />
       
