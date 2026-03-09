@@ -8,6 +8,7 @@ import {
   getLinkedEvents, saveLinkedEvent, deleteLinkedEvent,
   getDirectory, type DirectoryData,
   getVisibility, saveVisibility,
+  getDisplayName, saveNameOverride,
 } from "@/lib/store";
 import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
