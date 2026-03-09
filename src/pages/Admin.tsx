@@ -105,13 +105,39 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
 
   const handleUndo = () => {
     setEntries(getSimEntries(simId));
-    toast.info(`${name} reverted to last saved`);
+    toast.info(`${displayName} reverted to last saved`);
+  };
+
+  const handleSaveName = () => {
+    saveNameOverride(simId, displayName);
+    setEditingName(false);
+    toast.success(`Renamed to ${displayName}`);
   };
 
   return (
     <Card className="mb-4">
       <CardHeader className="py-3 flex flex-row items-center justify-between">
-        <CardTitle className="text-base">{name}</CardTitle>
+        {editingName ? (
+          <div className="flex items-center gap-1">
+            <Input
+              value={displayName}
+              onChange={e => setDisplayName(e.target.value)}
+              className="h-7 text-sm w-40"
+              autoFocus
+              onKeyDown={e => e.key === 'Enter' && handleSaveName()}
+            />
+            <Button onClick={handleSaveName} size="sm" variant="ghost" className="h-7 w-7 p-0">
+              <Check className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        ) : (
+          <CardTitle className="text-base flex items-center gap-1">
+            {displayName}
+            <button onClick={() => setEditingName(true)} className="text-muted-foreground hover:text-foreground">
+              <Pencil className="h-3 w-3" />
+            </button>
+          </CardTitle>
+        )}
         <Button onClick={handleUndo} size="sm" variant="ghost" className="text-xs h-7 gap-1">
           <Undo2 className="h-3.5 w-3.5" /> Undo
         </Button>
