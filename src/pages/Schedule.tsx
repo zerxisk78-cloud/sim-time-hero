@@ -112,8 +112,8 @@ export default function SchedulePage() {
         )}
 
         {visibility.necc && neccEntries.length > 0 && (
-          <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
-            <h3 className="text-lg font-bold underline mb-2 text-center">NECC Reservations</h3>
+          <div className="bg-sidebar-background text-sidebar-foreground p-2 rounded-lg">
+            <h3 className="text-sm font-bold underline mb-1 text-center">NECC Reservations</h3>
             <Table>
               <TableHeader>
                 <TableRow>
