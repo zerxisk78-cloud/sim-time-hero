@@ -583,6 +583,7 @@ export default function AdminPage() {
               }}
               onDelete={(id) => { deleteLinkedEvent(id); reload(); }}
               onUpdate={(id, updates) => { updateLinkedEvent(id, updates); reload(); }}
+              onReorder={(items) => { saveLinkedEventsOrder(items); reload(); }}
               renderInputs={() => (
                 <>
                   <div className="space-y-1">
