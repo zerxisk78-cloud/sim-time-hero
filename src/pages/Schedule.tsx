@@ -60,7 +60,11 @@ export default function SchedulePage() {
   const visibleSims = SIMULATORS.filter(s => visibleSimIds.includes(s.id));
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen relative">
+      <div
+        className="absolute inset-0 z-0 opacity-10 bg-center bg-no-repeat bg-contain pointer-events-none"
+        style={{ backgroundImage: `url(${usmcFlag})` }}
+      />
       <FlyingAircraft />
       <DirectorySidebar className="w-64 min-h-screen flex-shrink-0 rounded-none" />
       
