@@ -477,6 +477,7 @@ export default function AdminPage() {
                 toast.success("NECC entry added");
               }}
               onDelete={(id) => { deleteNECCEntry(id); reload(); }}
+              onUpdate={(id, updates) => { updateNECCEntry(id, updates); reload(); }}
               renderInputs={() => (
                 <>
                   <div className="space-y-1">
