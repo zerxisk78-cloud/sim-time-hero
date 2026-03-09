@@ -103,6 +103,9 @@ export default function SchedulePage() {
           {visibleSims.map(sim => (
             <SimScheduleTable key={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} />
           ))}
+          {visibleExtraSims.map(sim => (
+            <SimScheduleTable key={sim.id} name={getDisplayName(sim.id) || sim.name} entries={simData[sim.id] || []} />
+          ))}
           <p className="text-xs text-muted-foreground mt-4">*NB = No brief</p>
         </div>
       </div>
