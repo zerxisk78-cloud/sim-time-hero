@@ -215,6 +215,7 @@ export default function AdminPage() {
   const [neccEntries, setNeccEntries] = useState<NECCEntry[]>([]);
   const [linkedEvents, setLinkedEvents] = useState<LinkedEvent[]>([]);
   const [directoryData, setDirectoryData] = useState<DirectoryData>(getDirectory());
+  const [visibility, setVisibility] = useState<VisibilitySettings>(getVisibility());
 
   // CRUD form state
   const [classForm, setClassForm] = useState({ className: "", dateTime: "", location: "" });
