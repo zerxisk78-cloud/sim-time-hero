@@ -84,12 +84,12 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      <div className="w-72 flex-shrink-0 p-4 space-y-4">
+      <div className="w-72 flex-shrink-0 p-2 space-y-2 overflow-auto">
         {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} />}
 
         {visibility.classrooms && classrooms.length > 0 && (
-          <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
-            <h3 className="text-lg font-bold underline mb-2 text-center">Classes</h3>
+          <div className="bg-sidebar-background text-sidebar-foreground p-2 rounded-lg">
+            <h3 className="text-sm font-bold underline mb-1 text-center">Classes</h3>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -112,8 +112,8 @@ export default function SchedulePage() {
         )}
 
         {visibility.necc && neccEntries.length > 0 && (
-          <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
-            <h3 className="text-lg font-bold underline mb-2 text-center">NECC Reservations</h3>
+          <div className="bg-sidebar-background text-sidebar-foreground p-2 rounded-lg">
+            <h3 className="text-sm font-bold underline mb-1 text-center">NECC Reservations</h3>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -136,8 +136,8 @@ export default function SchedulePage() {
         )}
 
         {visibility.linkedEvents && linkedEvents.length > 0 && (
-          <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
-            <h3 className="text-lg font-bold underline mb-2 text-center">Linked Events</h3>
+          <div className="bg-sidebar-background text-sidebar-foreground p-2 rounded-lg">
+            <h3 className="text-sm font-bold underline mb-1 text-center">Linked Events</h3>
             <Table>
               <TableHeader>
                 <TableRow>
