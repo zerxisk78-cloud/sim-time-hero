@@ -82,6 +82,15 @@ function SimEditor({ simId, name, timeSlots }: { simId: string; name: string; ti
     }
   };
 
+  const addRow = () => {
+    setEntries(prev => [...prev, { time: '', unit: '', crew: '', csi: '' }]);
+  };
+
+  const removeRow = (index: number) => {
+    if (entries.length <= 1) return;
+    setEntries(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSave = () => {
     const ts = saveSimEntries(simId, entries);
     setLastSaved(ts);
@@ -93,33 +102,45 @@ function SimEditor({ simId, name, timeSlots }: { simId: string; name: string; ti
       <CardHeader className="py-3">
         <CardTitle className="text-base">{name}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="grid grid-cols-4 gap-2">
-          <div className="text-xs font-semibold text-muted-foreground">Time</div>
-          <div className="text-xs font-semibold text-muted-foreground">Unit</div>
-          <div className="text-xs font-semibold text-muted-foreground">Crew</div>
-          <div className="text-xs font-semibold text-muted-foreground">CSI/System</div>
-        </div>
-        {entries.map((entry, i) => (
-          <div key={i} className="grid grid-cols-4 gap-2 items-center">
-            {FIELD_ORDER.map((field, col) => (
-              <Input
-                key={field}
-                value={entry[field]}
-                data-sim={simId}
-                data-row={i}
-                data-col={col}
-                onChange={(e) => updateField(i, field, e.target.value)}
-                onPaste={(e) => handlePaste(i, col, e)}
-                onKeyDown={(e) => handleKeyDown(i, col, e)}
-                onFocus={(e) => e.target.select()}
-                className={`h-8 text-xs ${col === 0 ? 'font-mono' : ''}`}
-              />
+      <CardContent className="p-0">
+        <div className="border border-border rounded overflow-hidden mx-4 mb-3">
+          {/* Header row */}
+          <div className="grid grid-cols-[1fr_1fr_1fr_1fr_28px] bg-muted">
+            {['Time', 'Unit', 'Crew', 'CSI/System'].map((h, i) => (
+              <div key={h} className={`px-2 py-1.5 text-xs font-semibold text-muted-foreground border-r border-border last:border-r-0 ${i === 0 ? '' : ''}`}>{h}</div>
             ))}
+            <div />
           </div>
-        ))}
-        <div className="flex items-center gap-3 pt-2">
-          <Button onClick={handleSave} size="sm">Save {name}</Button>
+          {/* Data rows */}
+          {entries.map((entry, i) => (
+            <div key={i} className="grid grid-cols-[1fr_1fr_1fr_1fr_28px] border-t border-border">
+              {FIELD_ORDER.map((field, col) => (
+                <input
+                  key={field}
+                  value={entry[field]}
+                  data-sim={simId}
+                  data-row={i}
+                  data-col={col}
+                  onChange={(e) => updateField(i, field, e.target.value)}
+                  onPaste={(e) => handlePaste(i, col, e)}
+                  onKeyDown={(e) => handleKeyDown(i, col, e)}
+                  onFocus={(e) => e.target.select()}
+                  className={`bg-background px-2 py-1 text-xs border-r border-border outline-none focus:bg-accent/30 focus:ring-1 focus:ring-inset focus:ring-ring ${col === 0 ? 'font-mono' : ''}`}
+                />
+              ))}
+              <button
+                onClick={() => removeRow(i)}
+                className="flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
+                title="Remove row"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center gap-3 px-4 pb-3">
+          <Button onClick={addRow} size="sm" variant="outline" className="text-xs h-7">+ Add Row</Button>
+          <Button onClick={handleSave} size="sm" className="text-xs h-7">Save {name}</Button>
           {lastSaved && <span className="text-xs text-muted-foreground">Last saved: {lastSaved}</span>}
         </div>
       </CardContent>
