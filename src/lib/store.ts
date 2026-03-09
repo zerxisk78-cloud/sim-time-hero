@@ -91,6 +91,10 @@ export function deleteNECCEntry(id: string): void {
   setItem('necc', getNECCEntries().filter(e => e.id !== id));
 }
 
+export function saveNECCOrder(entries: NECCEntry[]): void {
+  setItem('necc', entries);
+}
+
 // Linked Events
 export function getLinkedEvents(): LinkedEvent[] {
   return getItem<LinkedEvent[]>('linked', []);
