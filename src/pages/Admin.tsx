@@ -443,6 +443,7 @@ export default function AdminPage() {
                 toast.success("Classroom added");
               }}
               onDelete={(id) => { deleteClassroom(id); reload(); }}
+              onUpdate={(id, updates) => { updateClassroom(id, updates); reload(); }}
               renderInputs={() => (
                 <>
                   <div className="space-y-1">
