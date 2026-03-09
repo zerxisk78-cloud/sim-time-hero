@@ -3,9 +3,9 @@ import { SIMULATORS, TRAINER_GROUPS } from "@/lib/types";
 import {
   getSimEntries, saveSimEntries, getSimLastSaved,
   getTrainerStatuses, saveTrainerStatuses,
-  getClassrooms, saveClassroom, updateClassroom, deleteClassroom,
-  getNECCEntries, saveNECCEntry, updateNECCEntry, deleteNECCEntry,
-  getLinkedEvents, saveLinkedEvent, updateLinkedEvent, deleteLinkedEvent,
+  getClassrooms, saveClassroom, updateClassroom, deleteClassroom, saveClassroomsOrder,
+  getNECCEntries, saveNECCEntry, updateNECCEntry, deleteNECCEntry, saveNECCOrder,
+  getLinkedEvents, saveLinkedEvent, updateLinkedEvent, deleteLinkedEvent, saveLinkedEventsOrder,
   getDirectory, type DirectoryData,
   getVisibility, saveVisibility,
   getDisplayName, saveNameOverride,
