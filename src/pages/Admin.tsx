@@ -513,6 +513,7 @@ export default function AdminPage() {
               }}
               onDelete={(id) => { deleteClassroom(id); reload(); }}
               onUpdate={(id, updates) => { updateClassroom(id, updates); reload(); }}
+              onReorder={(items) => { saveClassroomsOrder(items); reload(); }}
               renderInputs={() => (
                 <>
                   <div className="space-y-1">
