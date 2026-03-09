@@ -62,6 +62,8 @@ export default function SchedulePage() {
 
   const visibleSimIds = SIM_GROUPS[activeGroup].filter(id => visibility.simulators[id] !== false);
   const visibleSims = SIMULATORS.filter(s => visibleSimIds.includes(s.id));
+  // Custom trainers always visible (not in rotation groups) when toggled on
+  const visibleExtraSims = extraSims.filter(s => visibility.simulators[s.id] !== false);
 
   return (
     <div className="flex min-h-screen relative">
