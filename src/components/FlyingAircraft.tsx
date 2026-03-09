@@ -32,7 +32,7 @@ export function FlyingAircraft() {
   if (!flying) return null;
 
   return (
-    <div className="fixed top-0 left-0 w-full h-20 pointer-events-none z-50 overflow-hidden">
+    <div className="fixed top-0 left-0 w-full h-40 pointer-events-none z-50 overflow-hidden">
       {AIRCRAFT.map((craft, i) => (
         <img
           key={craft.alt}
