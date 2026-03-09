@@ -26,9 +26,11 @@ import { toast } from "sonner";
 
 const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
 
-function SimEditor({ simId, name, timeSlots }: { simId: string; name: string; timeSlots: string[] }) {
+function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; name: string; timeSlots: string[] }) {
   const [entries, setEntries] = useState<SimSlot[]>([]);
   const [lastSaved, setLastSaved] = useState("");
+  const [displayName, setDisplayName] = useState(getDisplayName(simId));
+  const [editingName, setEditingName] = useState(false);
 
   useEffect(() => {
     setEntries(getSimEntries(simId));
