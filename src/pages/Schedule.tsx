@@ -7,6 +7,7 @@ import { SimScheduleTable } from "@/components/SimScheduleTable";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
 import egaImage from "@/assets/usmc-ega.png";
+import { FlyingAircraft } from "@/components/FlyingAircraft";
 
 // Groups of simulator IDs to rotate through every 10 seconds
 const SIM_GROUPS = [
@@ -59,6 +60,7 @@ export default function SchedulePage() {
 
   return (
     <div className="flex min-h-screen">
+      <FlyingAircraft />
       <DirectorySidebar className="w-48 min-h-screen flex-shrink-0 rounded-none" />
       
       <div className="flex-1 p-4 overflow-auto">
