@@ -326,10 +326,26 @@ export default function AdminPage() {
             {/* 3 Trainer Status Panels by aircraft group */}
             {TRAINER_GROUPS.map(group => {
               const groupStatuses = trainerStatuses.filter(s => group.trainers.some(t => t.id === s.id));
+              const allVisible = group.trainers.every(t => visibility.simulators[t.id] !== false);
+              const toggleGroupVisibility = () => {
+                updateVisibility(prev => {
+                  const next = { ...prev, simulators: { ...prev.simulators } };
+                  group.trainers.forEach(t => { next.simulators[t.id] = !allVisible; });
+                  return next;
+                });
+                toast.info(`${group.name} ${allVisible ? 'hidden' : 'shown'} on display pages`);
+              };
               return (
                 <Card key={group.id} className="mb-4">
-                  <CardHeader className="py-3">
-                    <CardTitle className="text-base">{group.name}</CardTitle>
+                  <CardHeader className="py-3 flex flex-row items-center justify-between">
+                    <CardTitle
+                      className="text-base cursor-default select-none"
+                      onDoubleClick={toggleGroupVisibility}
+                      title=""
+                    >
+                      {group.name}
+                    </CardTitle>
+                    <span className={`h-2 w-2 rounded-full ${allVisible ? 'bg-green-500' : 'bg-red-500'} opacity-30`} />
                   </CardHeader>
                   <CardContent>
                     <TrainerStatusPanel
