@@ -227,5 +227,7 @@ export function getDisplayName(id: string): string {
   if (sim) return sim.name;
   const trainer = TRAINER_STATUS_IDS.find(t => t.id === id);
   if (trainer) return trainer.name;
+  const extra = getExtraSims().find(s => s.id === id);
+  if (extra) return extra.name;
   return id;
 }
