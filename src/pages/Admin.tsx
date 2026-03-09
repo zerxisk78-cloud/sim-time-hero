@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { SIMULATORS } from "@/lib/types";
+import { SIMULATORS, TRAINER_GROUPS } from "@/lib/types";
 import {
   getSimEntries, saveSimEntries, getSimLastSaved,
   getTrainerStatuses, saveTrainerStatuses,
@@ -7,7 +7,9 @@ import {
   getNECCEntries, saveNECCEntry, deleteNECCEntry,
   getLinkedEvents, saveLinkedEvent, deleteLinkedEvent,
   getDirectory, type DirectoryData,
+  getVisibility, saveVisibility,
 } from "@/lib/store";
+import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
 import { DirectoryEditor } from "@/components/DirectoryEditor";
 import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
