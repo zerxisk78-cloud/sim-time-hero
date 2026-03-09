@@ -191,6 +191,71 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
   );
 }
 
+function SortableRow<T extends { id: string }>({
+  item,
+  columns,
+  editingId,
+  editValues,
+  setEditValues,
+  saveEdit,
+  startEdit,
+  onDelete,
+}: {
+  item: T;
+  columns: { key: keyof T; label: string }[];
+  editingId: string | null;
+  editValues: Partial<T>;
+  setEditValues: React.Dispatch<React.SetStateAction<Partial<T>>>;
+  saveEdit: () => void;
+  startEdit: (item: T) => void;
+  onDelete: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <TableRow ref={setNodeRef} style={style}>
+      <TableCell className="py-1 w-8 cursor-grab" {...attributes} {...listeners}>
+        <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
+      </TableCell>
+      {columns.map(col => (
+        <TableCell key={String(col.key)} className="text-xs py-1">
+          {editingId === item.id ? (
+            <Input
+              value={String(editValues[col.key] ?? '')}
+              onChange={e => setEditValues(prev => ({ ...prev, [col.key]: e.target.value }))}
+              className="h-7 text-xs"
+              onKeyDown={e => e.key === 'Enter' && saveEdit()}
+            />
+          ) : (
+            String(item[col.key])
+          )}
+        </TableCell>
+      ))}
+      <TableCell className="py-1">
+        <div className="flex gap-1">
+          {editingId === item.id ? (
+            <button onClick={saveEdit} className="text-primary hover:opacity-70">
+              <Check className="h-3.5 w-3.5" />
+            </button>
+          ) : (
+            <button onClick={() => startEdit(item)} className="text-muted-foreground hover:text-foreground">
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          )}
+          <button onClick={() => onDelete(item.id)} className="text-destructive hover:opacity-70">
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+}
+
 function CrudTable<T extends { id: string }>({
   title,
   items,
@@ -198,6 +263,7 @@ function CrudTable<T extends { id: string }>({
   onAdd,
   onDelete,
   onUpdate,
+  onReorder,
   renderInputs,
 }: {
   title: string;
@@ -206,10 +272,16 @@ function CrudTable<T extends { id: string }>({
   onAdd: () => void;
   onDelete: (id: string) => void;
   onUpdate: (id: string, updates: Partial<T>) => void;
+  onReorder: (items: T[]) => void;
   renderInputs: () => React.ReactNode;
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Partial<T>>({});
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const startEdit = (item: T) => {
     setEditingId(item.id);
@@ -226,6 +298,16 @@ function CrudTable<T extends { id: string }>({
     }
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = items.findIndex(i => i.id === active.id);
+      const newIndex = items.findIndex(i => i.id === over.id);
+      const reordered = arrayMove(items, oldIndex, newIndex);
+      onReorder(reordered);
+    }
+  };
+
   return (
     <Card className="mb-4">
       <CardHeader className="py-3">
@@ -237,52 +319,36 @@ function CrudTable<T extends { id: string }>({
           <Button onClick={onAdd} size="sm">Add</Button>
         </div>
         {items.length > 0 && (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {columns.map(col => (
-                  <TableHead key={String(col.key)} className="text-xs">{col.label}</TableHead>
-                ))}
-                <TableHead className="w-20"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map(item => (
-                <TableRow key={item.id}>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-8"></TableHead>
                   {columns.map(col => (
-                    <TableCell key={String(col.key)} className="text-xs py-1">
-                      {editingId === item.id ? (
-                        <Input
-                          value={String(editValues[col.key] ?? '')}
-                          onChange={e => setEditValues(prev => ({ ...prev, [col.key]: e.target.value }))}
-                          className="h-7 text-xs"
-                          onKeyDown={e => e.key === 'Enter' && saveEdit()}
-                        />
-                      ) : (
-                        String(item[col.key])
-                      )}
-                    </TableCell>
+                    <TableHead key={String(col.key)} className="text-xs">{col.label}</TableHead>
                   ))}
-                  <TableCell className="py-1">
-                    <div className="flex gap-1">
-                      {editingId === item.id ? (
-                        <button onClick={saveEdit} className="text-primary hover:opacity-70">
-                          <Check className="h-3.5 w-3.5" />
-                        </button>
-                      ) : (
-                        <button onClick={() => startEdit(item)} className="text-muted-foreground hover:text-foreground">
-                          <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                      <button onClick={() => onDelete(item.id)} className="text-destructive hover:opacity-70">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </TableCell>
+                  <TableHead className="w-20"></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+                  {items.map(item => (
+                    <SortableRow
+                      key={item.id}
+                      item={item}
+                      columns={columns}
+                      editingId={editingId}
+                      editValues={editValues}
+                      setEditValues={setEditValues}
+                      saveEdit={saveEdit}
+                      startEdit={startEdit}
+                      onDelete={onDelete}
+                    />
+                  ))}
+                </SortableContext>
+              </TableBody>
+            </Table>
+          </DndContext>
         )}
       </CardContent>
     </Card>
