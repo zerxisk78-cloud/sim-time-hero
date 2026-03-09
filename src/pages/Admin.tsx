@@ -228,6 +228,7 @@ export default function AdminPage() {
     setNeccEntries(getNECCEntries());
     setLinkedEvents(getLinkedEvents());
     setDirectoryData(getDirectory());
+    setVisibility(getVisibility());
   }, []);
 
   useEffect(() => { reload(); }, [reload]);
