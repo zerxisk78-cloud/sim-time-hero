@@ -245,6 +245,14 @@ export default function AdminPage() {
     saveTrainerStatuses(updated);
   };
 
+  const updateVisibility = (updater: (prev: VisibilitySettings) => VisibilitySettings) => {
+    setVisibility(prev => {
+      const next = updater(prev);
+      saveVisibility(next);
+      return next;
+    });
+  };
+
   return (
     <div className="flex min-h-screen">
       <DirectorySidebar className="w-64 min-h-screen flex-shrink-0 rounded-none" directoryData={directoryData} />
