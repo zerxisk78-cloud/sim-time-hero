@@ -63,13 +63,13 @@ export default function SchedulePage() {
       
       <div className="flex-1 p-4 overflow-auto">
         <div className="text-center mb-4">
-          <div className="flex items-center justify-center gap-6">
-            <img src={egaImage} alt="USMC Eagle Globe and Anchor" className="h-24 w-24 object-contain" />
+          <div className="flex items-center justify-center gap-4">
+            <img src={egaImage} alt="USMC Eagle Globe and Anchor" className="h-16 w-16 object-contain" />
             <div>
               <h1 className="text-2xl font-bold">Marine Aviation Training System Site</h1>
               <p className="text-lg text-muted-foreground">MCAS Pendleton</p>
             </div>
-            <img src={egaImage} alt="USMC Eagle Globe and Anchor" className="h-24 w-24 object-contain" />
+            <img src={egaImage} alt="USMC Eagle Globe and Anchor" className="h-16 w-16 object-contain" />
           </div>
           <p className="text-lg mt-2">Current Simulator Schedule</p>
           <p className="text-sm text-muted-foreground">
