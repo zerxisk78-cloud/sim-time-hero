@@ -195,6 +195,20 @@ export function saveVisibility(settings: VisibilitySettings): void {
   setItem('visibility', settings);
 }
 
+// Extra (custom) simulators/trainers
+export interface ExtraSim {
+  id: string;
+  name: string;
+}
+
+export function getExtraSims(): ExtraSim[] {
+  return getItem<ExtraSim[]>('extra_sims', []);
+}
+
+export function saveExtraSims(sims: ExtraSim[]): void {
+  setItem('extra_sims', sims);
+}
+
 // Name Overrides
 export function getNameOverrides(): Record<string, string> {
   return getItem<Record<string, string>>('name_overrides', {});
@@ -213,5 +227,7 @@ export function getDisplayName(id: string): string {
   if (sim) return sim.name;
   const trainer = TRAINER_STATUS_IDS.find(t => t.id === id);
   if (trainer) return trainer.name;
+  const extra = getExtraSims().find(s => s.id === id);
+  if (extra) return extra.name;
   return id;
 }

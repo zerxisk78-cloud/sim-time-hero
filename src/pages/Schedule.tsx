@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { SIMULATORS } from "@/lib/types";
-import { getSimEntries, getTrainerStatuses, getClassrooms, getNECCEntries, getLinkedEvents, getVisibility, getDisplayName } from "@/lib/store";
+import { getSimEntries, getTrainerStatuses, getClassrooms, getNECCEntries, getLinkedEvents, getVisibility, getDisplayName, getExtraSims } from "@/lib/store";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
 import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
 import { SimScheduleTable } from "@/components/SimScheduleTable";
@@ -27,6 +27,7 @@ export default function SchedulePage() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeGroup, setActiveGroup] = useState(0);
   const [visibility, setVisibility] = useState<VisibilitySettings>(getVisibility());
+  const [extraSims, setExtraSims] = useState(getExtraSims());
 
   const sortByDate = <T extends { dateTime: string }>(items: T[]): T[] =>
     [...items].sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
@@ -34,6 +35,9 @@ export default function SchedulePage() {
   const loadData = () => {
     const data: Record<string, SimSlot[]> = {};
     SIMULATORS.forEach(sim => { data[sim.id] = getSimEntries(sim.id); });
+    const extras = getExtraSims();
+    extras.forEach(sim => { data[sim.id] = getSimEntries(sim.id); });
+    setExtraSims(extras);
     setSimData(data);
     setStatuses(getTrainerStatuses());
     setClassrooms(sortByDate(getClassrooms()));
@@ -58,6 +62,8 @@ export default function SchedulePage() {
 
   const visibleSimIds = SIM_GROUPS[activeGroup].filter(id => visibility.simulators[id] !== false);
   const visibleSims = SIMULATORS.filter(s => visibleSimIds.includes(s.id));
+  // Custom trainers always visible (not in rotation groups) when toggled on
+  const visibleExtraSims = extraSims.filter(s => visibility.simulators[s.id] !== false);
 
   return (
     <div className="flex min-h-screen relative">
@@ -96,6 +102,9 @@ export default function SchedulePage() {
         <div className="max-w-4xl mx-auto space-y-2">
           {visibleSims.map(sim => (
             <SimScheduleTable key={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} />
+          ))}
+          {visibleExtraSims.map(sim => (
+            <SimScheduleTable key={sim.id} name={getDisplayName(sim.id) || sim.name} entries={simData[sim.id] || []} />
           ))}
           <p className="text-xs text-muted-foreground mt-4">*NB = No brief</p>
         </div>

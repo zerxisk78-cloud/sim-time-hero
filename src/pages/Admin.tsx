@@ -9,6 +9,7 @@ import {
   getDirectory, type DirectoryData,
   getVisibility, saveVisibility,
   getDisplayName, saveNameOverride,
+  getExtraSims, saveExtraSims, type ExtraSim,
 } from "@/lib/store";
 import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
@@ -355,14 +356,7 @@ function CrudTable<T extends { id: string }>({
   );
 }
 
-const EXTRA_SIMS_KEY = 'matss_extra_sims';
-
-function getExtraSims(): { id: string; name: string }[] {
-  try { return JSON.parse(localStorage.getItem(EXTRA_SIMS_KEY) || '[]'); } catch { return []; }
-}
-function saveExtraSims(sims: { id: string; name: string }[]) {
-  localStorage.setItem(EXTRA_SIMS_KEY, JSON.stringify(sims));
-}
+// Extra sims now come from shared store
 
 export default function AdminPage() {
   const [trainerStatuses, setTrainerStatuses] = useState<TrainerStatus[]>([]);
@@ -371,7 +365,7 @@ export default function AdminPage() {
   const [linkedEvents, setLinkedEvents] = useState<LinkedEvent[]>([]);
   const [directoryData, setDirectoryData] = useState<DirectoryData>(getDirectory());
   const [visibility, setVisibility] = useState<VisibilitySettings>(getVisibility());
-  const [extraSims, setExtraSims] = useState<{ id: string; name: string }[]>(getExtraSims);
+  const [extraSims, setExtraSims] = useState<ExtraSim[]>(getExtraSims);
 
   // CRUD form state
   const [classForm, setClassForm] = useState({ className: "", dateTime: "", location: "" });
@@ -385,6 +379,7 @@ export default function AdminPage() {
     setLinkedEvents(getLinkedEvents());
     setDirectoryData(getDirectory());
     setVisibility(getVisibility());
+    setExtraSims(getExtraSims());
   }, []);
 
   useEffect(() => { reload(); }, [reload]);
@@ -435,6 +430,14 @@ export default function AdminPage() {
                     setExtraSims(updated);
                     saveExtraSims(updated);
                     localStorage.removeItem(`matss_sim_${sim.id}`);
+                    const newStatuses = getTrainerStatuses().filter(s => s.id !== sim.id);
+                    saveTrainerStatuses(newStatuses);
+                    setTrainerStatuses(newStatuses);
+                    updateVisibility(prev => {
+                      const sims = { ...prev.simulators };
+                      delete sims[sim.id];
+                      return { ...prev, simulators: sims };
+                    });
                     toast.info(`Removed ${sim.name}`);
                   }}
                   className="absolute top-2 right-2 p-1 bg-destructive/80 text-destructive-foreground rounded hover:bg-destructive"
@@ -456,6 +459,18 @@ export default function AdminPage() {
                   const updated = [...extraSims, { id, name: name.trim() }];
                   setExtraSims(updated);
                   saveExtraSims(updated);
+                  // Add trainer status entry
+                  const currentStatuses = getTrainerStatuses();
+                  if (!currentStatuses.find(s => s.id === id)) {
+                    const newStatuses = [...currentStatuses, { id, name: name.trim(), isUp: true, note: '' }];
+                    saveTrainerStatuses(newStatuses);
+                    setTrainerStatuses(newStatuses);
+                  }
+                  // Add visibility entry
+                  updateVisibility(prev => ({
+                    ...prev,
+                    simulators: { ...prev.simulators, [id]: true },
+                  }));
                   toast.success(`Added ${name.trim()}`);
                 }
               }}
@@ -477,6 +492,18 @@ export default function AdminPage() {
                   {SIMULATORS.map(sim => (
                     <div key={sim.id} className="flex items-center justify-between">
                       <span className="text-xs font-medium">{getDisplayName(sim.id)}</span>
+                      <Switch
+                        checked={visibility.simulators[sim.id] ?? true}
+                        onCheckedChange={(checked) => updateVisibility(prev => ({
+                          ...prev,
+                          simulators: { ...prev.simulators, [sim.id]: checked },
+                        }))}
+                      />
+                    </div>
+                  ))}
+                  {extraSims.map(sim => (
+                    <div key={sim.id} className="flex items-center justify-between">
+                      <span className="text-xs font-medium">{getDisplayName(sim.id) || sim.name}</span>
                       <Switch
                         checked={visibility.simulators[sim.id] ?? true}
                         onCheckedChange={(checked) => updateVisibility(prev => ({
@@ -547,6 +574,19 @@ export default function AdminPage() {
                     </div>
                   );
                 })}
+                {/* Custom Trainers */}
+                {extraSims.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-1">Custom Trainers</h4>
+                    <TrainerStatusPanel
+                      statuses={trainerStatuses.filter(s => extraSims.some(es => es.id === s.id))}
+                      editable
+                      hideHeader
+                      onToggle={handleTrainerToggle}
+                      onNoteChange={handleTrainerNote}
+                    />
+                  </div>
+                )}
               </CardContent>
             </Card>
 
