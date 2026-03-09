@@ -4,9 +4,9 @@ import uh1yImg from "@/assets/uh1y-cartoon.png";
 import mv22Img from "@/assets/mv22-cartoon.png";
 
 const AIRCRAFT = [
-  { src: ah1zImg, alt: "AH-1Z Super Cobra", size: "h-14" },
-  { src: uh1yImg, alt: "UH-1Y Huey", size: "h-14" },
-  { src: mv22Img, alt: "MV-22 Osprey", size: "h-16" },
+  { src: ah1zImg, alt: "AH-1Z Super Cobra", size: "h-28" },
+  { src: uh1yImg, alt: "UH-1Y Huey", size: "h-28" },
+  { src: mv22Img, alt: "MV-22 Osprey", size: "h-32" },
 ];
 
 export function FlyingAircraft() {
