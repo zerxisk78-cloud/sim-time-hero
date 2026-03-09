@@ -195,6 +195,20 @@ export function saveVisibility(settings: VisibilitySettings): void {
   setItem('visibility', settings);
 }
 
+// Extra (custom) simulators/trainers
+export interface ExtraSim {
+  id: string;
+  name: string;
+}
+
+export function getExtraSims(): ExtraSim[] {
+  return getItem<ExtraSim[]>('extra_sims', []);
+}
+
+export function saveExtraSims(sims: ExtraSim[]): void {
+  setItem('extra_sims', sims);
+}
+
 // Name Overrides
 export function getNameOverrides(): Record<string, string> {
   return getItem<Record<string, string>>('name_overrides', {});
