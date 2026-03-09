@@ -40,7 +40,7 @@ export function DirectorySidebar({ className, directoryData }: DirectorySidebarP
           <p className="text-amber-200 underline italic font-medium">{section.heading}</p>
           <div className="grid grid-cols-2 gap-x-2 gap-y-1">
             {section.contacts.map((contact, i) => (
-              <div key={`${section.heading}-${i}`} className="space-y-0">
+              <div key={`${section.heading}-${i}`} className="space-y-0 border border-sidebar-border rounded p-1.5 bg-sidebar-accent/30">
                 <p className="font-medium text-xs">{contact.title}</p>
                 {contact.name && (
                   <p className="text-xs">{contact.name}{contact.callsign ? ` ${contact.callsign}` : ''}</p>
