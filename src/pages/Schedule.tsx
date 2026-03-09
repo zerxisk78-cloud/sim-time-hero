@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { SIMULATORS } from "@/lib/types";
-import { getSimEntries, getTrainerStatuses, getClassrooms, getNECCEntries, getLinkedEvents, getVisibility } from "@/lib/store";
+import { getSimEntries, getTrainerStatuses, getClassrooms, getNECCEntries, getLinkedEvents, getVisibility, getDisplayName } from "@/lib/store";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
 import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
 import { SimScheduleTable } from "@/components/SimScheduleTable";
@@ -77,7 +77,7 @@ export default function SchedulePage() {
 
         <div className="max-w-2xl mx-auto space-y-2">
           {visibleSims.map(sim => (
-            <SimScheduleTable key={sim.id} name={sim.name} entries={simData[sim.id] || []} />
+            <SimScheduleTable key={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} />
           ))}
           <p className="text-xs text-muted-foreground mt-4">*NB = No brief</p>
         </div>

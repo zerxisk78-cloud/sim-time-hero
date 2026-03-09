@@ -8,6 +8,7 @@ import {
   getLinkedEvents, saveLinkedEvent, deleteLinkedEvent,
   getDirectory, type DirectoryData,
   getVisibility, saveVisibility,
+  getDisplayName, saveNameOverride,
 } from "@/lib/store";
 import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
@@ -19,15 +20,17 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trash2, Undo2 } from "lucide-react";
+import { Trash2, Undo2, Pencil, Check } from "lucide-react";
 import { toast } from "sonner";
 
 
 const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
 
-function SimEditor({ simId, name, timeSlots }: { simId: string; name: string; timeSlots: string[] }) {
+function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; name: string; timeSlots: string[] }) {
   const [entries, setEntries] = useState<SimSlot[]>([]);
   const [lastSaved, setLastSaved] = useState("");
+  const [displayName, setDisplayName] = useState(getDisplayName(simId));
+  const [editingName, setEditingName] = useState(false);
 
   useEffect(() => {
     setEntries(getSimEntries(simId));
@@ -102,13 +105,39 @@ function SimEditor({ simId, name, timeSlots }: { simId: string; name: string; ti
 
   const handleUndo = () => {
     setEntries(getSimEntries(simId));
-    toast.info(`${name} reverted to last saved`);
+    toast.info(`${displayName} reverted to last saved`);
+  };
+
+  const handleSaveName = () => {
+    saveNameOverride(simId, displayName);
+    setEditingName(false);
+    toast.success(`Renamed to ${displayName}`);
   };
 
   return (
     <Card className="mb-4">
       <CardHeader className="py-3 flex flex-row items-center justify-between">
-        <CardTitle className="text-base">{name}</CardTitle>
+        {editingName ? (
+          <div className="flex items-center gap-1">
+            <Input
+              value={displayName}
+              onChange={e => setDisplayName(e.target.value)}
+              className="h-7 text-sm w-40"
+              autoFocus
+              onKeyDown={e => e.key === 'Enter' && handleSaveName()}
+            />
+            <Button onClick={handleSaveName} size="sm" variant="ghost" className="h-7 w-7 p-0">
+              <Check className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        ) : (
+          <CardTitle className="text-base flex items-center gap-1">
+            {displayName}
+            <button onClick={() => setEditingName(true)} className="text-muted-foreground hover:text-foreground">
+              <Pencil className="h-3 w-3" />
+            </button>
+          </CardTitle>
+        )}
         <Button onClick={handleUndo} size="sm" variant="ghost" className="text-xs h-7 gap-1">
           <Undo2 className="h-3.5 w-3.5" /> Undo
         </Button>
@@ -151,7 +180,7 @@ function SimEditor({ simId, name, timeSlots }: { simId: string; name: string; ti
         </div>
         <div className="flex items-center gap-3 px-4 pb-3">
           <Button onClick={addRow} size="sm" variant="outline" className="text-xs h-7">+ Add Row</Button>
-          <Button onClick={handleSave} size="sm" className="text-xs h-7">Save {name}</Button>
+          <Button onClick={handleSave} size="sm" className="text-xs h-7">Save {displayName}</Button>
           {lastSaved && <span className="text-xs text-muted-foreground">Last saved: {lastSaved}</span>}
         </div>
       </CardContent>
@@ -290,7 +319,7 @@ export default function AdminPage() {
                 <div className="space-y-2">
                   {SIMULATORS.map(sim => (
                     <div key={sim.id} className="flex items-center justify-between">
-                      <span className="text-xs font-medium">{sim.name}</span>
+                      <span className="text-xs font-medium">{getDisplayName(sim.id)}</span>
                       <Switch
                         checked={visibility.simulators[sim.id] ?? true}
                         onCheckedChange={(checked) => updateVisibility(prev => ({
