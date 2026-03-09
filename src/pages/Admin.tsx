@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent } from "@/lib/types";
+
 
 const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
 
