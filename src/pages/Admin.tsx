@@ -451,6 +451,18 @@ export default function AdminPage() {
                   const updated = [...extraSims, { id, name: name.trim() }];
                   setExtraSims(updated);
                   saveExtraSims(updated);
+                  // Add trainer status entry
+                  const currentStatuses = getTrainerStatuses();
+                  if (!currentStatuses.find(s => s.id === id)) {
+                    const newStatuses = [...currentStatuses, { id, name: name.trim(), isUp: true, note: '' }];
+                    saveTrainerStatuses(newStatuses);
+                    setTrainerStatuses(newStatuses);
+                  }
+                  // Add visibility entry
+                  updateVisibility(prev => ({
+                    ...prev,
+                    simulators: { ...prev.simulators, [id]: true },
+                  }));
                   toast.success(`Added ${name.trim()}`);
                 }
               }}
