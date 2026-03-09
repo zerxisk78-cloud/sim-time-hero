@@ -501,6 +501,18 @@ export default function AdminPage() {
                       />
                     </div>
                   ))}
+                  {extraSims.map(sim => (
+                    <div key={sim.id} className="flex items-center justify-between">
+                      <span className="text-xs font-medium">{getDisplayName(sim.id) || sim.name}</span>
+                      <Switch
+                        checked={visibility.simulators[sim.id] ?? true}
+                        onCheckedChange={(checked) => updateVisibility(prev => ({
+                          ...prev,
+                          simulators: { ...prev.simulators, [sim.id]: checked },
+                        }))}
+                      />
+                    </div>
+                  ))}
                   <div className="border-t border-border pt-2 mt-2 space-y-2">
                     {[
                       { key: 'classrooms' as const, label: 'Classrooms' },
