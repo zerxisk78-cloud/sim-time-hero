@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { SIMULATORS } from "@/lib/types";
+import { SIMULATORS, TRAINER_GROUPS } from "@/lib/types";
 import {
   getSimEntries, saveSimEntries, getSimLastSaved,
   getTrainerStatuses, saveTrainerStatuses,
@@ -7,18 +7,21 @@ import {
   getNECCEntries, saveNECCEntry, deleteNECCEntry,
   getLinkedEvents, saveLinkedEvent, deleteLinkedEvent,
   getDirectory, type DirectoryData,
+  getVisibility, saveVisibility,
 } from "@/lib/store";
+import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
 import { DirectoryEditor } from "@/components/DirectoryEditor";
 import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent } from "@/lib/types";
+
 
 const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
 
@@ -212,6 +215,7 @@ export default function AdminPage() {
   const [neccEntries, setNeccEntries] = useState<NECCEntry[]>([]);
   const [linkedEvents, setLinkedEvents] = useState<LinkedEvent[]>([]);
   const [directoryData, setDirectoryData] = useState<DirectoryData>(getDirectory());
+  const [visibility, setVisibility] = useState<VisibilitySettings>(getVisibility());
 
   // CRUD form state
   const [classForm, setClassForm] = useState({ className: "", dateTime: "", location: "" });
@@ -224,6 +228,7 @@ export default function AdminPage() {
     setNeccEntries(getNECCEntries());
     setLinkedEvents(getLinkedEvents());
     setDirectoryData(getDirectory());
+    setVisibility(getVisibility());
   }, []);
 
   useEffect(() => { reload(); }, [reload]);
@@ -238,6 +243,14 @@ export default function AdminPage() {
     const updated = trainerStatuses.map(s => s.id === id ? { ...s, note } : s);
     setTrainerStatuses(updated);
     saveTrainerStatuses(updated);
+  };
+
+  const updateVisibility = (updater: (prev: VisibilitySettings) => VisibilitySettings) => {
+    setVisibility(prev => {
+      const next = updater(prev);
+      saveVisibility(next);
+      return next;
+    });
   };
 
   return (
@@ -257,14 +270,70 @@ export default function AdminPage() {
             ))}
           </div>
 
-          {/* Right column: Directory + CRUD tables + Trainer Status */}
+          {/* Right column: Trainer groups + Visibility + CRUD tables */}
           <div className="space-y-4">
-            <TrainerStatusPanel
-              statuses={trainerStatuses}
-              editable
-              onToggle={handleTrainerToggle}
-              onNoteChange={handleTrainerNote}
-            />
+            {/* Visibility Controls */}
+            <Card className="mb-4">
+              <CardHeader className="py-3">
+                <CardTitle className="text-base">Visibility Controls</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-xs text-muted-foreground">Toggle what's visible on Guard & Schedule pages</p>
+                <div className="space-y-2">
+                  {SIMULATORS.map(sim => (
+                    <div key={sim.id} className="flex items-center justify-between">
+                      <span className="text-xs font-medium">{sim.name}</span>
+                      <Switch
+                        checked={visibility.simulators[sim.id] ?? true}
+                        onCheckedChange={(checked) => updateVisibility(prev => ({
+                          ...prev,
+                          simulators: { ...prev.simulators, [sim.id]: checked },
+                        }))}
+                      />
+                    </div>
+                  ))}
+                  <div className="border-t border-border pt-2 mt-2 space-y-2">
+                    {[
+                      { key: 'classrooms' as const, label: 'Classrooms' },
+                      { key: 'necc' as const, label: 'NECC Reservations' },
+                      { key: 'linkedEvents' as const, label: 'Linked Events' },
+                      { key: 'trainerStatus' as const, label: 'Trainer Status' },
+                    ].map(item => (
+                      <div key={item.key} className="flex items-center justify-between">
+                        <span className="text-xs font-medium">{item.label}</span>
+                        <Switch
+                          checked={visibility[item.key]}
+                          onCheckedChange={(checked) => updateVisibility(prev => ({
+                            ...prev,
+                            [item.key]: checked,
+                          }))}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 3 Trainer Status Panels by aircraft group */}
+            {TRAINER_GROUPS.map(group => {
+              const groupStatuses = trainerStatuses.filter(s => group.trainers.some(t => t.id === s.id));
+              return (
+                <Card key={group.id} className="mb-4">
+                  <CardHeader className="py-3">
+                    <CardTitle className="text-base">{group.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <TrainerStatusPanel
+                      statuses={groupStatuses}
+                      editable
+                      onToggle={handleTrainerToggle}
+                      onNoteChange={handleTrainerNote}
+                    />
+                  </CardContent>
+                </Card>
+              );
+            })}
 
             <CrudTable
               title="Classrooms"

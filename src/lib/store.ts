@@ -1,4 +1,4 @@
-import { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, SIMULATORS, TRAINER_STATUS_IDS } from './types';
+import { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, SIMULATORS, TRAINER_STATUS_IDS, VisibilitySettings } from './types';
 
 const STORAGE_PREFIX = 'matss_';
 
@@ -164,4 +164,21 @@ export function getDirectory(): DirectoryData {
 
 export function saveDirectory(data: DirectoryData): void {
   setItem('directory', data);
+}
+
+// Visibility Settings
+const DEFAULT_VISIBILITY: VisibilitySettings = {
+  simulators: Object.fromEntries(SIMULATORS.map(s => [s.id, true])),
+  classrooms: true,
+  necc: true,
+  linkedEvents: true,
+  trainerStatus: true,
+};
+
+export function getVisibility(): VisibilitySettings {
+  return getItem<VisibilitySettings>('visibility', DEFAULT_VISIBILITY);
+}
+
+export function saveVisibility(settings: VisibilitySettings): void {
+  setItem('visibility', settings);
 }

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { SIMULATORS } from "@/lib/types";
-import { getSimEntries, getTrainerStatuses, getClassrooms, getNECCEntries, getLinkedEvents } from "@/lib/store";
+import { getSimEntries, getTrainerStatuses, getClassrooms, getNECCEntries, getLinkedEvents, getVisibility } from "@/lib/store";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
 import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
 import { SimScheduleTable } from "@/components/SimScheduleTable";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent } from "@/lib/types";
+import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
 
 export default function GuardPage() {
   const [simData, setSimData] = useState<Record<string, SimSlot[]>>({});
@@ -14,6 +14,7 @@ export default function GuardPage() {
   const [neccEntries, setNeccEntries] = useState<NECCEntry[]>([]);
   const [linkedEvents, setLinkedEvents] = useState<LinkedEvent[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [visibility, setVisibility] = useState<VisibilitySettings>(getVisibility());
 
   const loadData = () => {
     const data: Record<string, SimSlot[]> = {};
@@ -24,13 +25,16 @@ export default function GuardPage() {
     setNeccEntries(getNECCEntries());
     setLinkedEvents(getLinkedEvents());
     setCurrentTime(new Date());
+    setVisibility(getVisibility());
   };
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadData, 40000); // 40s refresh like original
+    const interval = setInterval(loadData, 40000);
     return () => clearInterval(interval);
   }, []);
+
+  const visibleSims = SIMULATORS.filter(s => visibility.simulators[s.id] !== false);
 
   return (
     <div className="flex min-h-screen">
@@ -47,7 +51,7 @@ export default function GuardPage() {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          {SIMULATORS.map(sim => (
+          {visibleSims.map(sim => (
             <SimScheduleTable key={sim.id} name={sim.name} entries={simData[sim.id] || []} />
           ))}
         </div>
@@ -56,9 +60,9 @@ export default function GuardPage() {
       </div>
 
       <div className="w-72 flex-shrink-0 p-4 space-y-4">
-        <TrainerStatusPanel statuses={statuses} />
+        {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} />}
 
-        {classrooms.length > 0 && (
+        {visibility.classrooms && classrooms.length > 0 && (
           <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
             <h3 className="text-lg font-bold underline mb-2 text-center">Classes</h3>
             <Table>
@@ -82,7 +86,7 @@ export default function GuardPage() {
           </div>
         )}
 
-        {neccEntries.length > 0 && (
+        {visibility.necc && neccEntries.length > 0 && (
           <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
             <h3 className="text-lg font-bold underline mb-2 text-center">NECC Reservations</h3>
             <Table>
@@ -106,7 +110,7 @@ export default function GuardPage() {
           </div>
         )}
 
-        {linkedEvents.length > 0 && (
+        {visibility.linkedEvents && linkedEvents.length > 0 && (
           <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
             <h3 className="text-lg font-bold underline mb-2 text-center">Linked Events</h3>
             <Table>

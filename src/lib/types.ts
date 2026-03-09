@@ -55,15 +55,43 @@ export const SIMULATORS: { id: string; name: string; shortName: string; timeSlot
   { id: 'mv22-ptt', name: 'MV-22 PTT', shortName: 'MV22 PTT', timeSlots: ['0800', '0900', '1000', '1100', '1200', '1300', '1400', '1500'] },
 ];
 
-export const TRAINER_STATUS_IDS = [
-  { id: 'mcat', name: 'MCAT' },
-  { id: 'ah1z-ffs', name: 'AH-1Z FFS' },
-  { id: 'ah1z-ftd', name: 'AH-1Z FTD' },
-  { id: 'ah1z-cpt', name: 'AH-1Z CPT' },
-  { id: 'uh1y-ffs', name: 'UH-1Y FFS' },
-  { id: 'uh1y-ftd', name: 'UH-1Y FTD' },
-  { id: 'uh1y-cpt', name: 'UH-1Y CPT' },
-  { id: 'mv22-13', name: 'MV-22 13' },
-  { id: 'mv22-14', name: 'MV-22 14' },
-  { id: 'mv22-ptt', name: 'MV-22 PTT' },
+export const TRAINER_GROUPS = [
+  {
+    id: 'mcat-ah1z',
+    name: 'MCAT / AH-1Z Trainers',
+    trainers: [
+      { id: 'mcat', name: 'MCAT' },
+      { id: 'ah1z-ffs', name: 'AH-1Z FFS' },
+      { id: 'ah1z-ftd', name: 'AH-1Z FTD' },
+      { id: 'ah1z-cpt', name: 'AH-1Z CPT' },
+    ],
+  },
+  {
+    id: 'uh1y',
+    name: 'UH-1Y Trainers',
+    trainers: [
+      { id: 'uh1y-ffs', name: 'UH-1Y FFS' },
+      { id: 'uh1y-ftd', name: 'UH-1Y FTD' },
+      { id: 'uh1y-cpt', name: 'UH-1Y CPT' },
+    ],
+  },
+  {
+    id: 'mv22',
+    name: 'MV-22 Trainers',
+    trainers: [
+      { id: 'mv22-13', name: 'MV-22 13' },
+      { id: 'mv22-14', name: 'MV-22 14' },
+      { id: 'mv22-ptt', name: 'MV-22 PTT' },
+    ],
+  },
 ];
+
+export const TRAINER_STATUS_IDS = TRAINER_GROUPS.flatMap(g => g.trainers);
+
+export interface VisibilitySettings {
+  simulators: Record<string, boolean>;
+  classrooms: boolean;
+  necc: boolean;
+  linkedEvents: boolean;
+  trainerStatus: boolean;
+}

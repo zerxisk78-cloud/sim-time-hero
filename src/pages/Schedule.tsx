@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { SIMULATORS } from "@/lib/types";
-import { getSimEntries, getTrainerStatuses, getClassrooms, getNECCEntries, getLinkedEvents } from "@/lib/store";
+import { getSimEntries, getTrainerStatuses, getClassrooms, getNECCEntries, getLinkedEvents, getVisibility } from "@/lib/store";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
 import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
 import { SimScheduleTable } from "@/components/SimScheduleTable";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent } from "@/lib/types";
+import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
 
 // Groups of simulator IDs to rotate through every 10 seconds
 const SIM_GROUPS = [
@@ -22,6 +22,7 @@ export default function SchedulePage() {
   const [linkedEvents, setLinkedEvents] = useState<LinkedEvent[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeGroup, setActiveGroup] = useState(0);
+  const [visibility, setVisibility] = useState<VisibilitySettings>(getVisibility());
 
   const loadData = () => {
     const data: Record<string, SimSlot[]> = {};
@@ -32,6 +33,7 @@ export default function SchedulePage() {
     setNeccEntries(getNECCEntries());
     setLinkedEvents(getLinkedEvents());
     setCurrentTime(new Date());
+    setVisibility(getVisibility());
   };
 
   useEffect(() => {
@@ -40,7 +42,6 @@ export default function SchedulePage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Rotate simulator groups every 10 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveGroup(prev => (prev + 1) % SIM_GROUPS.length);
@@ -48,7 +49,7 @@ export default function SchedulePage() {
     return () => clearInterval(interval);
   }, []);
 
-  const visibleSimIds = SIM_GROUPS[activeGroup];
+  const visibleSimIds = SIM_GROUPS[activeGroup].filter(id => visibility.simulators[id] !== false);
   const visibleSims = SIMULATORS.filter(s => visibleSimIds.includes(s.id));
 
   return (
@@ -65,7 +66,6 @@ export default function SchedulePage() {
           </p>
         </div>
 
-        {/* Group indicator dots */}
         <div className="flex justify-center gap-2 mb-4">
           {SIM_GROUPS.map((_, i) => (
             <div
@@ -84,9 +84,9 @@ export default function SchedulePage() {
       </div>
 
       <div className="w-72 flex-shrink-0 p-4 space-y-4">
-        <TrainerStatusPanel statuses={statuses} />
+        {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} />}
 
-        {classrooms.length > 0 && (
+        {visibility.classrooms && classrooms.length > 0 && (
           <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
             <h3 className="text-lg font-bold underline mb-2 text-center">Classes</h3>
             <Table>
@@ -110,7 +110,7 @@ export default function SchedulePage() {
           </div>
         )}
 
-        {neccEntries.length > 0 && (
+        {visibility.necc && neccEntries.length > 0 && (
           <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
             <h3 className="text-lg font-bold underline mb-2 text-center">NECC Reservations</h3>
             <Table>
@@ -134,7 +134,7 @@ export default function SchedulePage() {
           </div>
         )}
 
-        {linkedEvents.length > 0 && (
+        {visibility.linkedEvents && linkedEvents.length > 0 && (
           <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
             <h3 className="text-lg font-bold underline mb-2 text-center">Linked Events</h3>
             <Table>
