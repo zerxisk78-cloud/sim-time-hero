@@ -356,14 +356,7 @@ function CrudTable<T extends { id: string }>({
   );
 }
 
-const EXTRA_SIMS_KEY = 'matss_extra_sims';
-
-function getExtraSims(): { id: string; name: string }[] {
-  try { return JSON.parse(localStorage.getItem(EXTRA_SIMS_KEY) || '[]'); } catch { return []; }
-}
-function saveExtraSims(sims: { id: string; name: string }[]) {
-  localStorage.setItem(EXTRA_SIMS_KEY, JSON.stringify(sims));
-}
+// Extra sims now come from shared store
 
 export default function AdminPage() {
   const [trainerStatuses, setTrainerStatuses] = useState<TrainerStatus[]>([]);
