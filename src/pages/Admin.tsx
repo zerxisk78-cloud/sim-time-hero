@@ -364,6 +364,8 @@ export default function AdminPage() {
                 </>
               )}
             />
+
+            <DirectoryEditor data={directoryData} onChange={setDirectoryData} />
           </div>
         </div>
       </div>
