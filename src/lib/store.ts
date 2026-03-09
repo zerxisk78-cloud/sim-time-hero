@@ -114,6 +114,10 @@ export function deleteLinkedEvent(id: string): void {
   setItem('linked', getLinkedEvents().filter(e => e.id !== id));
 }
 
+export function saveLinkedEventsOrder(events: LinkedEvent[]): void {
+  setItem('linked', events);
+}
+
 // Directory
 export interface DirectoryContact {
   title: string;
