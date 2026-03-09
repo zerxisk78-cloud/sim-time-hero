@@ -60,6 +60,7 @@ export default function SchedulePage() {
 
   return (
     <div className="flex min-h-screen">
+      <FlyingAircraft />
       <DirectorySidebar className="w-48 min-h-screen flex-shrink-0 rounded-none" />
       
       <div className="flex-1 p-4 overflow-auto">
