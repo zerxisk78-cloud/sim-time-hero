@@ -19,7 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trash2 } from "lucide-react";
+import { Trash2, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 
 
@@ -100,10 +100,18 @@ function SimEditor({ simId, name, timeSlots }: { simId: string; name: string; ti
     toast.success(`${name} saved`);
   };
 
+  const handleUndo = () => {
+    setEntries(getSimEntries(simId));
+    toast.info(`${name} reverted to last saved`);
+  };
+
   return (
     <Card className="mb-4">
-      <CardHeader className="py-3">
+      <CardHeader className="py-3 flex flex-row items-center justify-between">
         <CardTitle className="text-base">{name}</CardTitle>
+        <Button onClick={handleUndo} size="sm" variant="ghost" className="text-xs h-7 gap-1">
+          <Undo2 className="h-3.5 w-3.5" /> Undo
+        </Button>
       </CardHeader>
       <CardContent className="p-0">
         <div className="border border-border rounded overflow-hidden mx-4 mb-3">
@@ -318,10 +326,26 @@ export default function AdminPage() {
             {/* 3 Trainer Status Panels by aircraft group */}
             {TRAINER_GROUPS.map(group => {
               const groupStatuses = trainerStatuses.filter(s => group.trainers.some(t => t.id === s.id));
+              const allVisible = group.trainers.every(t => visibility.simulators[t.id] !== false);
+              const toggleGroupVisibility = () => {
+                updateVisibility(prev => {
+                  const next = { ...prev, simulators: { ...prev.simulators } };
+                  group.trainers.forEach(t => { next.simulators[t.id] = !allVisible; });
+                  return next;
+                });
+                toast.info(`${group.name} ${allVisible ? 'hidden' : 'shown'} on display pages`);
+              };
               return (
                 <Card key={group.id} className="mb-4">
-                  <CardHeader className="py-3">
-                    <CardTitle className="text-base">{group.name}</CardTitle>
+                  <CardHeader className="py-3 flex flex-row items-center justify-between">
+                    <CardTitle
+                      className="text-base cursor-default select-none"
+                      onDoubleClick={toggleGroupVisibility}
+                      title=""
+                    >
+                      {group.name}
+                    </CardTitle>
+                    <span className={`h-2 w-2 rounded-full ${allVisible ? 'bg-green-500' : 'bg-red-500'} opacity-30`} />
                   </CardHeader>
                   <CardContent>
                     <TrainerStatusPanel
