@@ -319,7 +319,7 @@ export default function AdminPage() {
                 <div className="space-y-2">
                   {SIMULATORS.map(sim => (
                     <div key={sim.id} className="flex items-center justify-between">
-                      <span className="text-xs font-medium">{sim.name}</span>
+                      <span className="text-xs font-medium">{getDisplayName(sim.id)}</span>
                       <Switch
                         checked={visibility.simulators[sim.id] ?? true}
                         onCheckedChange={(checked) => updateVisibility(prev => ({
