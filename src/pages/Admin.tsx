@@ -148,7 +148,7 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
       <CardContent className="p-0">
         <div className="border border-border rounded overflow-hidden mx-4 mb-3">
           {/* Header row */}
-          <div className="grid grid-cols-[1fr_1fr_1fr_1fr_28px] bg-muted">
+          <div className="grid grid-cols-[1fr_1fr_1fr_1fr_36px] bg-muted">
             {['Time', 'Unit', 'Crew', 'CSI/System'].map((h, i) => (
               <div key={h} className={`px-2 py-1.5 text-xs font-semibold text-muted-foreground border-r border-border last:border-r-0 ${i === 0 ? '' : ''}`}>{h}</div>
             ))}
@@ -156,7 +156,7 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
           </div>
           {/* Data rows */}
           {entries.map((entry, i) => (
-            <div key={i} className="grid grid-cols-[1fr_1fr_1fr_1fr_28px] border-t border-border">
+            <div key={i} className="grid grid-cols-[1fr_1fr_1fr_1fr_36px] border-t border-border">
               {FIELD_ORDER.map((field, col) => (
                 <input
                   key={field}
@@ -173,10 +173,10 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
               ))}
               <button
                 onClick={() => removeRow(i)}
-                className="flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
+                className="flex items-center justify-center bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
                 title="Remove row"
               >
-                <Trash2 className="h-3 w-3" />
+                <Trash2 className="h-4 w-4" />
               </button>
             </div>
           ))}
