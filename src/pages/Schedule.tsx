@@ -76,7 +76,7 @@ export default function SchedulePage() {
           ))}
         </div>
 
-        <div className="max-w-2xl mx-auto space-y-2">
+        <div className="max-w-4xl mx-auto space-y-2">
           {visibleSims.map(sim => (
             <SimScheduleTable key={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} />
           ))}
