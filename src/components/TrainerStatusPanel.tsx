@@ -15,7 +15,7 @@ export function TrainerStatusPanel({ statuses, onToggle, onNoteChange, editable 
         <h2 className="text-sm font-bold text-center text-sidebar-foreground">Trainer Status</h2>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         {statuses.map((status) => (
           <div key={status.id} className="flex flex-col gap-1">
             <div className="flex items-center justify-between">

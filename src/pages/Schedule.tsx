@@ -136,8 +136,8 @@ export default function SchedulePage() {
         )}
 
         {visibility.linkedEvents && linkedEvents.length > 0 && (
-          <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
-            <h3 className="text-lg font-bold underline mb-2 text-center">Linked Events</h3>
+          <div className="bg-sidebar-background text-sidebar-foreground p-2 rounded-lg">
+            <h3 className="text-sm font-bold underline mb-1 text-center">Linked Events</h3>
             <Table>
               <TableHeader>
                 <TableRow>
