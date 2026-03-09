@@ -511,6 +511,7 @@ export default function AdminPage() {
                 toast.success("Linked event added");
               }}
               onDelete={(id) => { deleteLinkedEvent(id); reload(); }}
+              onUpdate={(id, updates) => { updateLinkedEvent(id, updates); reload(); }}
               renderInputs={() => (
                 <>
                   <div className="space-y-1">
