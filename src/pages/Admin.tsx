@@ -20,6 +20,8 @@ import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent } from "@/lib/types";
 
+const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
+
 function SimEditor({ simId, name, timeSlots }: { simId: string; name: string; timeSlots: string[] }) {
   const [entries, setEntries] = useState<SimSlot[]>([]);
   const [lastSaved, setLastSaved] = useState("");
@@ -33,28 +35,51 @@ function SimEditor({ simId, name, timeSlots }: { simId: string; name: string; ti
     setEntries(prev => prev.map((e, i) => i === index ? { ...e, [field]: value } : e));
   };
 
-  const handlePaste = (startIndex: number, field: keyof SimSlot, e: React.ClipboardEvent) => {
+  const focusCell = (row: number, col: number) => {
+    const el = document.querySelector<HTMLInputElement>(
+      `[data-sim="${simId}"][data-row="${row}"][data-col="${col}"]`
+    );
+    if (el) { el.focus(); el.select(); }
+  };
+
+  const handlePaste = (startRow: number, startCol: number, e: React.ClipboardEvent) => {
     const pasteData = e.clipboardData.getData('text');
-    // Split by newlines (rows from spreadsheet) and tabs (columns)
     const rows = pasteData.split(/\r?\n/).filter(r => r.length > 0);
-    if (rows.length <= 1 && !pasteData.includes('\t')) return; // single value, let default handle it
+    if (rows.length <= 1 && !pasteData.includes('\t')) return;
     e.preventDefault();
-    
+
     setEntries(prev => {
       const updated = [...prev];
-      const fields: (keyof SimSlot)[] = field === 'unit' ? ['unit', 'crew'] : field === 'crew' ? ['crew'] : [field];
       rows.forEach((row, ri) => {
-        const idx = startIndex + ri;
+        const idx = startRow + ri;
         if (idx >= updated.length) return;
         const cols = row.split('\t');
-        fields.forEach((f, ci) => {
-          if (ci < cols.length) {
-            updated[idx] = { ...updated[idx], [f]: cols[ci].trim() };
+        cols.forEach((val, ci) => {
+          const colIdx = startCol + ci;
+          if (colIdx < FIELD_ORDER.length) {
+            updated[idx] = { ...updated[idx], [FIELD_ORDER[colIdx]]: val.trim() };
           }
         });
       });
       return updated;
     });
+  };
+
+  const handleKeyDown = (row: number, col: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const next = e.shiftKey
+        ? (col > 0 ? [row, col - 1] : row > 0 ? [row - 1, FIELD_ORDER.length - 1] : null)
+        : (col < FIELD_ORDER.length - 1 ? [row, col + 1] : row < entries.length - 1 ? [row + 1, 0] : null);
+      if (next) focusCell(next[0], next[1]);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (row < entries.length - 1) focusCell(row + 1, col);
+    } else if (e.key === 'ArrowDown' && row < entries.length - 1) {
+      e.preventDefault(); focusCell(row + 1, col);
+    } else if (e.key === 'ArrowUp' && row > 0) {
+      e.preventDefault(); focusCell(row - 1, col);
+    }
   };
 
   const handleSave = () => {
@@ -77,28 +102,20 @@ function SimEditor({ simId, name, timeSlots }: { simId: string; name: string; ti
         </div>
         {entries.map((entry, i) => (
           <div key={i} className="grid grid-cols-4 gap-2 items-center">
-            <Input
-              value={entry.time}
-              onChange={(e) => updateField(i, "time", e.target.value)}
-              className="h-8 text-xs font-mono"
-            />
-            <Input
-              value={entry.unit}
-              onChange={(e) => updateField(i, "unit", e.target.value)}
-              onPaste={(e) => handlePaste(i, "unit", e)}
-              className="h-8 text-xs"
-            />
-            <Input
-              value={entry.crew}
-              onChange={(e) => updateField(i, "crew", e.target.value)}
-              onPaste={(e) => handlePaste(i, "crew", e)}
-              className="h-8 text-xs"
-            />
-            <Input
-              value={entry.csi}
-              onChange={(e) => updateField(i, "csi", e.target.value)}
-              className="h-8 text-xs"
-            />
+            {FIELD_ORDER.map((field, col) => (
+              <Input
+                key={field}
+                value={entry[field]}
+                data-sim={simId}
+                data-row={i}
+                data-col={col}
+                onChange={(e) => updateField(i, field, e.target.value)}
+                onPaste={(e) => handlePaste(i, col, e)}
+                onKeyDown={(e) => handleKeyDown(i, col, e)}
+                onFocus={(e) => e.target.select()}
+                className={`h-8 text-xs ${col === 0 ? 'font-mono' : ''}`}
+              />
+            ))}
           </div>
         ))}
         <div className="flex items-center gap-3 pt-2">
