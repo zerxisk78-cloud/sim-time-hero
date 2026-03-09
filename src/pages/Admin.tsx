@@ -379,6 +379,7 @@ export default function AdminPage() {
     setLinkedEvents(getLinkedEvents());
     setDirectoryData(getDirectory());
     setVisibility(getVisibility());
+    setExtraSims(getExtraSims());
   }, []);
 
   useEffect(() => { reload(); }, [reload]);
