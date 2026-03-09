@@ -6,14 +6,17 @@ interface TrainerStatusPanelProps {
   onToggle?: (id: string) => void;
   onNoteChange?: (id: string, note: string) => void;
   editable?: boolean;
+  hideHeader?: boolean;
 }
 
-export function TrainerStatusPanel({ statuses, onToggle, onNoteChange, editable = false }: TrainerStatusPanelProps) {
+export function TrainerStatusPanel({ statuses, onToggle, onNoteChange, editable = false, hideHeader = false }: TrainerStatusPanelProps) {
   return (
     <div className="bg-sidebar-background text-sidebar-foreground p-2 rounded-lg space-y-1">
-      <div className="bg-sidebar-accent px-2 py-1 rounded">
-        <h2 className="text-sm font-bold text-center text-sidebar-foreground">Trainer Status</h2>
-      </div>
+      {!hideHeader && (
+        <div className="bg-sidebar-accent px-2 py-1 rounded">
+          <h2 className="text-sm font-bold text-center text-sidebar-foreground">Trainer Status</h2>
+        </div>
+      )}
 
       <div className="space-y-1">
         {statuses.map((status) => (
