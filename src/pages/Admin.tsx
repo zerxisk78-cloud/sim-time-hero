@@ -430,8 +430,16 @@ export default function AdminPage() {
                     setExtraSims(updated);
                     saveExtraSims(updated);
                     localStorage.removeItem(`matss_sim_${sim.id}`);
+                    const newStatuses = getTrainerStatuses().filter(s => s.id !== sim.id);
+                    saveTrainerStatuses(newStatuses);
+                    setTrainerStatuses(newStatuses);
+                    updateVisibility(prev => {
+                      const sims = { ...prev.simulators };
+                      delete sims[sim.id];
+                      return { ...prev, simulators: sims };
+                    });
                     toast.info(`Removed ${sim.name}`);
-                  }}
+                  }
                   className="absolute top-2 right-2 p-1 bg-destructive/80 text-destructive-foreground rounded hover:bg-destructive"
                   title="Remove trainer box"
                 >
