@@ -259,7 +259,6 @@ export default function AdminPage() {
 
           {/* Right column: Directory + CRUD tables + Trainer Status */}
           <div className="space-y-4">
-            <DirectoryEditor data={directoryData} onChange={setDirectoryData} />
             <TrainerStatusPanel
               statuses={trainerStatuses}
               editable
@@ -365,6 +364,8 @@ export default function AdminPage() {
                 </>
               )}
             />
+
+            <DirectoryEditor data={directoryData} onChange={setDirectoryData} />
           </div>
         </div>
       </div>
