@@ -182,3 +182,24 @@ export function getVisibility(): VisibilitySettings {
 export function saveVisibility(settings: VisibilitySettings): void {
   setItem('visibility', settings);
 }
+
+// Name Overrides
+export function getNameOverrides(): Record<string, string> {
+  return getItem<Record<string, string>>('name_overrides', {});
+}
+
+export function saveNameOverride(id: string, name: string): void {
+  const overrides = getNameOverrides();
+  overrides[id] = name;
+  setItem('name_overrides', overrides);
+}
+
+export function getDisplayName(id: string): string {
+  const overrides = getNameOverrides();
+  if (overrides[id]) return overrides[id];
+  const sim = SIMULATORS.find(s => s.id === id);
+  if (sim) return sim.name;
+  const trainer = TRAINER_STATUS_IDS.find(t => t.id === id);
+  if (trainer) return trainer.name;
+  return id;
+}
