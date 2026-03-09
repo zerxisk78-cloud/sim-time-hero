@@ -57,7 +57,7 @@ export default function SchedulePage() {
     <div className="flex min-h-screen">
       <DirectorySidebar className="w-64 min-h-screen flex-shrink-0 rounded-none" />
       
-      <div className="flex-1 flex flex-col p-4 overflow-auto">
+      <div className="flex-1 p-4 overflow-auto">
         <div className="text-center mb-4">
           <h1 className="text-2xl font-bold">Marine Aviation Training System Site</h1>
           <p className="text-lg text-muted-foreground">MCAS Pendleton</p>
@@ -76,90 +76,88 @@ export default function SchedulePage() {
           ))}
         </div>
 
-        <div className="flex flex-1 items-end">
-          <div className="flex-1 max-w-4xl mx-auto space-y-2 pb-4">
-            {visibleSims.map(sim => (
-              <SimScheduleTable key={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} />
-            ))}
-            <p className="text-xs text-muted-foreground mt-4">*NB = No brief</p>
-          </div>
-
-          <div className="w-72 flex-shrink-0 space-y-4 pb-4">
-            {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} />}
-
-            {visibility.classrooms && classrooms.length > 0 && (
-              <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
-                <h3 className="text-lg font-bold underline mb-2 text-center">Classes</h3>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-xs text-sidebar-foreground">Unit</TableHead>
-                      <TableHead className="text-xs text-sidebar-foreground">Date/Time</TableHead>
-                      <TableHead className="text-xs text-sidebar-foreground">Location</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {classrooms.map(c => (
-                      <TableRow key={c.id}>
-                        <TableCell className="text-xs py-1 text-sidebar-foreground">{c.className}</TableCell>
-                        <TableCell className="text-xs py-1 text-sidebar-foreground">{c.dateTime}</TableCell>
-                        <TableCell className="text-xs py-1 text-sidebar-foreground">{c.location}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-
-            {visibility.necc && neccEntries.length > 0 && (
-              <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
-                <h3 className="text-lg font-bold underline mb-2 text-center">NECC Reservations</h3>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-xs text-sidebar-foreground">Unit</TableHead>
-                      <TableHead className="text-xs text-sidebar-foreground">Date/Time</TableHead>
-                      <TableHead className="text-xs text-sidebar-foreground">Notes</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {neccEntries.map(e => (
-                      <TableRow key={e.id}>
-                        <TableCell className="text-xs py-1 text-sidebar-foreground">{e.unit}</TableCell>
-                        <TableCell className="text-xs py-1 text-sidebar-foreground">{e.dateTime}</TableCell>
-                        <TableCell className="text-xs py-1 text-sidebar-foreground">{e.notes}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-
-            {visibility.linkedEvents && linkedEvents.length > 0 && (
-              <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
-                <h3 className="text-lg font-bold underline mb-2 text-center">Linked Events</h3>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-xs text-sidebar-foreground">Date/Time</TableHead>
-                      <TableHead className="text-xs text-sidebar-foreground">Unit</TableHead>
-                      <TableHead className="text-xs text-sidebar-foreground">System</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {linkedEvents.map(e => (
-                      <TableRow key={e.id}>
-                        <TableCell className="text-xs py-1 text-sidebar-foreground">{e.dateTime}</TableCell>
-                        <TableCell className="text-xs py-1 text-sidebar-foreground">{e.unit}</TableCell>
-                        <TableCell className="text-xs py-1 text-sidebar-foreground">{e.system}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </div>
+        <div className="max-w-4xl mx-auto space-y-2">
+          {visibleSims.map(sim => (
+            <SimScheduleTable key={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} />
+          ))}
+          <p className="text-xs text-muted-foreground mt-4">*NB = No brief</p>
         </div>
+      </div>
+
+      <div className="w-72 flex-shrink-0 p-4 space-y-4">
+        {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} />}
+
+        {visibility.classrooms && classrooms.length > 0 && (
+          <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
+            <h3 className="text-lg font-bold underline mb-2 text-center">Classes</h3>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs text-sidebar-foreground">Unit</TableHead>
+                  <TableHead className="text-xs text-sidebar-foreground">Date/Time</TableHead>
+                  <TableHead className="text-xs text-sidebar-foreground">Location</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {classrooms.map(c => (
+                  <TableRow key={c.id}>
+                    <TableCell className="text-xs py-1 text-sidebar-foreground">{c.className}</TableCell>
+                    <TableCell className="text-xs py-1 text-sidebar-foreground">{c.dateTime}</TableCell>
+                    <TableCell className="text-xs py-1 text-sidebar-foreground">{c.location}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        {visibility.necc && neccEntries.length > 0 && (
+          <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
+            <h3 className="text-lg font-bold underline mb-2 text-center">NECC Reservations</h3>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs text-sidebar-foreground">Unit</TableHead>
+                  <TableHead className="text-xs text-sidebar-foreground">Date/Time</TableHead>
+                  <TableHead className="text-xs text-sidebar-foreground">Notes</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {neccEntries.map(e => (
+                  <TableRow key={e.id}>
+                    <TableCell className="text-xs py-1 text-sidebar-foreground">{e.unit}</TableCell>
+                    <TableCell className="text-xs py-1 text-sidebar-foreground">{e.dateTime}</TableCell>
+                    <TableCell className="text-xs py-1 text-sidebar-foreground">{e.notes}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        {visibility.linkedEvents && linkedEvents.length > 0 && (
+          <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">
+            <h3 className="text-lg font-bold underline mb-2 text-center">Linked Events</h3>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs text-sidebar-foreground">Date/Time</TableHead>
+                  <TableHead className="text-xs text-sidebar-foreground">Unit</TableHead>
+                  <TableHead className="text-xs text-sidebar-foreground">System</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {linkedEvents.map(e => (
+                  <TableRow key={e.id}>
+                    <TableCell className="text-xs py-1 text-sidebar-foreground">{e.dateTime}</TableCell>
+                    <TableCell className="text-xs py-1 text-sidebar-foreground">{e.unit}</TableCell>
+                    <TableCell className="text-xs py-1 text-sidebar-foreground">{e.system}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </div>
     </div>
   );
