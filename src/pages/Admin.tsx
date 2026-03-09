@@ -548,6 +548,7 @@ export default function AdminPage() {
               }}
               onDelete={(id) => { deleteNECCEntry(id); reload(); }}
               onUpdate={(id, updates) => { updateNECCEntry(id, updates); reload(); }}
+              onReorder={(items) => { saveNECCOrder(items); reload(); }}
               renderInputs={() => (
                 <>
                   <div className="space-y-1">
