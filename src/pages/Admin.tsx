@@ -574,6 +574,19 @@ export default function AdminPage() {
                     </div>
                   );
                 })}
+                {/* Custom Trainers */}
+                {extraSims.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-1">Custom Trainers</h4>
+                    <TrainerStatusPanel
+                      statuses={trainerStatuses.filter(s => extraSims.some(es => es.id === s.id))}
+                      editable
+                      hideHeader
+                      onToggle={handleTrainerToggle}
+                      onNoteChange={handleTrainerNote}
+                    />
+                  </div>
+                )}
               </CardContent>
             </Card>
 
