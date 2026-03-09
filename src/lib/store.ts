@@ -68,6 +68,10 @@ export function deleteClassroom(id: string): void {
   setItem('classrooms', getClassrooms().filter(c => c.id !== id));
 }
 
+export function saveClassroomsOrder(classrooms: ClassroomEntry[]): void {
+  setItem('classrooms', classrooms);
+}
+
 // NECC Reservations
 export function getNECCEntries(): NECCEntry[] {
   return getItem<NECCEntry[]>('necc', []);
