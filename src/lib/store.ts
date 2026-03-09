@@ -68,6 +68,10 @@ export function deleteClassroom(id: string): void {
   setItem('classrooms', getClassrooms().filter(c => c.id !== id));
 }
 
+export function saveClassroomsOrder(classrooms: ClassroomEntry[]): void {
+  setItem('classrooms', classrooms);
+}
+
 // NECC Reservations
 export function getNECCEntries(): NECCEntry[] {
   return getItem<NECCEntry[]>('necc', []);
@@ -87,6 +91,10 @@ export function deleteNECCEntry(id: string): void {
   setItem('necc', getNECCEntries().filter(e => e.id !== id));
 }
 
+export function saveNECCOrder(entries: NECCEntry[]): void {
+  setItem('necc', entries);
+}
+
 // Linked Events
 export function getLinkedEvents(): LinkedEvent[] {
   return getItem<LinkedEvent[]>('linked', []);
@@ -104,6 +112,10 @@ export function updateLinkedEvent(id: string, entry: Partial<LinkedEvent>): void
 
 export function deleteLinkedEvent(id: string): void {
   setItem('linked', getLinkedEvents().filter(e => e.id !== id));
+}
+
+export function saveLinkedEventsOrder(events: LinkedEvent[]): void {
+  setItem('linked', events);
 }
 
 // Directory
