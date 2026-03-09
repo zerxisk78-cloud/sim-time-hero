@@ -439,7 +439,7 @@ export default function AdminPage() {
                       return { ...prev, simulators: sims };
                     });
                     toast.info(`Removed ${sim.name}`);
-                  }
+                  }}
                   className="absolute top-2 right-2 p-1 bg-destructive/80 text-destructive-foreground rounded hover:bg-destructive"
                   title="Remove trainer box"
                 >
