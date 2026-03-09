@@ -100,10 +100,18 @@ function SimEditor({ simId, name, timeSlots }: { simId: string; name: string; ti
     toast.success(`${name} saved`);
   };
 
+  const handleUndo = () => {
+    setEntries(getSimEntries(simId));
+    toast.info(`${name} reverted to last saved`);
+  };
+
   return (
     <Card className="mb-4">
-      <CardHeader className="py-3">
+      <CardHeader className="py-3 flex flex-row items-center justify-between">
         <CardTitle className="text-base">{name}</CardTitle>
+        <Button onClick={handleUndo} size="sm" variant="ghost" className="text-xs h-7 gap-1">
+          <Undo2 className="h-3.5 w-3.5" /> Undo
+        </Button>
       </CardHeader>
       <CardContent className="p-0">
         <div className="border border-border rounded overflow-hidden mx-4 mb-3">
