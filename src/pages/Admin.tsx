@@ -492,6 +492,7 @@ export default function AdminPage() {
                       <TrainerStatusPanel
                         statuses={groupStatuses}
                         editable
+                        hideHeader
                         onToggle={handleTrainerToggle}
                         onNoteChange={handleTrainerNote}
                       />
