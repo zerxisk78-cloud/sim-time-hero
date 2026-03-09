@@ -20,7 +20,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trash2, Undo2, Pencil, Check, GripVertical } from "lucide-react";
+import { Trash2, Undo2, Pencil, Check, GripVertical, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -148,15 +148,15 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
       <CardContent className="p-0">
         <div className="border border-border rounded overflow-hidden mx-4 mb-3">
           {/* Header row */}
-          <div className="grid grid-cols-[1fr_1fr_1fr_1fr_36px] bg-muted">
-            {['Time', 'Unit', 'Crew', 'CSI/System'].map((h, i) => (
-              <div key={h} className={`px-2 py-1.5 text-xs font-semibold text-muted-foreground border-r border-border last:border-r-0 ${i === 0 ? '' : ''}`}>{h}</div>
+          <div className="grid grid-cols-[60px_1fr_1fr_60px_44px] bg-muted">
+            {['Time', 'Unit', 'Crew', 'CSI/Sys'].map((h, i) => (
+              <div key={h} className={`px-2 py-1.5 text-xs font-semibold text-muted-foreground border-r border-border last:border-r-0`}>{h}</div>
             ))}
             <div />
           </div>
           {/* Data rows */}
           {entries.map((entry, i) => (
-            <div key={i} className="grid grid-cols-[1fr_1fr_1fr_1fr_36px] border-t border-border">
+            <div key={i} className="grid grid-cols-[60px_1fr_1fr_60px_44px] border-t border-border">
               {FIELD_ORDER.map((field, col) => (
                 <input
                   key={field}
@@ -355,6 +355,15 @@ function CrudTable<T extends { id: string }>({
   );
 }
 
+const EXTRA_SIMS_KEY = 'matss_extra_sims';
+
+function getExtraSims(): { id: string; name: string }[] {
+  try { return JSON.parse(localStorage.getItem(EXTRA_SIMS_KEY) || '[]'); } catch { return []; }
+}
+function saveExtraSims(sims: { id: string; name: string }[]) {
+  localStorage.setItem(EXTRA_SIMS_KEY, JSON.stringify(sims));
+}
+
 export default function AdminPage() {
   const [trainerStatuses, setTrainerStatuses] = useState<TrainerStatus[]>([]);
   const [classrooms, setClassrooms] = useState<ClassroomEntry[]>([]);
@@ -362,6 +371,7 @@ export default function AdminPage() {
   const [linkedEvents, setLinkedEvents] = useState<LinkedEvent[]>([]);
   const [directoryData, setDirectoryData] = useState<DirectoryData>(getDirectory());
   const [visibility, setVisibility] = useState<VisibilitySettings>(getVisibility());
+  const [extraSims, setExtraSims] = useState<{ id: string; name: string }[]>(getExtraSims);
 
   // CRUD form state
   const [classForm, setClassForm] = useState({ className: "", dateTime: "", location: "" });
@@ -414,6 +424,44 @@ export default function AdminPage() {
             {SIMULATORS.map(sim => (
               <SimEditor key={sim.id} simId={sim.id} name={sim.name} timeSlots={sim.timeSlots} />
             ))}
+            
+            {/* Extra custom trainer boxes */}
+            {extraSims.map(sim => (
+              <div key={sim.id} className="relative">
+                <SimEditor simId={sim.id} name={sim.name} timeSlots={[]} />
+                <button
+                  onClick={() => {
+                    const updated = extraSims.filter(s => s.id !== sim.id);
+                    setExtraSims(updated);
+                    saveExtraSims(updated);
+                    localStorage.removeItem(`matss_sim_${sim.id}`);
+                    toast.info(`Removed ${sim.name}`);
+                  }}
+                  className="absolute top-2 right-2 p-1 bg-destructive/80 text-destructive-foreground rounded hover:bg-destructive"
+                  title="Remove trainer box"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+            
+            {/* Add new trainer box button */}
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                const name = prompt("Enter trainer name:");
+                if (name?.trim()) {
+                  const id = `custom-${Date.now()}`;
+                  const updated = [...extraSims, { id, name: name.trim() }];
+                  setExtraSims(updated);
+                  saveExtraSims(updated);
+                  toast.success(`Added ${name.trim()}`);
+                }
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" /> Add Trainer Box
+            </Button>
           </div>
 
           {/* Right column: Trainer groups + Visibility + CRUD tables */}
