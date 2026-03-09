@@ -9,9 +9,10 @@ import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, Vi
 
 // Groups of simulator IDs to rotate through every 10 seconds
 const SIM_GROUPS = [
-  ['mcat', 'ah1z-ffs', 'ah1z-ftd'],
-  ['ah1z-cpt', 'uh1y-ftd', 'uh1y-ffs'],
-  ['uh1y-cpt', 'mv22-13', 'mv22-14', 'mv22-ptt'],
+  ['ah1z-ftd', 'ah1z-ffs'],
+  ['uh1y-ftd', 'uh1y-ffs'],
+  ['mcat', 'mv22-13', 'mv22-14'],
+  ['ah1z-cpt', 'uh1y-cpt', 'mv22-ptt'],
 ];
 
 export default function SchedulePage() {
