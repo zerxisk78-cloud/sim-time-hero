@@ -194,6 +194,7 @@ function CrudTable<T extends { id: string }>({
   columns,
   onAdd,
   onDelete,
+  onUpdate,
   renderInputs,
 }: {
   title: string;
@@ -201,8 +202,27 @@ function CrudTable<T extends { id: string }>({
   columns: { key: keyof T; label: string }[];
   onAdd: () => void;
   onDelete: (id: string) => void;
+  onUpdate: (id: string, updates: Partial<T>) => void;
   renderInputs: () => React.ReactNode;
 }) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValues, setEditValues] = useState<Partial<T>>({});
+
+  const startEdit = (item: T) => {
+    setEditingId(item.id);
+    const vals: Partial<T> = {};
+    columns.forEach(col => { vals[col.key] = item[col.key]; });
+    setEditValues(vals);
+  };
+
+  const saveEdit = () => {
+    if (editingId) {
+      onUpdate(editingId, editValues);
+      setEditingId(null);
+      toast.success(`${title} updated`);
+    }
+  };
+
   return (
     <Card className="mb-4">
       <CardHeader className="py-3">
@@ -211,7 +231,7 @@ function CrudTable<T extends { id: string }>({
       <CardContent className="space-y-3">
         <div className="flex gap-2 items-end flex-wrap">
           {renderInputs()}
-          <Button onClick={onAdd} size="sm">Save</Button>
+          <Button onClick={onAdd} size="sm">Add</Button>
         </div>
         {items.length > 0 && (
           <Table>
@@ -220,7 +240,7 @@ function CrudTable<T extends { id: string }>({
                 {columns.map(col => (
                   <TableHead key={String(col.key)} className="text-xs">{col.label}</TableHead>
                 ))}
-                <TableHead className="w-10"></TableHead>
+                <TableHead className="w-20"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -228,13 +248,33 @@ function CrudTable<T extends { id: string }>({
                 <TableRow key={item.id}>
                   {columns.map(col => (
                     <TableCell key={String(col.key)} className="text-xs py-1">
-                      {String(item[col.key])}
+                      {editingId === item.id ? (
+                        <Input
+                          value={String(editValues[col.key] ?? '')}
+                          onChange={e => setEditValues(prev => ({ ...prev, [col.key]: e.target.value }))}
+                          className="h-7 text-xs"
+                          onKeyDown={e => e.key === 'Enter' && saveEdit()}
+                        />
+                      ) : (
+                        String(item[col.key])
+                      )}
                     </TableCell>
                   ))}
                   <TableCell className="py-1">
-                    <button onClick={() => onDelete(item.id)} className="text-destructive hover:opacity-70">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    <div className="flex gap-1">
+                      {editingId === item.id ? (
+                        <button onClick={saveEdit} className="text-primary hover:opacity-70">
+                          <Check className="h-3.5 w-3.5" />
+                        </button>
+                      ) : (
+                        <button onClick={() => startEdit(item)} className="text-muted-foreground hover:text-foreground">
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      <button onClick={() => onDelete(item.id)} className="text-destructive hover:opacity-70">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

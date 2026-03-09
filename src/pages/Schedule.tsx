@@ -25,14 +25,17 @@ export default function SchedulePage() {
   const [activeGroup, setActiveGroup] = useState(0);
   const [visibility, setVisibility] = useState<VisibilitySettings>(getVisibility());
 
+  const sortByDate = <T extends { dateTime: string }>(items: T[]): T[] =>
+    [...items].sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
+
   const loadData = () => {
     const data: Record<string, SimSlot[]> = {};
     SIMULATORS.forEach(sim => { data[sim.id] = getSimEntries(sim.id); });
     setSimData(data);
     setStatuses(getTrainerStatuses());
-    setClassrooms(getClassrooms());
-    setNeccEntries(getNECCEntries());
-    setLinkedEvents(getLinkedEvents());
+    setClassrooms(sortByDate(getClassrooms()));
+    setNeccEntries(sortByDate(getNECCEntries()));
+    setLinkedEvents(sortByDate(getLinkedEvents()));
     setCurrentTime(new Date());
     setVisibility(getVisibility());
   };
