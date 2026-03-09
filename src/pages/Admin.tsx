@@ -365,7 +365,7 @@ export default function AdminPage() {
   const [linkedEvents, setLinkedEvents] = useState<LinkedEvent[]>([]);
   const [directoryData, setDirectoryData] = useState<DirectoryData>(getDirectory());
   const [visibility, setVisibility] = useState<VisibilitySettings>(getVisibility());
-  const [extraSims, setExtraSims] = useState<{ id: string; name: string }[]>(getExtraSims);
+  const [extraSims, setExtraSims] = useState<ExtraSim[]>(getExtraSims);
 
   // CRUD form state
   const [classForm, setClassForm] = useState({ className: "", dateTime: "", location: "" });
