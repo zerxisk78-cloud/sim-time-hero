@@ -10,9 +10,9 @@ interface TrainerStatusPanelProps {
 
 export function TrainerStatusPanel({ statuses, onToggle, onNoteChange, editable = false }: TrainerStatusPanelProps) {
   return (
-    <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg space-y-3">
-      <div className="bg-sidebar-accent px-3 py-2 rounded">
-        <h2 className="text-lg font-bold text-center text-sidebar-foreground">Trainer Status</h2>
+    <div className="bg-sidebar-background text-sidebar-foreground p-2 rounded-lg space-y-1">
+      <div className="bg-sidebar-accent px-2 py-1 rounded">
+        <h2 className="text-sm font-bold text-center text-sidebar-foreground">Trainer Status</h2>
       </div>
 
       <div className="space-y-2">
