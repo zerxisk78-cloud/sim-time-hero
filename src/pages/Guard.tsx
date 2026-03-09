@@ -52,7 +52,7 @@ export default function GuardPage() {
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           {visibleSims.map(sim => (
-            <SimScheduleTable key={sim.id} name={sim.name} entries={simData[sim.id] || []} />
+            <SimScheduleTable key={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} />
           ))}
         </div>
 
