@@ -270,14 +270,70 @@ export default function AdminPage() {
             ))}
           </div>
 
-          {/* Right column: Directory + CRUD tables + Trainer Status */}
+          {/* Right column: Trainer groups + Visibility + CRUD tables */}
           <div className="space-y-4">
-            <TrainerStatusPanel
-              statuses={trainerStatuses}
-              editable
-              onToggle={handleTrainerToggle}
-              onNoteChange={handleTrainerNote}
-            />
+            {/* Visibility Controls */}
+            <Card className="mb-4">
+              <CardHeader className="py-3">
+                <CardTitle className="text-base">Visibility Controls</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-xs text-muted-foreground">Toggle what's visible on Guard & Schedule pages</p>
+                <div className="space-y-2">
+                  {SIMULATORS.map(sim => (
+                    <div key={sim.id} className="flex items-center justify-between">
+                      <span className="text-xs font-medium">{sim.name}</span>
+                      <Switch
+                        checked={visibility.simulators[sim.id] ?? true}
+                        onCheckedChange={(checked) => updateVisibility(prev => ({
+                          ...prev,
+                          simulators: { ...prev.simulators, [sim.id]: checked },
+                        }))}
+                      />
+                    </div>
+                  ))}
+                  <div className="border-t border-border pt-2 mt-2 space-y-2">
+                    {[
+                      { key: 'classrooms' as const, label: 'Classrooms' },
+                      { key: 'necc' as const, label: 'NECC Reservations' },
+                      { key: 'linkedEvents' as const, label: 'Linked Events' },
+                      { key: 'trainerStatus' as const, label: 'Trainer Status' },
+                    ].map(item => (
+                      <div key={item.key} className="flex items-center justify-between">
+                        <span className="text-xs font-medium">{item.label}</span>
+                        <Switch
+                          checked={visibility[item.key]}
+                          onCheckedChange={(checked) => updateVisibility(prev => ({
+                            ...prev,
+                            [item.key]: checked,
+                          }))}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 3 Trainer Status Panels by aircraft group */}
+            {TRAINER_GROUPS.map(group => {
+              const groupStatuses = trainerStatuses.filter(s => group.trainers.some(t => t.id === s.id));
+              return (
+                <Card key={group.id} className="mb-4">
+                  <CardHeader className="py-3">
+                    <CardTitle className="text-base">{group.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <TrainerStatusPanel
+                      statuses={groupStatuses}
+                      editable
+                      onToggle={handleTrainerToggle}
+                      onNoteChange={handleTrainerNote}
+                    />
+                  </CardContent>
+                </Card>
+              );
+            })}
 
             <CrudTable
               title="Classrooms"
