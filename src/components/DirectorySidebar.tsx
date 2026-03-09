@@ -36,18 +36,20 @@ export function DirectorySidebar({ className, directoryData }: DirectorySidebarP
       </div>
 
       {data.sections.map((section) => (
-        <div key={section.heading} className="space-y-3">
+        <div key={section.heading} className="space-y-1">
           <p className="text-amber-200 underline italic font-medium">{section.heading}</p>
-          {section.contacts.map((contact, i) => (
-            <div key={`${section.heading}-${i}`} className="space-y-0.5">
-              <p className="font-medium">{contact.title}</p>
-              {contact.name && (
-                <p>{contact.name}{contact.callsign ? ` ${contact.callsign}` : ''}</p>
-              )}
-              {contact.office && <p>Office: {contact.office}</p>}
-              {contact.room && <p>Room: {contact.room}</p>}
-            </div>
-          ))}
+          <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+            {section.contacts.map((contact, i) => (
+              <div key={`${section.heading}-${i}`} className="space-y-0">
+                <p className="font-medium text-xs">{contact.title}</p>
+                {contact.name && (
+                  <p className="text-xs">{contact.name}{contact.callsign ? ` ${contact.callsign}` : ''}</p>
+                )}
+                {contact.office && <p className="text-xs">Office: {contact.office}</p>}
+                {contact.room && <p className="text-xs">Room: {contact.room}</p>}
+              </div>
+            ))}
+          </div>
         </div>
       ))}
     </aside>
