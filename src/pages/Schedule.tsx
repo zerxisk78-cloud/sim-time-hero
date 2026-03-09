@@ -58,7 +58,7 @@ export default function SchedulePage() {
 
   return (
     <div className="flex min-h-screen">
-      <DirectorySidebar className="w-64 min-h-screen flex-shrink-0 rounded-none" />
+      <DirectorySidebar className="w-48 min-h-screen flex-shrink-0 rounded-none" />
       
       <div className="flex-1 p-4 overflow-auto">
         <div className="text-center mb-4">
