@@ -1,4 +1,5 @@
 import { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, SIMULATORS, TRAINER_STATUS_IDS, VisibilitySettings } from './types';
+import { apiSet, apiDelete } from './api';
 
 const STORAGE_PREFIX = 'matss_';
 
@@ -13,15 +14,24 @@ function getItem<T>(key: string, defaultValue: T): T {
 
 function setItem<T>(key: string, value: T): void {
   localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
+  // Also persist to server (fire-and-forget)
+  apiSet(key, value);
+}
+
+function removeItem(key: string): void {
+  localStorage.removeItem(STORAGE_PREFIX + key);
+  apiDelete(key);
 }
 
 // Simulator schedules
 export function getSimEntries(simId: string): SimSlot[] {
   const sim = SIMULATORS.find(s => s.id === simId);
-  if (!sim) return [];
   const entries = getItem<SimSlot[]>(`sim_${simId}`, []);
-  if (entries.length === 0) {
+  if (entries.length === 0 && sim) {
     return sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: '' }));
+  }
+  if (entries.length === 0) {
+    return [{ time: '', unit: '', crew: '', csi: '' }];
   }
   return entries;
 }
@@ -207,6 +217,11 @@ export function getExtraSims(): ExtraSim[] {
 
 export function saveExtraSims(sims: ExtraSim[]): void {
   setItem('extra_sims', sims);
+}
+
+export function removeSimData(simId: string): void {
+  removeItem(`sim_${simId}`);
+  removeItem(`sim_${simId}_saved`);
 }
 
 // Name Overrides
