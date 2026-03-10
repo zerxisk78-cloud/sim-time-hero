@@ -28,6 +28,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <DataSync />
+      <ConnectionStatus />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
