@@ -1,5 +1,5 @@
 import { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, SIMULATORS, TRAINER_STATUS_IDS, VisibilitySettings } from './types';
-import { apiSet, apiDelete } from './api';
+import { apiSet, apiDelete, apiGet } from './api';
 
 const STORAGE_PREFIX = 'matss_';
 
@@ -10,6 +10,11 @@ function getItem<T>(key: string, defaultValue: T): T {
   } catch {
     return defaultValue;
   }
+}
+
+// Async version that reads from server first
+async function getItemAsync<T>(key: string, defaultValue: T): Promise<T> {
+  return apiGet<T>(key, defaultValue);
 }
 
 function setItem<T>(key: string, value: T): void {
