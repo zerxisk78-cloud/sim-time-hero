@@ -9,7 +9,7 @@ import {
   getDirectory, type DirectoryData,
   getVisibility, saveVisibility,
   getDisplayName, saveNameOverride,
-  getExtraSims, saveExtraSims, type ExtraSim,
+  getExtraSims, saveExtraSims, removeSimData, type ExtraSim,
 } from "@/lib/store";
 import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
@@ -429,7 +429,7 @@ export default function AdminPage() {
                     const updated = extraSims.filter(s => s.id !== sim.id);
                     setExtraSims(updated);
                     saveExtraSims(updated);
-                    localStorage.removeItem(`matss_sim_${sim.id}`);
+                    removeSimData(sim.id);
                     const newStatuses = getTrainerStatuses().filter(s => s.id !== sim.id);
                     saveTrainerStatuses(newStatuses);
                     setTrainerStatuses(newStatuses);
