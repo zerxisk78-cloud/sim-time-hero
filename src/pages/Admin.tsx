@@ -429,7 +429,7 @@ export default function AdminPage() {
                     const updated = extraSims.filter(s => s.id !== sim.id);
                     setExtraSims(updated);
                     saveExtraSims(updated);
-                    localStorage.removeItem(`matss_sim_${sim.id}`);
+                    removeSimData(sim.id);
                     const newStatuses = getTrainerStatuses().filter(s => s.id !== sim.id);
                     saveTrainerStatuses(newStatuses);
                     setTrainerStatuses(newStatuses);
