@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { SIMULATORS } from "@/lib/types";
-import { getSimEntries, getTrainerStatuses, getClassrooms, getNECCEntries, getLinkedEvents, getVisibility, getDisplayName, getExtraSims } from "@/lib/store";
+import { getDisplayName, loadAllData } from "@/lib/store";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
 import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
 import { SimScheduleTable } from "@/components/SimScheduleTable";
@@ -14,29 +14,26 @@ export default function GuardPage() {
   const [neccEntries, setNeccEntries] = useState<NECCEntry[]>([]);
   const [linkedEvents, setLinkedEvents] = useState<LinkedEvent[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [visibility, setVisibility] = useState<VisibilitySettings>(getVisibility());
-  const [extraSims, setExtraSims] = useState(getExtraSims());
+  const [visibility, setVisibility] = useState<VisibilitySettings>({ simulators: {}, classrooms: true, necc: true, linkedEvents: true, trainerStatus: true });
+  const [extraSims, setExtraSims] = useState<{ id: string; name: string }[]>([]);
 
-  const loadData = () => {
-    const data: Record<string, SimSlot[]> = {};
-    SIMULATORS.forEach(sim => { data[sim.id] = getSimEntries(sim.id); });
-    const extras = getExtraSims();
-    extras.forEach(sim => { data[sim.id] = getSimEntries(sim.id); });
-    setExtraSims(extras);
-    setSimData(data);
-    setStatuses(getTrainerStatuses());
-    setClassrooms(getClassrooms());
-    setNeccEntries(getNECCEntries());
-    setLinkedEvents(getLinkedEvents());
+  const loadData = useCallback(async () => {
+    const data = await loadAllData();
+    setSimData(data.simData);
+    setStatuses(data.statuses);
+    setClassrooms(data.classrooms);
+    setNeccEntries(data.neccEntries);
+    setLinkedEvents(data.linkedEvents);
+    setVisibility(data.visibility);
+    setExtraSims(data.extraSims);
     setCurrentTime(new Date());
-    setVisibility(getVisibility());
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadData, 40000);
+    const interval = setInterval(loadData, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [loadData]);
 
   const allSims = [...SIMULATORS, ...extraSims.map(s => ({ ...s, shortName: s.name, timeSlots: [] as string[] }))];
   const visibleSims = allSims.filter(s => visibility.simulators[s.id] !== false);
