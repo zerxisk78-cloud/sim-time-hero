@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import { syncFromServer, pushToServer } from "./lib/api";
+import { ConnectionStatus } from "./components/ConnectionStatus";
 import Index from "./pages/Index";
 import Schedule from "./pages/Schedule";
 import Guard from "./pages/Guard";
