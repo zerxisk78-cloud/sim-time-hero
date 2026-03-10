@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { SIMULATORS } from "@/lib/types";
-import { getSimEntries, getTrainerStatuses, getClassrooms, getNECCEntries, getLinkedEvents, getVisibility, getDisplayName, getExtraSims } from "@/lib/store";
+import { getDisplayName, loadAllData } from "@/lib/store";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
 import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
 import { SimScheduleTable } from "@/components/SimScheduleTable";
@@ -26,32 +26,29 @@ export default function SchedulePage() {
   const [linkedEvents, setLinkedEvents] = useState<LinkedEvent[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeGroup, setActiveGroup] = useState(0);
-  const [visibility, setVisibility] = useState<VisibilitySettings>(getVisibility());
-  const [extraSims, setExtraSims] = useState(getExtraSims());
+  const [visibility, setVisibility] = useState<VisibilitySettings>({ simulators: {}, classrooms: true, necc: true, linkedEvents: true, trainerStatus: true });
+  const [extraSims, setExtraSims] = useState<{ id: string; name: string }[]>([]);
 
   const sortByDate = <T extends { dateTime: string }>(items: T[]): T[] =>
     [...items].sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
 
-  const loadData = () => {
-    const data: Record<string, SimSlot[]> = {};
-    SIMULATORS.forEach(sim => { data[sim.id] = getSimEntries(sim.id); });
-    const extras = getExtraSims();
-    extras.forEach(sim => { data[sim.id] = getSimEntries(sim.id); });
-    setExtraSims(extras);
-    setSimData(data);
-    setStatuses(getTrainerStatuses());
-    setClassrooms(sortByDate(getClassrooms()));
-    setNeccEntries(sortByDate(getNECCEntries()));
-    setLinkedEvents(sortByDate(getLinkedEvents()));
+  const loadData = useCallback(async () => {
+    const data = await loadAllData();
+    setSimData(data.simData);
+    setStatuses(data.statuses);
+    setClassrooms(sortByDate(data.classrooms));
+    setNeccEntries(sortByDate(data.neccEntries));
+    setLinkedEvents(sortByDate(data.linkedEvents));
+    setVisibility(data.visibility);
+    setExtraSims(data.extraSims);
     setCurrentTime(new Date());
-    setVisibility(getVisibility());
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
     const interval = setInterval(loadData, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [loadData]);
 
   useEffect(() => {
     const interval = setInterval(() => {

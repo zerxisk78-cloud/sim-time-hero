@@ -1,5 +1,5 @@
 import { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, SIMULATORS, TRAINER_STATUS_IDS, VisibilitySettings } from './types';
-import { apiSet, apiDelete } from './api';
+import { apiSet, apiDelete, apiGet } from './api';
 
 const STORAGE_PREFIX = 'matss_';
 
@@ -10,6 +10,11 @@ function getItem<T>(key: string, defaultValue: T): T {
   } catch {
     return defaultValue;
   }
+}
+
+// Async version that reads from server first
+async function getItemAsync<T>(key: string, defaultValue: T): Promise<T> {
+  return apiGet<T>(key, defaultValue);
 }
 
 function setItem<T>(key: string, value: T): void {
@@ -245,4 +250,44 @@ export function getDisplayName(id: string): string {
   const extra = getExtraSims().find(s => s.id === id);
   if (extra) return extra.name;
   return id;
+}
+
+// ---- Async loaders (server-first) for Guard/Schedule pages ----
+export async function loadAllData(): Promise<{
+  simData: Record<string, SimSlot[]>;
+  statuses: TrainerStatus[];
+  classrooms: ClassroomEntry[];
+  neccEntries: NECCEntry[];
+  linkedEvents: LinkedEvent[];
+  visibility: VisibilitySettings;
+  extraSims: ExtraSim[];
+}> {
+  const extraSims = await getItemAsync<ExtraSim[]>('extra_sims', []);
+  const allSimIds = [...SIMULATORS.map(s => s.id), ...extraSims.map(s => s.id)];
+
+  const [statuses, classrooms, neccEntries, linkedEvents, visibility, ...simResults] = await Promise.all([
+    getItemAsync<TrainerStatus[]>('trainer_statuses',
+      TRAINER_STATUS_IDS.map(t => ({ id: t.id, name: t.name, isUp: true, note: '' }))),
+    getItemAsync<ClassroomEntry[]>('classrooms', []),
+    getItemAsync<NECCEntry[]>('necc', []),
+    getItemAsync<LinkedEvent[]>('linked', []),
+    getItemAsync<VisibilitySettings>('visibility', {
+      simulators: Object.fromEntries(SIMULATORS.map(s => [s.id, true])),
+      classrooms: true, necc: true, linkedEvents: true, trainerStatus: true,
+    }),
+    ...allSimIds.map(id => getItemAsync<SimSlot[]>(`sim_${id}`, [])),
+  ]);
+
+  const simData: Record<string, SimSlot[]> = {};
+  allSimIds.forEach((id, i) => {
+    const entries = simResults[i] as SimSlot[];
+    if (entries.length === 0) {
+      const sim = SIMULATORS.find(s => s.id === id);
+      simData[id] = sim ? sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: '' })) : [];
+    } else {
+      simData[id] = entries;
+    }
+  });
+
+  return { simData, statuses, classrooms, neccEntries, linkedEvents, visibility, extraSims };
 }
