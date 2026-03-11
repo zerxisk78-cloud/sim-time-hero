@@ -75,7 +75,7 @@ export async function apiDelete(key: string): Promise<void> {
   const isUp = await checkServer();
   if (isUp) {
     try {
-      await fetch(`${API_BASE}/${STORAGE_PREFIX}${key}`, { method: 'DELETE' });
+      await fetch(`${getApiBase()}/${STORAGE_PREFIX}${key}`, { method: 'DELETE' });
     } catch { /* silent */ }
   }
 }
