@@ -358,6 +358,78 @@ function CrudTable<T extends { id: string }>({
   );
 }
 
+// Server connection settings component
+function ServerSettings() {
+  const [url, setUrl] = useState(getServerUrl());
+  const [testing, setTesting] = useState(false);
+  const [status, setStatus] = useState<boolean | null>(null);
+
+  const testConnection = async () => {
+    setTesting(true);
+    try {
+      const res = await fetch(`${url}/api/data`, { method: 'GET', signal: AbortSignal.timeout(3000) });
+      const text = await res.text();
+      try {
+        JSON.parse(text);
+        setStatus(true);
+        toast.success("Connected to server!");
+      } catch {
+        setStatus(false);
+        toast.error("Server returned HTML, not JSON — check that the Express server is running on this URL");
+      }
+    } catch {
+      setStatus(false);
+      toast.error("Cannot reach server at " + url);
+    }
+    setTesting(false);
+  };
+
+  const saveUrl = () => {
+    setServerUrl(url);
+    resetServerCheck();
+    toast.success("Server URL saved — connection will re-check automatically");
+  };
+
+  return (
+    <Card className="mb-4">
+      <CardHeader className="py-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Server className="h-4 w-4" /> Server Connection
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Set the URL of your Express data server (runs alongside IIS on port 3001).
+        </p>
+        <div className="flex gap-2 items-end">
+          <div className="flex-1 space-y-1">
+            <label className="text-xs text-muted-foreground">Server URL</label>
+            <Input
+              value={url}
+              onChange={e => setUrl(e.target.value)}
+              placeholder="http://your-server-ip:3001"
+              className="h-8 text-xs font-mono"
+            />
+          </div>
+          <Button onClick={saveUrl} size="sm" className="h-8 text-xs">Save</Button>
+          <Button onClick={testConnection} size="sm" variant="outline" className="h-8 text-xs" disabled={testing}>
+            {testing ? "Testing…" : "Test"}
+          </Button>
+        </div>
+        {status !== null && (
+          <div className={`flex items-center gap-1.5 text-xs font-medium ${status ? "text-green-400" : "text-destructive"}`}>
+            {status ? <Wifi className="h-3.5 w-3.5" /> : <WifiOff className="h-3.5 w-3.5" />}
+            {status ? "Server Connected — data syncs across all computers" : "Not Connected — data stays local only"}
+          </div>
+        )}
+        <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded border border-border">
+          <strong>IIS Setup:</strong> IIS serves the website. Run <code className="bg-muted px-1 rounded">node server/index.js</code> on the same laptop to start the data server on port 3001. All computers on the network will share the same data.
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // Extra sims now come from shared store
 
 export default function AdminPage() {
