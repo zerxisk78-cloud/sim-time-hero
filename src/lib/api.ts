@@ -59,7 +59,7 @@ export async function apiSet<T>(key: string, value: T): Promise<void> {
   const isUp = await checkServer();
   if (isUp) {
     try {
-      await fetch(`${API_BASE}/${STORAGE_PREFIX}${key}`, {
+      await fetch(`${getApiBase()}/${STORAGE_PREFIX}${key}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ value }),
