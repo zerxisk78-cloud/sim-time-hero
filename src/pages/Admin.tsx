@@ -481,8 +481,10 @@ export default function AdminPage() {
             </Button>
           </div>
 
-          {/* Right column: Trainer groups + Visibility + CRUD tables */}
+          {/* Right column: Server Settings + Trainer groups + Visibility + CRUD tables */}
           <div className="space-y-4">
+            {/* Server Connection Settings */}
+            <ServerSettings />
             {/* Visibility Controls */}
             <Card className="mb-4">
               <CardHeader className="py-3">
