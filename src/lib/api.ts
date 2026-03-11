@@ -1,7 +1,8 @@
 // API client for syncing data with the local server.
 // Falls back to localStorage when the server is unavailable (e.g. during development).
 
-const API_BASE = '/api/data';
+import { getApiBase } from './serverConfig';
+
 const STORAGE_PREFIX = 'matss_';
 
 let serverAvailable: boolean | null = null;
@@ -9,7 +10,7 @@ let serverAvailable: boolean | null = null;
 async function checkServer(): Promise<boolean> {
   if (serverAvailable !== null) return serverAvailable;
   try {
-    const res = await fetch(API_BASE, { method: 'GET', signal: AbortSignal.timeout(2000) });
+    const res = await fetch(getApiBase(), { method: 'GET', signal: AbortSignal.timeout(2000) });
     if (!res.ok) { serverAvailable = false; return false; }
     // Verify response is JSON (not SPA fallback HTML)
     const text = await res.text();
@@ -24,7 +25,12 @@ async function checkServer(): Promise<boolean> {
   }
   // Re-check every 30 seconds
   setTimeout(() => { serverAvailable = null; }, 30000);
-  return serverAvailable;
+  return serverAvailable ?? false;
+}
+
+// Allow forcing a re-check (e.g. when server URL changes)
+export function resetServerCheck(): void {
+  serverAvailable = null;
 }
 
 // Read a key: try server first, fall back to localStorage
@@ -32,7 +38,7 @@ export async function apiGet<T>(key: string, defaultValue: T): Promise<T> {
   const isUp = await checkServer();
   if (isUp) {
     try {
-      const res = await fetch(`${API_BASE}/${STORAGE_PREFIX}${key}`);
+      const res = await fetch(`${getApiBase()}/${STORAGE_PREFIX}${key}`);
       const json = await res.json();
       if (json.value !== null && json.value !== undefined) {
         // Also cache in localStorage
@@ -58,7 +64,7 @@ export async function apiSet<T>(key: string, value: T): Promise<void> {
   const isUp = await checkServer();
   if (isUp) {
     try {
-      await fetch(`${API_BASE}/${STORAGE_PREFIX}${key}`, {
+      await fetch(`${getApiBase()}/${STORAGE_PREFIX}${key}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ value }),
@@ -74,7 +80,7 @@ export async function apiDelete(key: string): Promise<void> {
   const isUp = await checkServer();
   if (isUp) {
     try {
-      await fetch(`${API_BASE}/${STORAGE_PREFIX}${key}`, { method: 'DELETE' });
+      await fetch(`${getApiBase()}/${STORAGE_PREFIX}${key}`, { method: 'DELETE' });
     } catch { /* silent */ }
   }
 }
@@ -84,7 +90,7 @@ export async function syncFromServer(): Promise<void> {
   const isUp = await checkServer();
   if (!isUp) return;
   try {
-    const res = await fetch(API_BASE);
+    const res = await fetch(getApiBase());
     const data = await res.json();
     for (const [key, value] of Object.entries(data)) {
       if (key.startsWith(STORAGE_PREFIX)) {
@@ -109,7 +115,7 @@ export async function pushToServer(): Promise<void> {
       }
     }
     if (Object.keys(bulk).length > 0) {
-      await fetch(`${API_BASE}/bulk`, {
+      await fetch(`${getApiBase()}/bulk`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bulk),
