@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Wifi, WifiOff } from "lucide-react";
+import { getApiBase } from "@/lib/serverConfig";
 
 export function ConnectionStatus() {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
@@ -7,11 +8,10 @@ export function ConnectionStatus() {
   useEffect(() => {
     const check = async () => {
       try {
-        const res = await fetch("/api/data", {
+        const res = await fetch(getApiBase(), {
           method: "GET",
           signal: AbortSignal.timeout(2000),
         });
-        // If the response is JSON, server is up. If HTML, it's the SPA fallback.
         const text = await res.text();
         try {
           JSON.parse(text);
