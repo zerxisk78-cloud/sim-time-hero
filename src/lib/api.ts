@@ -10,7 +10,7 @@ let serverAvailable: boolean | null = null;
 async function checkServer(): Promise<boolean> {
   if (serverAvailable !== null) return serverAvailable;
   try {
-    const res = await fetch(API_BASE, { method: 'GET', signal: AbortSignal.timeout(2000) });
+    const res = await fetch(getApiBase(), { method: 'GET', signal: AbortSignal.timeout(2000) });
     if (!res.ok) { serverAvailable = false; return false; }
     // Verify response is JSON (not SPA fallback HTML)
     const text = await res.text();
