@@ -25,7 +25,12 @@ async function checkServer(): Promise<boolean> {
   }
   // Re-check every 30 seconds
   setTimeout(() => { serverAvailable = null; }, 30000);
-  return serverAvailable;
+  return serverAvailable ?? false;
+}
+
+// Allow forcing a re-check (e.g. when server URL changes)
+export function resetServerCheck(): void {
+  serverAvailable = null;
 }
 
 // Read a key: try server first, fall back to localStorage
