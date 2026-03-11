@@ -33,7 +33,7 @@ export async function apiGet<T>(key: string, defaultValue: T): Promise<T> {
   const isUp = await checkServer();
   if (isUp) {
     try {
-      const res = await fetch(`${API_BASE}/${STORAGE_PREFIX}${key}`);
+      const res = await fetch(`${getApiBase()}/${STORAGE_PREFIX}${key}`);
       const json = await res.json();
       if (json.value !== null && json.value !== undefined) {
         // Also cache in localStorage
