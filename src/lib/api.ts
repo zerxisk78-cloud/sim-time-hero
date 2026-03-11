@@ -110,7 +110,7 @@ export async function pushToServer(): Promise<void> {
       }
     }
     if (Object.keys(bulk).length > 0) {
-      await fetch(`${API_BASE}/bulk`, {
+      await fetch(`${getApiBase()}/bulk`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bulk),
