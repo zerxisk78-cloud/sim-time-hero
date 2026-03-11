@@ -85,7 +85,7 @@ export async function syncFromServer(): Promise<void> {
   const isUp = await checkServer();
   if (!isUp) return;
   try {
-    const res = await fetch(API_BASE);
+    const res = await fetch(getApiBase());
     const data = await res.json();
     for (const [key, value] of Object.entries(data)) {
       if (key.startsWith(STORAGE_PREFIX)) {
