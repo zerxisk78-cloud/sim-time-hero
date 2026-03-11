@@ -1,7 +1,8 @@
 // API client for syncing data with the local server.
 // Falls back to localStorage when the server is unavailable (e.g. during development).
 
-const API_BASE = '/api/data';
+import { getApiBase } from './serverConfig';
+
 const STORAGE_PREFIX = 'matss_';
 
 let serverAvailable: boolean | null = null;
