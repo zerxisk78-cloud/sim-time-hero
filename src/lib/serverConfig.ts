@@ -11,7 +11,13 @@ function getDefaultServerUrl(): string {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) return saved;
   
-  // Default to port 3001 on the current hostname
+  // If running on standard ports (80/443) or iisnode, API is same-origin
+  const port = window.location.port;
+  if (!port || port === '80' || port === '443') {
+    return window.location.origin;
+  }
+  
+  // Development: default to port 3001 on the current hostname
   return `http://${window.location.hostname}:3001`;
 }
 

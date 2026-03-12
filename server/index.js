@@ -82,9 +82,16 @@ if (fs.existsSync(DIST_DIR)) {
   });
 }
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`MATSS server running on http://0.0.0.0:${PORT}`);
-  console.log(`Other computers can access at http://<your-ip>:${PORT}`);
+// iisnode sets PORT to a named pipe; standalone uses a numeric port
+const listener = app.listen(PORT, () => {
+  const addr = listener.address();
+  if (typeof addr === 'string') {
+    // Named pipe (iisnode)
+    console.log(`MATSS server running via iisnode on pipe: ${addr}`);
+  } else {
+    console.log(`MATSS server running on http://0.0.0.0:${addr.port}`);
+    console.log(`Other computers can access at http://<your-ip>:${addr.port}`);
+  }
   console.log(`  /schedule - Schedule page`);
   console.log(`  /guard    - Guard page`);
   console.log(`  /admin    - Admin page`);
