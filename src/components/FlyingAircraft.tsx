@@ -9,110 +9,126 @@ const AIRCRAFT = [
   { src: mv22Img, alt: "MV-22 Osprey", size: "h-28", fires: false },
 ];
 
+// AH-1Z is h-28 = 112px tall, flying left-to-right
+// Nose gun (M197) is at bottom-front of aircraft: ~right edge, ~90% down
+// Rocket pods on stub wings: ~60% right, ~65% down
+const GUN_ORIGIN = { x: 150, y: 95 };       // chin turret - nose of aircraft
+const ROCKET_ORIGIN_TOP = { x: 120, y: 58 }; // upper stub wing pod
+const ROCKET_ORIGIN_BOT = { x: 120, y: 72 }; // lower stub wing pod
+
 function Projectiles({ delay }: { delay: number }) {
-  // Generate rockets and tracer bursts at various timings
   const rockets = [
-    { type: "rocket", offsetY: 18, fireAt: 1.5 },
-    { type: "rocket", offsetY: 24, fireAt: 2.8 },
-    { type: "rocket", offsetY: 14, fireAt: 3.6 },
+    { origin: ROCKET_ORIGIN_TOP, fireAt: 1.4, angle: 2 },
+    { origin: ROCKET_ORIGIN_BOT, fireAt: 1.5, angle: -1 },
+    { origin: ROCKET_ORIGIN_TOP, fireAt: 2.6, angle: 1 },
+    { origin: ROCKET_ORIGIN_BOT, fireAt: 2.7, angle: -2 },
+    { origin: ROCKET_ORIGIN_TOP, fireAt: 3.8, angle: 0 },
+    { origin: ROCKET_ORIGIN_BOT, fireAt: 3.9, angle: -1 },
   ];
-  const tracers = [
-    { offsetY: 10, fireAt: 1.0, spread: 0 },
-    { offsetY: 12, fireAt: 1.15, spread: 2 },
-    { offsetY: 14, fireAt: 1.3, spread: -1 },
-    { offsetY: 10, fireAt: 2.2, spread: 1 },
-    { offsetY: 12, fireAt: 2.3, spread: -2 },
-    { offsetY: 14, fireAt: 2.4, spread: 0 },
-    { offsetY: 10, fireAt: 3.1, spread: 1 },
-    { offsetY: 12, fireAt: 3.15, spread: -1 },
-    { offsetY: 14, fireAt: 3.2, spread: 2 },
-    { offsetY: 10, fireAt: 3.9, spread: 0 },
-    { offsetY: 12, fireAt: 3.95, spread: -2 },
-    { offsetY: 14, fireAt: 4.0, spread: 1 },
-  ];
+
+  // Tracer bursts from chin gun - rapid 3-round bursts
+  const tracerBursts = [1.0, 2.2, 3.1, 3.9];
+  const tracers = tracerBursts.flatMap((t) => [
+    { fireAt: t, spreadY: 0 },
+    { fireAt: t + 0.05, spreadY: -1 },
+    { fireAt: t + 0.1, spreadY: 1 },
+    { fireAt: t + 0.15, spreadY: -2 },
+    { fireAt: t + 0.2, spreadY: 0 },
+  ]);
 
   return (
     <>
-      {/* Rockets - thicker, with a smoke trail feel */}
+      {/* Rockets from stub wing pods */}
       {rockets.map((r, i) => (
         <div
           key={`rocket-${i}`}
           className="absolute"
           style={{
-            top: `${r.offsetY}px`,
+            top: `${8 + r.origin.y}px`,
             animation: `flyAcross 5s linear forwards`,
             animationDelay: `${delay}s`,
             opacity: 0,
           }}
         >
-          {/* Rocket fires ahead of the aircraft */}
           <div
             className="absolute"
             style={{
-              left: "140px",
-              top: "0px",
-              animation: `fireRocket 1.2s linear forwards`,
+              left: `${r.origin.x}px`,
+              animation: `fireRocket 1.0s linear forwards`,
               animationDelay: `${delay + r.fireAt}s`,
               opacity: 0,
+              transform: `rotate(${r.angle}deg)`,
             }}
           >
-            {/* Rocket body */}
-            <div
-              style={{
-                width: "16px",
-                height: "3px",
-                background: "linear-gradient(90deg, #ff4400, #ffaa00, #fff)",
-                borderRadius: "2px",
-                boxShadow: "0 0 8px 2px rgba(255,100,0,0.6), 0 0 16px 4px rgba(255,60,0,0.3)",
-              }}
-            />
-            {/* Smoke trail */}
-            <div
-              style={{
-                position: "absolute",
-                left: "-30px",
-                top: "-2px",
-                width: "30px",
-                height: "7px",
-                background: "linear-gradient(90deg, transparent, rgba(180,180,180,0.3), rgba(200,200,200,0.5))",
-                borderRadius: "4px",
-                filter: "blur(2px)",
-              }}
-            />
+            {/* Rocket flame tip */}
+            <div style={{
+              width: "20px",
+              height: "3px",
+              background: "linear-gradient(90deg, rgba(255,80,0,0.4), #ff4400, #ffcc00, #fff)",
+              borderRadius: "1px 3px 3px 1px",
+              boxShadow: "0 0 6px 2px rgba(255,100,0,0.7), 0 0 12px 3px rgba(255,60,0,0.3)",
+            }} />
+            {/* Exhaust smoke */}
+            <div style={{
+              position: "absolute",
+              left: "-40px",
+              top: "-3px",
+              width: "42px",
+              height: "9px",
+              background: "linear-gradient(90deg, transparent 0%, rgba(160,160,160,0.15) 40%, rgba(200,200,200,0.4) 100%)",
+              borderRadius: "5px",
+              filter: "blur(3px)",
+            }} />
           </div>
         </div>
       ))}
 
-      {/* Tracer rounds - small bright dots that streak forward */}
+      {/* Tracer rounds from chin turret M197 */}
       {tracers.map((t, i) => (
         <div
           key={`tracer-${i}`}
           className="absolute"
           style={{
-            top: `${t.offsetY + t.spread}px`,
+            top: `${8 + GUN_ORIGIN.y + t.spreadY}px`,
             animation: `flyAcross 5s linear forwards`,
             animationDelay: `${delay}s`,
             opacity: 0,
           }}
         >
+          {/* Muzzle flash on first round of each burst */}
+          {t.spreadY === 0 && (
+            <div
+              className="absolute"
+              style={{
+                left: `${GUN_ORIGIN.x}px`,
+                top: "-3px",
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                background: "radial-gradient(circle, #fff 20%, #ffcc00 60%, rgba(255,100,0,0) 100%)",
+                animation: `muzzleFlash 0.1s linear forwards`,
+                animationDelay: `${delay + t.fireAt}s`,
+                opacity: 0,
+              }}
+            />
+          )}
           <div
+            className="absolute"
             style={{
-              position: "absolute",
-              left: "130px",
-              animation: `fireTracer 0.4s linear forwards`,
+              left: `${GUN_ORIGIN.x + 8}px`,
+              animation: `fireTracer 0.25s linear forwards`,
               animationDelay: `${delay + t.fireAt}s`,
               opacity: 0,
             }}
           >
-            <div
-              style={{
-                width: "8px",
-                height: "2px",
-                background: "linear-gradient(90deg, #ff2200, #ffcc00, #fff)",
-                borderRadius: "1px",
-                boxShadow: "0 0 4px 1px rgba(255,200,0,0.8)",
-              }}
-            />
+            {/* Tracer round */}
+            <div style={{
+              width: "12px",
+              height: "1.5px",
+              background: "linear-gradient(90deg, rgba(255,50,0,0.3), #ff2200, #ffcc00, #ffffcc)",
+              borderRadius: "1px",
+              boxShadow: "0 0 3px 1px rgba(255,200,0,0.6)",
+            }} />
           </div>
         </div>
       ))}
@@ -166,11 +182,18 @@ export function FlyingAircraft() {
         }
         @keyframes fireRocket {
           0% { opacity: 1; transform: translateX(0); }
-          100% { opacity: 0; transform: translateX(500px); }
+          50% { opacity: 1; }
+          100% { opacity: 0; transform: translateX(600px); }
         }
         @keyframes fireTracer {
           0% { opacity: 1; transform: translateX(0); }
-          100% { opacity: 0; transform: translateX(350px); }
+          60% { opacity: 0.8; }
+          100% { opacity: 0; transform: translateX(400px); }
+        }
+        @keyframes muzzleFlash {
+          0% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.5); }
+          100% { opacity: 0; transform: scale(0.5); }
         }
       `}</style>
     </div>
