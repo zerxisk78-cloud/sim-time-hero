@@ -414,7 +414,7 @@ function ServerSettings() {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
-          Set the URL of your Express data server (runs alongside IIS on port 3001).
+          Set the URL of your Express data server (managed by PM2).
         </p>
         <div className="flex gap-2 items-end">
           <div className="flex-1 space-y-1">
