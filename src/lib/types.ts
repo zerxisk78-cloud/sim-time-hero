@@ -102,6 +102,8 @@ export const TRAINER_GROUPS = [
 
 export const TRAINER_STATUS_IDS = TRAINER_GROUPS.flatMap(g => g.trainers);
 
+export const MRT_SIM_IDS = ['mrt-1', 'mrt-2', 'mrt-3', 'mrt-4'];
+
 export interface VisibilitySettings {
   simulators: Record<string, boolean>;
   classrooms: boolean;
