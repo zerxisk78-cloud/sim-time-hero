@@ -6,7 +6,7 @@ import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
 import { SimScheduleTable } from "@/components/SimScheduleTable";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
-import egaImage from "@/assets/usmc-ega.png";
+import matssPatc from "@/assets/matss-patch.png";
 import usmcFlag from "@/assets/usmc-flag.png";
 import { FlyingAircraft } from "@/components/FlyingAircraft";
 
@@ -75,12 +75,12 @@ export default function SchedulePage() {
       <div className="flex-1 p-2 overflow-auto">
         <div className="text-center mb-2">
           <div className="flex items-center justify-center gap-3">
-            <img src={egaImage} alt="USMC Eagle Globe and Anchor" className="h-12 w-12 object-contain" />
+            <img src={matssPatc} alt="MATSS Official Patch" className="h-14 w-14 object-contain" />
             <div>
               <h1 className="text-xl font-bold leading-tight">Marine Aviation Training System Site</h1>
               <p className="text-sm text-muted-foreground">MCAS Pendleton</p>
             </div>
-            <img src={egaImage} alt="USMC Eagle Globe and Anchor" className="h-12 w-12 object-contain" />
+            <img src={matssPatc} alt="MATSS Official Patch" className="h-14 w-14 object-contain" />
           </div>
           <p className="text-sm mt-1">Current Simulator Schedule</p>
           <p className="text-xs text-muted-foreground">
