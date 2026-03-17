@@ -6,7 +6,7 @@ import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
 import { SimScheduleTable } from "@/components/SimScheduleTable";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
-import egaImage from "@/assets/usmc-ega.png";
+import matssPatc from "@/assets/matss-patch.png";
 import usmcFlag from "@/assets/usmc-flag.png";
 import { FlyingAircraft } from "@/components/FlyingAircraft";
 
