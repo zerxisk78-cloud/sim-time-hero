@@ -72,43 +72,43 @@ export default function SchedulePage() {
       <FlyingAircraft />
       <DirectorySidebar className="w-64 min-h-screen flex-shrink-0 rounded-none" />
       
-      <div className="flex-1 p-4 overflow-auto">
-        <div className="text-center mb-4">
-          <div className="flex items-center justify-center gap-4">
-            <img src={egaImage} alt="USMC Eagle Globe and Anchor" className="h-16 w-16 object-contain" />
+      <div className="flex-1 p-2 overflow-auto">
+        <div className="text-center mb-2">
+          <div className="flex items-center justify-center gap-3">
+            <img src={egaImage} alt="USMC Eagle Globe and Anchor" className="h-12 w-12 object-contain" />
             <div>
-              <h1 className="text-2xl font-bold">Marine Aviation Training System Site</h1>
-              <p className="text-lg text-muted-foreground">MCAS Pendleton</p>
+              <h1 className="text-xl font-bold leading-tight">Marine Aviation Training System Site</h1>
+              <p className="text-sm text-muted-foreground">MCAS Pendleton</p>
             </div>
-            <img src={egaImage} alt="USMC Eagle Globe and Anchor" className="h-16 w-16 object-contain" />
+            <img src={egaImage} alt="USMC Eagle Globe and Anchor" className="h-12 w-12 object-contain" />
           </div>
-          <p className="text-lg mt-2">Current Simulator Schedule</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm mt-1">Current Simulator Schedule</p>
+          <p className="text-xs text-muted-foreground">
             {currentTime.toLocaleDateString()} {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>
 
-        <div className="flex justify-center gap-2 mb-4">
+        <div className="flex justify-center gap-1.5 mb-2">
           {SIM_GROUPS.map((_, i) => (
             <div
               key={i}
-              className={`w-3 h-3 rounded-full transition-colors ${i === activeGroup ? 'bg-primary' : 'bg-muted'}`}
+              className={`w-2.5 h-2.5 rounded-full transition-colors ${i === activeGroup ? 'bg-primary' : 'bg-muted'}`}
             />
           ))}
         </div>
 
-        <div className="max-w-4xl mx-auto space-y-2">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 xl:grid-cols-2 gap-2">
           {visibleSims.map(sim => (
             <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} />
           ))}
           {visibleExtraSims.map(sim => (
             <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id) || sim.name} entries={simData[sim.id] || []} />
           ))}
-          <p className="text-xs text-muted-foreground mt-4">*NB = No brief</p>
         </div>
+        <p className="text-xs text-muted-foreground mt-2 text-center">*NB = No brief</p>
       </div>
 
-      <div className="w-72 flex-shrink-0 p-2 space-y-2 overflow-auto">
+      <div className="w-64 flex-shrink-0 p-2 space-y-1.5 overflow-auto">
         {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} />}
 
         {visibility.classrooms && classrooms.length > 0 && (

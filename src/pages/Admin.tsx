@@ -414,7 +414,7 @@ function ServerSettings() {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
-          Set the URL of your Express data server (runs alongside IIS on port 3001).
+          Set the URL of your Express data server (managed by PM2).
         </p>
         <div className="flex gap-2 items-end">
           <div className="flex-1 space-y-1">
@@ -438,7 +438,7 @@ function ServerSettings() {
           </div>
         )}
         <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded border border-border">
-          <strong>IIS Setup:</strong> IIS serves the website. Run <code className="bg-muted px-1 rounded">node server/index.js</code> on the same laptop to start the data server on port 3001. All computers on the network will share the same data.
+          <strong>PM2 Setup:</strong> Run <code className="bg-muted px-1 rounded">pm2 start ecosystem.config.js</code> in the server folder. Express serves both the website and API. All computers on the network will share the same data.
         </div>
       </CardContent>
     </Card>
