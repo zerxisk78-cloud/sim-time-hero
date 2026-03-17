@@ -1,73 +1,70 @@
-# Welcome to your Lovable project
+# MATSS Local Server Setup
 
-## Project info
+## One-click Windows install/update
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+If this project is deployed on the Windows host at `C:\inetpub\wwwroot\sim-time-hero`, you can now run:
 
-## How can I edit this code?
+- `install-or-update-server.bat` for normal use
+- or `install-or-update-server.ps1` directly in PowerShell
 
-There are several ways of editing your application.
+The script will automatically:
 
-**Use Lovable**
+1. Request Administrator access
+2. Optionally pull the latest Git changes
+3. Install root dependencies
+4. Build the React frontend
+5. Install `server` dependencies
+6. Install PM2 globally if missing
+7. Open Windows Firewall for TCP port `3001`
+8. Start or restart the PM2 server
+9. Save the PM2 process list
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## What you need installed once
 
-Changes made via Lovable will be committed automatically to this repo.
+- Node.js LTS
+- Git for Windows (optional, but recommended for auto-updates)
 
-**Use your preferred IDE**
+## How to use it
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### First install
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Copy or clone the project to:
+   - `C:\inetpub\wwwroot\sim-time-hero`
+2. Double-click:
+   - `install-or-update-server.bat`
+3. Approve the Administrator prompt
+4. Wait for the script to finish
 
-Follow these steps:
+### Future updates
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+After you pull new files from GitHub, just double-click:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- `install-or-update-server.bat`
 
-# Step 3: Install the necessary dependencies.
-npm i
+It will rebuild the app and restart the live server automatically.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+## Live URLs on your network
+
+After the script completes, the app should be available at:
+
+- `http://192.168.0.197:3001/`
+- `http://192.168.0.197:3001/schedule`
+- `http://192.168.0.197:3001/guard`
+- `http://192.168.0.197:3001/admin`
+
+## PM2 manual commands
+
+If you ever need them manually:
+
+```bat
+cd C:\inetpub\wwwroot\sim-time-hero\server
+npm run pm2:status
+npm run pm2:restart
+npm run pm2:logs
 ```
 
-**Edit a file directly in GitHub**
+## Notes
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- Shared data is stored in `server/data.json`
+- The firewall rule created by the script is `MATSS Server 3001`
+- If Git is not installed, the script skips `git pull` and still completes the install/update

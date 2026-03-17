@@ -1,0 +1,116 @@
+param(
+  [switch]$SkipGitPull
+)
+
+$ErrorActionPreference = 'Stop'
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::UTF8
+
+$repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+Set-Location $repoRoot
+
+function Write-Step([string]$Message) {
+  Write-Host "`n==> $Message" -ForegroundColor Cyan
+}
+
+function Require-Command([string]$Name, [string]$InstallHint) {
+  if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
+    Write-Host "Missing required command: $Name" -ForegroundColor Red
+    Write-Host $InstallHint -ForegroundColor Yellow
+    Read-Host "Press Enter to close"
+    exit 1
+  }
+}
+
+function Invoke-Step([string]$FilePath, [string[]]$Arguments, [string]$WorkingDirectory) {
+  Write-Host "Running: $FilePath $($Arguments -join ' ')" -ForegroundColor DarkGray
+  $process = Start-Process -FilePath $FilePath -ArgumentList $Arguments -WorkingDirectory $WorkingDirectory -NoNewWindow -Wait -PassThru
+  if ($process.ExitCode -ne 0) {
+    throw "Command failed with exit code $($process.ExitCode): $FilePath $($Arguments -join ' ')"
+  }
+}
+
+try {
+  $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+  $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+  $isAdmin = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+  if (-not $isAdmin) {
+    Write-Host "Requesting administrator privileges..." -ForegroundColor Yellow
+    $argumentList = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$PSCommandPath`"")
+    if ($SkipGitPull) { $argumentList += '-SkipGitPull' }
+    Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentList -Verb RunAs | Out-Null
+    exit 0
+  }
+
+  Write-Host "MATSS one-click install/update starting..." -ForegroundColor Green
+  Write-Host "Repo: $repoRoot" -ForegroundColor DarkGray
+
+  Require-Command 'node' 'Install Node.js LTS first: https://nodejs.org/'
+  Require-Command 'npm' 'Install Node.js LTS first: https://nodejs.org/'
+
+  if ((Test-Path (Join-Path $repoRoot '.git')) -and (-not $SkipGitPull)) {
+    if (Get-Command git -ErrorAction SilentlyContinue) {
+      Write-Step 'Pull latest code from Git'
+      try {
+        Invoke-Step 'git.exe' @('pull', '--ff-only') $repoRoot
+      } catch {
+        Write-Host "Git pull skipped: $($_.Exception.Message)" -ForegroundColor Yellow
+      }
+    } else {
+      Write-Host "Git not found, so update pull was skipped." -ForegroundColor Yellow
+    }
+  }
+
+  Write-Step 'Install frontend dependencies'
+  Invoke-Step 'npm.cmd' @('install') $repoRoot
+
+  Write-Step 'Build frontend'
+  Invoke-Step 'npm.cmd' @('run', 'build') $repoRoot
+
+  $serverDir = Join-Path $repoRoot 'server'
+
+  Write-Step 'Install server dependencies'
+  Invoke-Step 'npm.cmd' @('install') $serverDir
+
+  if (-not (Get-Command pm2 -ErrorAction SilentlyContinue)) {
+    Write-Step 'Install PM2 globally'
+    Invoke-Step 'npm.cmd' @('install', '-g', 'pm2') $repoRoot
+  }
+
+  $pm2Command = (Get-Command pm2).Source
+
+  Write-Step 'Ensure Windows Firewall allows TCP port 3001'
+  $ruleName = 'MATSS Server 3001'
+  $existingRule = Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue
+  if (-not $existingRule) {
+    New-NetFirewallRule -DisplayName $ruleName -Direction Inbound -Action Allow -Protocol TCP -LocalPort 3001 | Out-Null
+    Write-Host 'Firewall rule created.' -ForegroundColor Green
+  } else {
+    Write-Host 'Firewall rule already exists.' -ForegroundColor DarkGray
+  }
+
+  Write-Step 'Start or restart the PM2 server'
+  $describe = Start-Process -FilePath $pm2Command -ArgumentList @('describe', 'matss-server') -WorkingDirectory $serverDir -NoNewWindow -Wait -PassThru
+  if ($describe.ExitCode -eq 0) {
+    Invoke-Step 'npm.cmd' @('run', 'pm2:restart') $serverDir
+  } else {
+    Invoke-Step 'npm.cmd' @('run', 'pm2:start') $serverDir
+  }
+
+  Write-Step 'Save PM2 process list'
+  Invoke-Step $pm2Command @('save') $serverDir
+
+  Write-Step 'Completed successfully'
+  Write-Host 'Open these URLs from another computer on the LAN:' -ForegroundColor Green
+  Write-Host '  http://192.168.0.197:3001/' -ForegroundColor White
+  Write-Host '  http://192.168.0.197:3001/schedule' -ForegroundColor White
+  Write-Host '  http://192.168.0.197:3001/guard' -ForegroundColor White
+  Write-Host '  http://192.168.0.197:3001/admin' -ForegroundColor White
+}
+catch {
+  Write-Host "`nInstall/update failed: $($_.Exception.Message)" -ForegroundColor Red
+  exit 1
+}
+finally {
+  Read-Host "`nPress Enter to close"
+}
