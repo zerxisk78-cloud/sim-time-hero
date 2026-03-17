@@ -3,11 +3,15 @@
 
 const STORAGE_KEY = 'matss_server_url';
 
+function normalizeServerUrl(url: string): string {
+  const cleaned = url.trim().replace(/\/+$/, '').replace(/\/api\/data$/i, '');
+  return cleaned || window.location.origin;
+}
+
 function getDefaultServerUrl(): string {
-  // If there's a saved custom URL, use it
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) return saved;
-  
+  if (saved) return normalizeServerUrl(saved);
+
   // When Express serves everything (PM2 setup), API is same-origin
   // This works whether the server is on port 3001, 80, or any other port
   return window.location.origin;
@@ -20,7 +24,7 @@ export function getServerUrl(): string {
 }
 
 export function setServerUrl(url: string): void {
-  _serverUrl = url.replace(/\/+$/, ''); // trim trailing slashes
+  _serverUrl = normalizeServerUrl(url);
   localStorage.setItem(STORAGE_KEY, _serverUrl);
 }
 

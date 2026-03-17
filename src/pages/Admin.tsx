@@ -382,7 +382,10 @@ function ServerSettings() {
   const testConnection = async () => {
     setTesting(true);
     try {
-      const res = await fetch(`${url}/api/data`, { method: 'GET', signal: AbortSignal.timeout(3000) });
+      const res = await fetch(`${url.replace(/\/+$/, '').replace(/\/api\/data$/i, '')}/api/data/__healthcheck`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(3000),
+      });
       const text = await res.text();
       try {
         JSON.parse(text);

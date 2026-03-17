@@ -8,7 +8,7 @@ export function ConnectionStatus() {
   useEffect(() => {
     const check = async () => {
       try {
-        const res = await fetch(getApiBase(), {
+        const res = await fetch(`${getApiBase()}/__healthcheck`, {
           method: "GET",
           signal: AbortSignal.timeout(2000),
         });

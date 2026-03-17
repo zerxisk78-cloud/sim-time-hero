@@ -4,52 +4,92 @@
 import { getApiBase } from './serverConfig';
 
 const STORAGE_PREFIX = 'matss_';
+const HEALTH_KEY = '__healthcheck';
 
 let serverAvailable: boolean | null = null;
+let recheckTimer: number | null = null;
+
+function scheduleServerRecheck() {
+  if (recheckTimer !== null) {
+    window.clearTimeout(recheckTimer);
+  }
+  recheckTimer = window.setTimeout(() => {
+    serverAvailable = null;
+    recheckTimer = null;
+  }, 30000);
+}
+
+function markServerState(isAvailable: boolean) {
+  serverAvailable = isAvailable;
+  scheduleServerRecheck();
+}
 
 async function checkServer(): Promise<boolean> {
   if (serverAvailable !== null) return serverAvailable;
   try {
-    const res = await fetch(getApiBase(), { method: 'GET', signal: AbortSignal.timeout(2000) });
-    if (!res.ok) { serverAvailable = false; return false; }
-    // Verify response is JSON (not SPA fallback HTML)
+    const res = await fetch(`${getApiBase()}/${HEALTH_KEY}`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(2000),
+    });
+    if (!res.ok) {
+      markServerState(false);
+      return false;
+    }
+
     const text = await res.text();
     try {
       JSON.parse(text);
-      serverAvailable = true;
+      markServerState(true);
+      return true;
     } catch {
-      serverAvailable = false;
+      markServerState(false);
+      return false;
     }
   } catch {
-    serverAvailable = false;
+    markServerState(false);
+    return false;
   }
-  // Re-check every 30 seconds
-  setTimeout(() => { serverAvailable = null; }, 30000);
-  return serverAvailable ?? false;
 }
 
 // Allow forcing a re-check (e.g. when server URL changes)
 export function resetServerCheck(): void {
   serverAvailable = null;
+  if (recheckTimer !== null) {
+    window.clearTimeout(recheckTimer);
+    recheckTimer = null;
+  }
 }
 
 // Read a key: try server first, fall back to localStorage
 export async function apiGet<T>(key: string, defaultValue: T): Promise<T> {
-  const isUp = await checkServer();
-  if (isUp) {
+  const fullKey = STORAGE_PREFIX + key;
+  let shouldTryServer = await checkServer();
+
+  // Optimistic retry for environments where /api/data can be rewritten but /api/data/:key still works.
+  if (!shouldTryServer) shouldTryServer = true;
+
+  if (shouldTryServer) {
     try {
-      const res = await fetch(`${getApiBase()}/${STORAGE_PREFIX}${key}`);
-      const json = await res.json();
-      if (json.value !== null && json.value !== undefined) {
-        // Also cache in localStorage
-        localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(json.value));
-        return json.value as T;
+      const res = await fetch(`${getApiBase()}/${fullKey}`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(2000),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        markServerState(true);
+        if (json.value !== null && json.value !== undefined) {
+          localStorage.setItem(fullKey, JSON.stringify(json.value));
+          return json.value as T;
+        }
       }
-    } catch { /* fall through */ }
+    } catch {
+      markServerState(false);
+    }
   }
+
   // Fallback to localStorage
   try {
-    const raw = localStorage.getItem(STORAGE_PREFIX + key);
+    const raw = localStorage.getItem(fullKey);
     return raw ? JSON.parse(raw) : defaultValue;
   } catch {
     return defaultValue;
@@ -58,30 +98,35 @@ export async function apiGet<T>(key: string, defaultValue: T): Promise<T> {
 
 // Write a key: save to server AND localStorage
 export async function apiSet<T>(key: string, value: T): Promise<void> {
-  // Always save to localStorage immediately
-  localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
-  
-  const isUp = await checkServer();
-  if (isUp) {
-    try {
-      await fetch(`${getApiBase()}/${STORAGE_PREFIX}${key}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value }),
-      });
-    } catch { /* silently fail, localStorage has the data */ }
+  const fullKey = STORAGE_PREFIX + key;
+  localStorage.setItem(fullKey, JSON.stringify(value));
+
+  try {
+    const res = await fetch(`${getApiBase()}/${fullKey}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value }),
+      signal: AbortSignal.timeout(3000),
+    });
+    markServerState(res.ok);
+  } catch {
+    markServerState(false);
   }
 }
 
 // Delete a key from server and localStorage
 export async function apiDelete(key: string): Promise<void> {
-  localStorage.removeItem(STORAGE_PREFIX + key);
-  
-  const isUp = await checkServer();
-  if (isUp) {
-    try {
-      await fetch(`${getApiBase()}/${STORAGE_PREFIX}${key}`, { method: 'DELETE' });
-    } catch { /* silent */ }
+  const fullKey = STORAGE_PREFIX + key;
+  localStorage.removeItem(fullKey);
+
+  try {
+    const res = await fetch(`${getApiBase()}/${fullKey}`, {
+      method: 'DELETE',
+      signal: AbortSignal.timeout(3000),
+    });
+    markServerState(res.ok);
+  } catch {
+    markServerState(false);
   }
 }
 
@@ -89,21 +134,31 @@ export async function apiDelete(key: string): Promise<void> {
 export async function syncFromServer(): Promise<void> {
   const isUp = await checkServer();
   if (!isUp) return;
+
   try {
-    const res = await fetch(getApiBase());
+    const res = await fetch(getApiBase(), {
+      method: 'GET',
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) {
+      markServerState(false);
+      return;
+    }
+
     const data = await res.json();
+    markServerState(true);
     for (const [key, value] of Object.entries(data)) {
       if (key.startsWith(STORAGE_PREFIX)) {
         localStorage.setItem(key, JSON.stringify(value));
       }
     }
-  } catch { /* silent */ }
+  } catch {
+    markServerState(false);
+  }
 }
 
 // Push all localStorage data to server (initial migration)
 export async function pushToServer(): Promise<void> {
-  const isUp = await checkServer();
-  if (!isUp) return;
   try {
     const bulk: Record<string, unknown> = {};
     for (let i = 0; i < localStorage.length; i++) {
@@ -111,15 +166,22 @@ export async function pushToServer(): Promise<void> {
       if (key && key.startsWith(STORAGE_PREFIX)) {
         try {
           bulk[key] = JSON.parse(localStorage.getItem(key)!);
-        } catch { /* skip malformed */ }
+        } catch {
+          // skip malformed values
+        }
       }
     }
+
     if (Object.keys(bulk).length > 0) {
-      await fetch(`${getApiBase()}/bulk`, {
+      const res = await fetch(`${getApiBase()}/bulk`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bulk),
+        signal: AbortSignal.timeout(5000),
       });
+      markServerState(res.ok);
     }
-  } catch { /* silent */ }
+  } catch {
+    markServerState(false);
+  }
 }
