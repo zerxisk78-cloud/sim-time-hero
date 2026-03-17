@@ -271,9 +271,8 @@ export async function loadAllData(): Promise<{
   const extraSims = await getItemAsync<ExtraSim[]>('extra_sims', []);
   const allSimIds = [...SIMULATORS.map(s => s.id), ...extraSims.map(s => s.id)];
 
-  const [statuses, classrooms, neccEntries, linkedEvents, visibility, ...simResults] = await Promise.all([
-    getItemAsync<TrainerStatus[]>('trainer_statuses',
-      TRAINER_STATUS_IDS.map(t => ({ id: t.id, name: t.name, isUp: true, note: '' }))),
+  const [rawStatuses, classrooms, neccEntries, linkedEvents, visibility, ...simResults] = await Promise.all([
+    getItemAsync<TrainerStatus[]>('trainer_statuses', []),
     getItemAsync<ClassroomEntry[]>('classrooms', []),
     getItemAsync<NECCEntry[]>('necc', []),
     getItemAsync<LinkedEvent[]>('linked', []),
