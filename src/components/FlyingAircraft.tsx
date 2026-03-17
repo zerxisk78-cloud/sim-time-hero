@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import ah1zImg from "@/assets/ah1z-cartoon.png";
-import uh1yImg from "@/assets/uh1y-cartoon.png";
+import ah1zImg from "@/assets/ah1z-clean.png";
+import uh1yImg from "@/assets/uh1y-clean.png";
 import mv22Img from "@/assets/mv22-cartoon.png";
 
 const AIRCRAFT = [
@@ -13,7 +13,6 @@ export function FlyingAircraft() {
   const [flying, setFlying] = useState(false);
 
   useEffect(() => {
-    // Fly on mount after a short delay, then every 60s
     const initialTimeout = setTimeout(() => setFlying(true), 2000);
     const interval = setInterval(() => setFlying(true), 60000);
     return () => {
@@ -43,6 +42,7 @@ export function FlyingAircraft() {
             top: `${8 + i * 4}px`,
             animation: `flyAcross 5s linear forwards`,
             animationDelay: `${i * 0.8}s`,
+            mixBlendMode: "multiply",
           }}
         />
       ))}
