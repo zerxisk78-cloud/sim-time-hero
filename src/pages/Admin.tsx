@@ -33,6 +33,7 @@ import { resetServerCheck } from "@/lib/api";
 const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
 
 function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; name: string; timeSlots: string[] }) {
+  const isMrt = MRT_SIM_IDS.includes(simId);
   const [entries, setEntries] = useState<SimSlot[]>([]);
   const [lastSaved, setLastSaved] = useState("");
   const [displayName, setDisplayName] = useState(getDisplayName(simId));
