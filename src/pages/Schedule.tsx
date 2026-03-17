@@ -97,7 +97,7 @@ export default function SchedulePage() {
           ))}
         </div>
 
-        <div className="max-w-5xl mx-auto grid grid-cols-1 xl:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
           {visibleSims.map(sim => (
             <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} />
           ))}
@@ -108,7 +108,7 @@ export default function SchedulePage() {
         <p className="text-xs text-muted-foreground mt-2 text-center">*NB = No brief</p>
       </div>
 
-      <div className="w-64 flex-shrink-0 p-2 space-y-1.5 overflow-auto">
+      <div className="w-48 flex-shrink-0 p-1.5 space-y-1.5 overflow-auto">
         {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} />}
 
         {visibility.classrooms && classrooms.length > 0 && (
