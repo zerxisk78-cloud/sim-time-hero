@@ -152,8 +152,8 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
       <CardContent className="p-0">
         <div className="border border-border rounded overflow-hidden mx-4 mb-3">
           {/* Header row */}
-          <div className="grid grid-cols-[60px_1fr_1fr_60px_44px] bg-muted">
-            {['Time', 'Unit', 'Crew', 'CSI/Sys'].map((h, i) => (
+          <div className={`grid ${isMrt ? 'grid-cols-[60px_1fr_1fr_60px_44px]' : 'grid-cols-[60px_1fr_1fr_60px_44px]'} bg-muted`}>
+            {['Time', 'Unit', 'Crew', isMrt ? 'Type' : 'CSI/Sys'].map((h, i) => (
               <div key={h} className={`px-2 py-1.5 text-xs font-semibold text-muted-foreground border-r border-border last:border-r-0`}>{h}</div>
             ))}
             <div />
