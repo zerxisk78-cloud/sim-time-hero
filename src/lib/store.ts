@@ -53,11 +53,16 @@ export function getSimLastSaved(simId: string): string {
   return getItem<string>(`sim_${simId}_saved`, '');
 }
 
-// Trainer Status
+// Trainer Status — always merge saved data with current TRAINER_STATUS_IDS
+// so newly added trainers (like MRTs) appear even if old data was saved without them
+function mergeTrainerStatuses(saved: TrainerStatus[]): TrainerStatus[] {
+  const map = new Map(saved.map(s => [s.id, s]));
+  return TRAINER_STATUS_IDS.map(t => map.get(t.id) ?? { id: t.id, name: t.name, isUp: true, note: '' });
+}
+
 export function getTrainerStatuses(): TrainerStatus[] {
-  return getItem<TrainerStatus[]>('trainer_statuses', 
-    TRAINER_STATUS_IDS.map(t => ({ id: t.id, name: t.name, isUp: true, note: '' }))
-  );
+  const saved = getItem<TrainerStatus[]>('trainer_statuses', []);
+  return mergeTrainerStatuses(saved);
 }
 
 export function saveTrainerStatuses(statuses: TrainerStatus[]): void {
@@ -266,9 +271,8 @@ export async function loadAllData(): Promise<{
   const extraSims = await getItemAsync<ExtraSim[]>('extra_sims', []);
   const allSimIds = [...SIMULATORS.map(s => s.id), ...extraSims.map(s => s.id)];
 
-  const [statuses, classrooms, neccEntries, linkedEvents, visibility, ...simResults] = await Promise.all([
-    getItemAsync<TrainerStatus[]>('trainer_statuses',
-      TRAINER_STATUS_IDS.map(t => ({ id: t.id, name: t.name, isUp: true, note: '' }))),
+  const [rawStatuses, classrooms, neccEntries, linkedEvents, visibility, ...simResults] = await Promise.all([
+    getItemAsync<TrainerStatus[]>('trainer_statuses', []),
     getItemAsync<ClassroomEntry[]>('classrooms', []),
     getItemAsync<NECCEntry[]>('necc', []),
     getItemAsync<LinkedEvent[]>('linked', []),
@@ -291,5 +295,6 @@ export async function loadAllData(): Promise<{
     }
   });
 
+  const statuses = mergeTrainerStatuses(rawStatuses as TrainerStatus[]);
   return { simData, statuses, classrooms, neccEntries, linkedEvents, visibility, extraSims };
 }
