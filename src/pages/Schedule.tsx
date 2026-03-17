@@ -16,6 +16,7 @@ const SIM_GROUPS = [
   ['uh1y-ftd', 'uh1y-ffs'],
   ['mcat', 'mv22-13', 'mv22-14'],
   ['ah1z-cpt', 'uh1y-cpt', 'mv22-ptt'],
+  ['mrt-1', 'mrt-2', 'mrt-3', 'mrt-4'],
 ];
 
 export default function SchedulePage() {
