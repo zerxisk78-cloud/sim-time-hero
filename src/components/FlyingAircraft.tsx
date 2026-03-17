@@ -10,120 +10,72 @@ const AIRCRAFT = [
   { src: mv22Img, alt: "MV-22 Osprey", size: "h-28", fires: false },
 ];
 
-function Projectiles({ delay }: { delay: number }) {
-  // Fire downward toward the tank at bottom-right
-  const rockets = [
-    { fireAt: 1.2, angle: 35 },
-    { fireAt: 1.4, angle: 38 },
-    { fireAt: 2.4, angle: 32 },
-    { fireAt: 2.6, angle: 36 },
-    { fireAt: 3.2, angle: 30 },
-    { fireAt: 3.4, angle: 34 },
-  ];
-
-  const tracerBursts = [0.8, 1.8, 2.8, 3.6];
-  const tracers = tracerBursts.flatMap((t) => [
-    { fireAt: t, spread: 0 },
-    { fireAt: t + 0.04, spread: -1 },
-    { fireAt: t + 0.08, spread: 1 },
-    { fireAt: t + 0.12, spread: -2 },
-    { fireAt: t + 0.16, spread: 0 },
-  ]);
+function HellfireMissile({ delay }: { delay: number }) {
+  const fireAt = 1.8;
 
   return (
-    <>
-      {rockets.map((r, i) => (
-        <div
-          key={`rocket-${i}`}
-          className="absolute"
-          style={{
-            top: "72px",
-            animation: `flyAcross 5s linear forwards`,
-            animationDelay: `${delay}s`,
-            opacity: 0,
-          }}
-        >
-          <div
-            className="absolute"
-            style={{
-              left: "120px",
-              animation: `fireDown${i % 2 === 0 ? 'A' : 'B'} 1.2s linear forwards`,
-              animationDelay: `${delay + r.fireAt}s`,
-              opacity: 0,
-              transformOrigin: "top left",
-              transform: `rotate(${r.angle}deg)`,
-            }}
-          >
-            <div style={{
-              width: "20px",
-              height: "3px",
-              background: "linear-gradient(90deg, rgba(255,80,0,0.4), #ff4400, #ffcc00, #fff)",
-              borderRadius: "1px 3px 3px 1px",
-              boxShadow: "0 0 6px 2px rgba(255,100,0,0.7), 0 0 12px 3px rgba(255,60,0,0.3)",
-            }} />
-            <div style={{
-              position: "absolute",
-              left: "-40px",
-              top: "-3px",
-              width: "42px",
-              height: "9px",
-              background: "linear-gradient(90deg, transparent 0%, rgba(160,160,160,0.15) 40%, rgba(200,200,200,0.4) 100%)",
-              borderRadius: "5px",
-              filter: "blur(3px)",
-            }} />
-          </div>
+    <div
+      className="absolute"
+      style={{
+        top: "70px",
+        animation: `flyAcross 5s linear forwards`,
+        animationDelay: `${delay}s`,
+        opacity: 0,
+      }}
+    >
+      <div
+        className="absolute"
+        style={{
+          left: "110px",
+          animation: `hellfireFlight 2s ease-in forwards`,
+          animationDelay: `${delay + fireAt}s`,
+          opacity: 0,
+          transformOrigin: "top left",
+        }}
+      >
+        {/* Missile body */}
+        <div style={{
+          width: "24px",
+          height: "4px",
+          background: "linear-gradient(90deg, #666, #999, #888)",
+          borderRadius: "2px 4px 4px 2px",
+          position: "relative",
+        }}>
+          {/* Fins */}
+          <div style={{
+            position: "absolute",
+            left: "0",
+            top: "-3px",
+            width: "6px",
+            height: "10px",
+            background: "linear-gradient(180deg, transparent 20%, #555 50%, transparent 80%)",
+          }} />
         </div>
-      ))}
-
-      {tracers.map((t, i) => (
-        <div
-          key={`tracer-${i}`}
-          className="absolute"
-          style={{
-            top: `${95 + t.spread}px`,
-            animation: `flyAcross 5s linear forwards`,
-            animationDelay: `${delay}s`,
-            opacity: 0,
-          }}
-        >
-          {t.spread === 0 && (
-            <div
-              className="absolute"
-              style={{
-                left: "150px",
-                top: "-3px",
-                width: "8px",
-                height: "8px",
-                borderRadius: "50%",
-                background: "radial-gradient(circle, #fff 20%, #ffcc00 60%, rgba(255,100,0,0) 100%)",
-                animation: `muzzleFlash 0.1s linear forwards`,
-                animationDelay: `${delay + t.fireAt}s`,
-                opacity: 0,
-              }}
-            />
-          )}
-          <div
-            className="absolute"
-            style={{
-              left: "158px",
-              animation: `fireTracerDown 0.3s linear forwards`,
-              animationDelay: `${delay + t.fireAt}s`,
-              opacity: 0,
-              transform: `rotate(${30 + t.spread * 2}deg)`,
-              transformOrigin: "top left",
-            }}
-          >
-            <div style={{
-              width: "12px",
-              height: "1.5px",
-              background: "linear-gradient(90deg, rgba(255,50,0,0.3), #ff2200, #ffcc00, #ffffcc)",
-              borderRadius: "1px",
-              boxShadow: "0 0 3px 1px rgba(255,200,0,0.6)",
-            }} />
-          </div>
-        </div>
-      ))}
-    </>
+        {/* Exhaust flame */}
+        <div style={{
+          position: "absolute",
+          left: "-18px",
+          top: "-2px",
+          width: "20px",
+          height: "8px",
+          background: "linear-gradient(90deg, transparent, rgba(255,200,0,0.3), #ff8800, #ffcc00, #fff)",
+          borderRadius: "4px",
+          boxShadow: "0 0 8px 3px rgba(255,150,0,0.5)",
+          filter: "blur(1px)",
+        }} />
+        {/* Smoke trail */}
+        <div style={{
+          position: "absolute",
+          left: "-80px",
+          top: "-4px",
+          width: "65px",
+          height: "12px",
+          background: "linear-gradient(90deg, transparent 0%, rgba(200,200,200,0.1) 30%, rgba(180,180,180,0.35) 100%)",
+          borderRadius: "6px",
+          filter: "blur(4px)",
+        }} />
+      </div>
+    </div>
   );
 }
 
@@ -134,9 +86,9 @@ function Explosion({ delay }: { delay: number }) {
       style={{
         bottom: "10px",
         right: "15%",
-        width: "120px",
-        height: "80px",
-        animation: `explode 1.5s ease-out forwards`,
+        width: "160px",
+        height: "120px",
+        animation: `explode 2s ease-out forwards`,
         animationDelay: `${delay}s`,
         opacity: 0,
         pointerEvents: "none",
@@ -146,27 +98,41 @@ function Explosion({ delay }: { delay: number }) {
       <div style={{
         position: "absolute",
         bottom: "10px",
-        left: "30px",
-        width: "60px",
-        height: "60px",
+        left: "40px",
+        width: "80px",
+        height: "80px",
         borderRadius: "50%",
-        background: "radial-gradient(circle, #fff 5%, #ffcc00 25%, #ff6600 50%, rgba(255,0,0,0.6) 75%, transparent 100%)",
-        boxShadow: "0 0 40px 20px rgba(255,100,0,0.6), 0 0 80px 40px rgba(255,60,0,0.3)",
-        animation: `fireballGrow 1.5s ease-out forwards`,
+        background: "radial-gradient(circle, #fff 5%, #ffcc00 20%, #ff6600 45%, rgba(255,0,0,0.6) 70%, transparent 100%)",
+        boxShadow: "0 0 60px 30px rgba(255,100,0,0.7), 0 0 120px 60px rgba(255,60,0,0.3)",
+        animation: `fireballGrow 2s ease-out forwards`,
         animationDelay: `${delay}s`,
+        opacity: 0,
+      }} />
+      {/* Secondary fireball */}
+      <div style={{
+        position: "absolute",
+        bottom: "20px",
+        left: "60px",
+        width: "50px",
+        height: "50px",
+        borderRadius: "50%",
+        background: "radial-gradient(circle, #fff 10%, #ffaa00 40%, rgba(255,60,0,0.5) 80%, transparent 100%)",
+        boxShadow: "0 0 30px 15px rgba(255,120,0,0.5)",
+        animation: `fireballGrow 1.8s ease-out forwards`,
+        animationDelay: `${delay + 0.15}s`,
         opacity: 0,
       }} />
       {/* Smoke column */}
       <div style={{
         position: "absolute",
-        bottom: "40px",
-        left: "40px",
-        width: "40px",
-        height: "60px",
+        bottom: "50px",
+        left: "50px",
+        width: "60px",
+        height: "80px",
         borderRadius: "50% 50% 0 0",
-        background: "radial-gradient(ellipse, rgba(80,80,80,0.7) 0%, rgba(40,40,40,0.3) 60%, transparent 100%)",
-        filter: "blur(8px)",
-        animation: `smokeRise 2s ease-out forwards`,
+        background: "radial-gradient(ellipse, rgba(60,60,60,0.8) 0%, rgba(40,40,40,0.3) 60%, transparent 100%)",
+        filter: "blur(10px)",
+        animation: `smokeRise 3s ease-out forwards`,
         animationDelay: `${delay + 0.3}s`,
         opacity: 0,
       }} />
@@ -195,26 +161,23 @@ export function FlyingAircraft() {
 
   if (!flying) return null;
 
-  const tankHitTime = 3.5; // seconds after animation start when tank gets hit
+  const tankHitTime = 3.8;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-      {/* Tank rolling in from the right */}
+      {/* Tank rolling in from the right, facing left */}
       <img
         src={t90Img}
         alt="T-90 Tank"
         className="absolute h-20 object-contain"
         style={{
           bottom: "20px",
-          animation: `tankRollIn 4s ease-out forwards, tankDestroyed 0.5s ease-out forwards ${tankHitTime}s`,
-          transform: "scaleX(-1)",
+          animation: `tankRollIn 4s ease-out forwards, tankDestroyed 0.6s ease-out forwards ${tankHitTime}s`,
         }}
       />
 
-      {/* Explosion on tank */}
       <Explosion delay={tankHitTime} />
 
-      {/* Aircraft formation */}
       {AIRCRAFT.map((craft, i) => (
         <div key={craft.alt}>
           <img
@@ -228,7 +191,7 @@ export function FlyingAircraft() {
               mixBlendMode: "multiply",
             }}
           />
-          {craft.fires && <Projectiles delay={i * 0.8} />}
+          {craft.fires && <HellfireMissile delay={i * 0.8} />}
         </div>
       ))}
 
@@ -243,24 +206,15 @@ export function FlyingAircraft() {
           100% { right: 15%; opacity: 1; }
         }
         @keyframes tankDestroyed {
-          0% { opacity: 1; transform: scaleX(-1) translateY(0); }
-          30% { opacity: 1; transform: scaleX(-1) translateY(-10px) rotate(5deg); }
-          100% { opacity: 0; transform: scaleX(-1) translateY(20px) rotate(8deg); filter: brightness(3); }
+          0% { opacity: 1; transform: translateY(0); }
+          30% { opacity: 1; transform: translateY(-15px) rotate(-5deg); }
+          100% { opacity: 0; transform: translateY(10px) rotate(-8deg); filter: brightness(4); }
         }
-        @keyframes fireDownA {
-          0% { opacity: 1; transform: rotate(35deg) translateX(0); }
-          50% { opacity: 1; }
-          100% { opacity: 0; transform: rotate(35deg) translateX(700px); }
-        }
-        @keyframes fireDownB {
-          0% { opacity: 1; transform: rotate(38deg) translateX(0); }
-          50% { opacity: 1; }
-          100% { opacity: 0; transform: rotate(38deg) translateX(700px); }
-        }
-        @keyframes fireTracerDown {
-          0% { opacity: 1; transform: rotate(30deg) translateX(0); }
-          60% { opacity: 0.8; }
-          100% { opacity: 0; transform: rotate(30deg) translateX(500px); }
+        @keyframes hellfireFlight {
+          0% { opacity: 1; transform: rotate(25deg) translate(0, 0); }
+          30% { opacity: 1; transform: rotate(35deg) translate(200px, 0); }
+          60% { opacity: 1; transform: rotate(40deg) translate(500px, 0); }
+          100% { opacity: 0; transform: rotate(45deg) translate(800px, 0); }
         }
         @keyframes muzzleFlash {
           0% { opacity: 1; transform: scale(1); }
@@ -270,19 +224,19 @@ export function FlyingAircraft() {
         @keyframes explode {
           0% { opacity: 0; }
           10% { opacity: 1; }
-          70% { opacity: 1; }
+          60% { opacity: 1; }
           100% { opacity: 0; }
         }
         @keyframes fireballGrow {
-          0% { opacity: 0; transform: scale(0.2); }
-          15% { opacity: 1; transform: scale(1.2); }
-          50% { opacity: 0.9; transform: scale(1); }
-          100% { opacity: 0; transform: scale(1.5); }
+          0% { opacity: 0; transform: scale(0.1); }
+          15% { opacity: 1; transform: scale(1.3); }
+          40% { opacity: 0.9; transform: scale(1); }
+          100% { opacity: 0; transform: scale(1.8); }
         }
         @keyframes smokeRise {
           0% { opacity: 0; transform: translateY(0) scale(0.5); }
-          30% { opacity: 0.6; }
-          100% { opacity: 0; transform: translateY(-80px) scale(2); }
+          25% { opacity: 0.7; }
+          100% { opacity: 0; transform: translateY(-100px) scale(2.5); }
         }
       `}</style>
     </div>
