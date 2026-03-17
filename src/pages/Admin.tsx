@@ -162,6 +162,19 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
           {entries.map((entry, i) => (
             <div key={i} className="grid grid-cols-[60px_1fr_1fr_60px_44px] border-t border-border">
               {FIELD_ORDER.map((field, col) => (
+                field === 'csi' && isMrt ? (
+                  <button
+                    key={field}
+                    onClick={() => updateField(i, 'csi', entry.csi === 'AH' ? 'UH' : 'AH')}
+                    className={`flex items-center justify-center text-xs font-bold border-r border-border transition-colors ${
+                      entry.csi === 'AH' 
+                        ? 'bg-red-600/20 text-red-400 hover:bg-red-600/30' 
+                        : 'bg-blue-600/20 text-blue-400 hover:bg-blue-600/30'
+                    }`}
+                  >
+                    {entry.csi || 'UH'}
+                  </button>
+                ) : (
                 <input
                   key={field}
                   value={entry[field]}
@@ -174,6 +187,7 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
                   onFocus={(e) => e.target.select()}
                   className={`bg-background px-2 py-1 text-xs border-r border-border outline-none focus:bg-accent/30 focus:ring-1 focus:ring-inset focus:ring-ring ${col === 0 ? 'font-mono' : ''}`}
                 />
+                )
               ))}
               <button
                 onClick={() => removeRow(i)}
