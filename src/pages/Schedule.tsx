@@ -183,7 +183,7 @@ export default function SchedulePage() {
       </div>
 
       <div className="w-48 flex-shrink-0 p-1.5 space-y-1.5 overflow-auto">
-        {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} />}
+        {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} simData={simData} />}
       </div>
     </div>
   );
