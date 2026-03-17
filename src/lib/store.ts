@@ -3,6 +3,13 @@ import { apiSet, apiDelete, apiGet } from './api';
 
 const STORAGE_PREFIX = 'matss_';
 
+function createEntryId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `id-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function getItem<T>(key: string, defaultValue: T): T {
   try {
     const raw = localStorage.getItem(STORAGE_PREFIX + key);
@@ -76,7 +83,7 @@ export function getClassrooms(): ClassroomEntry[] {
 
 export function saveClassroom(entry: Omit<ClassroomEntry, 'id'>): void {
   const classrooms = getClassrooms();
-  classrooms.push({ ...entry, id: crypto.randomUUID() });
+  classrooms.push({ ...entry, id: createEntryId() });
   setItem('classrooms', classrooms);
 }
 
@@ -100,7 +107,7 @@ export function getNECCEntries(): NECCEntry[] {
 
 export function saveNECCEntry(entry: Omit<NECCEntry, 'id'>): void {
   const entries = getNECCEntries();
-  entries.push({ ...entry, id: crypto.randomUUID() });
+  entries.push({ ...entry, id: createEntryId() });
   setItem('necc', entries);
 }
 
@@ -123,7 +130,7 @@ export function getLinkedEvents(): LinkedEvent[] {
 
 export function saveLinkedEvent(entry: Omit<LinkedEvent, 'id'>): void {
   const events = getLinkedEvents();
-  events.push({ ...entry, id: crypto.randomUUID() });
+  events.push({ ...entry, id: createEntryId() });
   setItem('linked', events);
 }
 
