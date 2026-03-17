@@ -32,11 +32,12 @@ function removeItem(key: string): void {
 export function getSimEntries(simId: string): SimSlot[] {
   const sim = SIMULATORS.find(s => s.id === simId);
   const entries = getItem<SimSlot[]>(`sim_${simId}`, []);
+  const isMrt = MRT_SIM_IDS.includes(simId);
   if (entries.length === 0 && sim) {
-    return sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: '' }));
+    return sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: isMrt ? 'UH' : '' }));
   }
   if (entries.length === 0) {
-    return [{ time: '', unit: '', crew: '', csi: '' }];
+    return [{ time: '', unit: '', crew: '', csi: isMrt ? 'UH' : '' }];
   }
   return entries;
 }
