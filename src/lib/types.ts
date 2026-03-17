@@ -53,6 +53,10 @@ export const SIMULATORS: { id: string; name: string; shortName: string; timeSlot
   { id: 'mv22-13', name: 'MV-22 13', shortName: 'MV22-13', timeSlots: ['0800', '1000', '1200', '1400'] },
   { id: 'mv22-14', name: 'MV-22 14', shortName: 'MV22-14', timeSlots: ['0800', '1000', '1200', '1400'] },
   { id: 'mv22-ptt', name: 'MV-22 PTT', shortName: 'MV22 PTT', timeSlots: ['0800', '0900', '1000', '1100', '1200', '1300', '1400', '1500'] },
+  { id: 'mrt-1', name: 'MRT-1', shortName: 'MRT-1', timeSlots: ['0800', '1000', '1200', '1400'] },
+  { id: 'mrt-2', name: 'MRT-2', shortName: 'MRT-2', timeSlots: ['0800', '1000', '1200', '1400'] },
+  { id: 'mrt-3', name: 'MRT-3', shortName: 'MRT-3', timeSlots: ['0800', '1000', '1200', '1400'] },
+  { id: 'mrt-4', name: 'MRT-4', shortName: 'MRT-4', timeSlots: ['0800', '1000', '1200', '1400'] },
 ];
 
 export const TRAINER_GROUPS = [
