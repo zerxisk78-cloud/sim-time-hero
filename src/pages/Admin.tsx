@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { SIMULATORS, TRAINER_GROUPS } from "@/lib/types";
+import { SIMULATORS, TRAINER_GROUPS, MRT_SIM_IDS } from "@/lib/types";
 import {
   getSimEntries, saveSimEntries, getSimLastSaved,
   getTrainerStatuses, saveTrainerStatuses,
