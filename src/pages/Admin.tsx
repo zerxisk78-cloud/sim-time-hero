@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { SIMULATORS, TRAINER_GROUPS } from "@/lib/types";
+import { SIMULATORS, TRAINER_GROUPS, MRT_SIM_IDS } from "@/lib/types";
 import {
   getSimEntries, saveSimEntries, getSimLastSaved,
   getTrainerStatuses, saveTrainerStatuses,
@@ -33,6 +33,7 @@ import { resetServerCheck } from "@/lib/api";
 const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
 
 function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; name: string; timeSlots: string[] }) {
+  const isMrt = MRT_SIM_IDS.includes(simId);
   const [entries, setEntries] = useState<SimSlot[]>([]);
   const [lastSaved, setLastSaved] = useState("");
   const [displayName, setDisplayName] = useState(getDisplayName(simId));
@@ -151,8 +152,8 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
       <CardContent className="p-0">
         <div className="border border-border rounded overflow-hidden mx-4 mb-3">
           {/* Header row */}
-          <div className="grid grid-cols-[60px_1fr_1fr_60px_44px] bg-muted">
-            {['Time', 'Unit', 'Crew', 'CSI/Sys'].map((h, i) => (
+          <div className={`grid ${isMrt ? 'grid-cols-[60px_1fr_1fr_60px_44px]' : 'grid-cols-[60px_1fr_1fr_60px_44px]'} bg-muted`}>
+            {['Time', 'Unit', 'Crew', isMrt ? 'Type' : 'CSI/Sys'].map((h, i) => (
               <div key={h} className={`px-2 py-1.5 text-xs font-semibold text-muted-foreground border-r border-border last:border-r-0`}>{h}</div>
             ))}
             <div />
@@ -161,6 +162,19 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
           {entries.map((entry, i) => (
             <div key={i} className="grid grid-cols-[60px_1fr_1fr_60px_44px] border-t border-border">
               {FIELD_ORDER.map((field, col) => (
+                field === 'csi' && isMrt ? (
+                  <button
+                    key={field}
+                    onClick={() => updateField(i, 'csi', entry.csi === 'AH' ? 'UH' : 'AH')}
+                    className={`flex items-center justify-center text-xs font-bold border-r border-border transition-colors ${
+                      entry.csi === 'AH' 
+                        ? 'bg-red-600/20 text-red-400 hover:bg-red-600/30' 
+                        : 'bg-blue-600/20 text-blue-400 hover:bg-blue-600/30'
+                    }`}
+                  >
+                    {entry.csi || 'UH'}
+                  </button>
+                ) : (
                 <input
                   key={field}
                   value={entry[field]}
@@ -173,6 +187,7 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
                   onFocus={(e) => e.target.select()}
                   className={`bg-background px-2 py-1 text-xs border-r border-border outline-none focus:bg-accent/30 focus:ring-1 focus:ring-inset focus:ring-ring ${col === 0 ? 'font-mono' : ''}`}
                 />
+                )
               ))}
               <button
                 onClick={() => removeRow(i)}

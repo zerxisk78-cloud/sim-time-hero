@@ -16,6 +16,7 @@ const SIM_GROUPS = [
   ['uh1y-ftd', 'uh1y-ffs'],
   ['mcat', 'mv22-13', 'mv22-14'],
   ['ah1z-cpt', 'uh1y-cpt', 'mv22-ptt'],
+  ['mrt-1', 'mrt-2', 'mrt-3', 'mrt-4'],
 ];
 
 export default function SchedulePage() {
@@ -98,10 +99,10 @@ export default function SchedulePage() {
 
         <div className="max-w-4xl mx-auto space-y-2">
           {visibleSims.map(sim => (
-            <SimScheduleTable key={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} />
+            <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} />
           ))}
           {visibleExtraSims.map(sim => (
-            <SimScheduleTable key={sim.id} name={getDisplayName(sim.id) || sim.name} entries={simData[sim.id] || []} />
+            <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id) || sim.name} entries={simData[sim.id] || []} />
           ))}
           <p className="text-xs text-muted-foreground mt-4">*NB = No brief</p>
         </div>

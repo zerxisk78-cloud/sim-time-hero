@@ -1,4 +1,4 @@
-import { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, SIMULATORS, TRAINER_STATUS_IDS, VisibilitySettings } from './types';
+import { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, SIMULATORS, TRAINER_STATUS_IDS, MRT_SIM_IDS, VisibilitySettings } from './types';
 import { apiSet, apiDelete, apiGet } from './api';
 
 const STORAGE_PREFIX = 'matss_';
@@ -32,11 +32,12 @@ function removeItem(key: string): void {
 export function getSimEntries(simId: string): SimSlot[] {
   const sim = SIMULATORS.find(s => s.id === simId);
   const entries = getItem<SimSlot[]>(`sim_${simId}`, []);
+  const isMrt = MRT_SIM_IDS.includes(simId);
   if (entries.length === 0 && sim) {
-    return sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: '' }));
+    return sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: isMrt ? 'UH' : '' }));
   }
   if (entries.length === 0) {
-    return [{ time: '', unit: '', crew: '', csi: '' }];
+    return [{ time: '', unit: '', crew: '', csi: isMrt ? 'UH' : '' }];
   }
   return entries;
 }
@@ -281,9 +282,10 @@ export async function loadAllData(): Promise<{
   const simData: Record<string, SimSlot[]> = {};
   allSimIds.forEach((id, i) => {
     const entries = simResults[i] as SimSlot[];
+    const isMrt = MRT_SIM_IDS.includes(id);
     if (entries.length === 0) {
       const sim = SIMULATORS.find(s => s.id === id);
-      simData[id] = sim ? sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: '' })) : [];
+      simData[id] = sim ? sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: isMrt ? 'UH' : '' })) : [];
     } else {
       simData[id] = entries;
     }
