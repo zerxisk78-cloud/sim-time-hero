@@ -80,7 +80,7 @@ export default function SchedulePage() {
               <h1 className="text-xl font-bold leading-tight">Marine Aviation Training System Site</h1>
               <p className="text-sm text-muted-foreground">MCAS Pendleton</p>
             </div>
-            <img src={egaImage} alt="USMC Eagle Globe and Anchor" className="h-12 w-12 object-contain" />
+            <img src={matssPatc} alt="MATSS Official Patch" className="h-14 w-14 object-contain" />
           </div>
           <p className="text-sm mt-1">Current Simulator Schedule</p>
           <p className="text-xs text-muted-foreground">
