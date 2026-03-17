@@ -295,5 +295,6 @@ export async function loadAllData(): Promise<{
     }
   });
 
+  const statuses = mergeTrainerStatuses(rawStatuses as TrainerStatus[]);
   return { simData, statuses, classrooms, neccEntries, linkedEvents, visibility, extraSims };
 }
