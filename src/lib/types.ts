@@ -88,6 +88,16 @@ export const TRAINER_GROUPS = [
       { id: 'mv22-ptt', name: 'MV-22 PTT' },
     ],
   },
+  {
+    id: 'mrt',
+    name: 'MRT Trainers',
+    trainers: [
+      { id: 'mrt-1', name: 'MRT-1' },
+      { id: 'mrt-2', name: 'MRT-2' },
+      { id: 'mrt-3', name: 'MRT-3' },
+      { id: 'mrt-4', name: 'MRT-4' },
+    ],
+  },
 ];
 
 export const TRAINER_STATUS_IDS = TRAINER_GROUPS.flatMap(g => g.trainers);
