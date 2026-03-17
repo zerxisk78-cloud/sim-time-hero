@@ -1,4 +1,4 @@
-import { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, SIMULATORS, TRAINER_STATUS_IDS, VisibilitySettings } from './types';
+import { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, SIMULATORS, TRAINER_STATUS_IDS, MRT_SIM_IDS, VisibilitySettings } from './types';
 import { apiSet, apiDelete, apiGet } from './api';
 
 const STORAGE_PREFIX = 'matss_';
