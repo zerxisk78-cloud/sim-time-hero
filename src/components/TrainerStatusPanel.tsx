@@ -17,26 +17,29 @@ interface TrainerStatusPanelProps {
   simData?: Record<string, SimSlot[]>;
 }
 
+function normalizeMrtType(value?: string): string {
+  const normalized = value?.trim().toUpperCase();
+  return normalized === 'AH' ? 'AH' : 'UH';
+}
+
 function getCurrentMrtConfig(simData: Record<string, SimSlot[]>): MrtConfig[] {
   const now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
   return MRT_SIM_IDS.map(id => {
     const slots = simData[id] || [];
-    // Find the current or most recent slot
-    let currentSlot: SimSlot | null = null;
-    for (const slot of slots) {
-      if (!slot.unit && !slot.csi) continue;
+    const datedSlots = slots.filter(slot => slot.time);
+    const pastOrCurrentSlots = datedSlots.filter(slot => {
       const [h, m] = [parseInt(slot.time.slice(0, 2)), parseInt(slot.time.slice(2))];
-      const slotMinutes = h * 60 + m;
-      if (slotMinutes <= currentMinutes) {
-        currentSlot = slot;
-      }
-    }
+      return h * 60 + m <= currentMinutes;
+    });
+
+    const resolvedSlot = pastOrCurrentSlots[pastOrCurrentSlots.length - 1] ?? datedSlots[0] ?? null;
+
     return {
       id,
       name: getDisplayName(id) || id.toUpperCase(),
-      type: currentSlot?.csi || '--',
+      type: normalizeMrtType(resolvedSlot?.csi),
     };
   });
 }
