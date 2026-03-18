@@ -297,10 +297,9 @@ export async function loadAllData(): Promise<{
   const simData: Record<string, SimSlot[]> = {};
   allSimIds.forEach((id, i) => {
     const entries = simResults[i] as SimSlot[];
-    const isMrt = MRT_SIM_IDS.includes(id);
     if (entries.length === 0) {
       const sim = SIMULATORS.find(s => s.id === id);
-      simData[id] = sim ? sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: isMrt ? 'UH' : '' })) : [];
+      simData[id] = sim ? sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: getDefaultCsiValue(id) })) : [];
     } else {
       simData[id] = entries;
     }
