@@ -500,6 +500,7 @@ export default function AdminPage() {
     setDirectoryData(getDirectory());
     setVisibility(getVisibility());
     setExtraSims(getExtraSims());
+    setMrtLocations(getMrtLocations());
   }, []);
 
   useEffect(() => { reload(); }, [reload]);
