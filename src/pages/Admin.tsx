@@ -604,6 +604,41 @@ export default function AdminPage() {
           <div className="space-y-4">
             {/* Server Connection Settings */}
             <ServerSettings />
+
+            <Card className="mb-4">
+              <CardHeader className="py-3">
+                <CardTitle className="text-base">MRT Locations</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-xs text-muted-foreground">Edit the default room/deployment location shown for MRT 1-4 on the display pages.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {MRT_SIM_IDS.map((id) => (
+                    <div key={id} className="space-y-1">
+                      <label className="text-xs text-muted-foreground">{getDisplayName(id)}</label>
+                      <Input
+                        value={mrtLocations[id] ?? ''}
+                        onChange={(e) => setMrtLocations((prev) => ({ ...prev, [id]: e.target.value }))}
+                        className="h-8 text-xs"
+                        placeholder="Enter room or deployment note"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => {
+                      saveMrtLocations(mrtLocations);
+                      setMrtLocations(getMrtLocations());
+                      toast.success('MRT locations saved');
+                    }}
+                  >
+                    Save MRT Locations
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
             {/* Visibility Controls */}
             <Card className="mb-4">
               <CardHeader className="py-3">
