@@ -485,6 +485,7 @@ export default function AdminPage() {
   const [directoryData, setDirectoryData] = useState<DirectoryData>(getDirectory());
   const [visibility, setVisibility] = useState<VisibilitySettings>(getVisibility());
   const [extraSims, setExtraSims] = useState<ExtraSim[]>(getExtraSims);
+  const [mrtLocations, setMrtLocations] = useState<Record<string, string>>(getMrtLocations());
 
   // CRUD form state
   const [classForm, setClassForm] = useState({ className: "", dateTime: "", location: "" });
