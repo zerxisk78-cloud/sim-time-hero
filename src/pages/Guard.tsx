@@ -3,9 +3,10 @@ import { SIMULATORS } from "@/lib/types";
 import { getDisplayName, loadAllData } from "@/lib/store";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
 import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
+import { MrtLocationsPanel } from "@/components/MrtLocationsPanel";
 import { SimScheduleTable } from "@/components/SimScheduleTable";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
+import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings, MrtLocationSettings } from "@/lib/types";
 
 export default function GuardPage() {
   const [simData, setSimData] = useState<Record<string, SimSlot[]>>({});

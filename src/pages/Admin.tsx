@@ -10,6 +10,7 @@ import {
   getVisibility, saveVisibility,
   getDisplayName, saveNameOverride,
   getExtraSims, saveExtraSims, removeSimData, type ExtraSim,
+  getMrtLocations, saveMrtLocations,
 } from "@/lib/store";
 import { getServerUrl, setServerUrl, getApiBase } from "@/lib/serverConfig";
 import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
