@@ -21,6 +21,26 @@ function Require-Command([string]$Name, [string]$InstallHint) {
   }
 }
 
+function Resolve-CommandPath([string[]]$Names, [string]$InstallHint = '') {
+  foreach ($name in $Names) {
+    $command = Get-Command $name -ErrorAction SilentlyContinue
+    if ($command) {
+      if ($command.Source) { return $command.Source }
+      if ($command.Path) { return $command.Path }
+      return $name
+    }
+  }
+
+  if ($InstallHint) {
+    Write-Host "Missing required command: $($Names -join ', ')" -ForegroundColor Red
+    Write-Host $InstallHint -ForegroundColor Yellow
+    Read-Host "Press Enter to close"
+    exit 1
+  }
+
+  return $null
+}
+
 function Invoke-Step([string]$FilePath, [string[]]$Arguments, [string]$WorkingDirectory) {
   Write-Host "Running: $FilePath $($Arguments -join ' ')" -ForegroundColor DarkGray
   $process = Start-Process -FilePath $FilePath -ArgumentList $Arguments -WorkingDirectory $WorkingDirectory -NoNewWindow -Wait -PassThru
@@ -45,14 +65,16 @@ try {
   Write-Host "MATSS one-click install/update starting..." -ForegroundColor Green
   Write-Host "Repo: $repoRoot" -ForegroundColor DarkGray
 
+  $npmCmd = Resolve-CommandPath @('npm.cmd', 'npm') 'Install Node.js LTS first: https://nodejs.org/'
+  $gitCmd = Resolve-CommandPath @('git.exe', 'git.cmd', 'git')
+
   Require-Command 'node' 'Install Node.js LTS first: https://nodejs.org/'
-  Require-Command 'npm' 'Install Node.js LTS first: https://nodejs.org/'
 
   if ((Test-Path (Join-Path $repoRoot '.git')) -and (-not $SkipGitPull)) {
-    if (Get-Command git -ErrorAction SilentlyContinue) {
+    if ($gitCmd) {
       Write-Step 'Pull latest code from Git'
       try {
-        Invoke-Step 'git.exe' @('pull', '--ff-only') $repoRoot
+        Invoke-Step $gitCmd @('pull', '--ff-only') $repoRoot
       } catch {
         Write-Host "Git pull skipped: $($_.Exception.Message)" -ForegroundColor Yellow
       }
@@ -62,22 +84,22 @@ try {
   }
 
   Write-Step 'Install frontend dependencies'
-  Invoke-Step 'npm.cmd' @('install') $repoRoot
+  Invoke-Step $npmCmd @('install') $repoRoot
 
   Write-Step 'Build frontend'
-  Invoke-Step 'npm.cmd' @('run', 'build') $repoRoot
+  Invoke-Step $npmCmd @('run', 'build') $repoRoot
 
   $serverDir = Join-Path $repoRoot 'server'
 
   Write-Step 'Install server dependencies'
-  Invoke-Step 'npm.cmd' @('install') $serverDir
+  Invoke-Step $npmCmd @('install') $serverDir
 
-  if (-not (Get-Command pm2 -ErrorAction SilentlyContinue)) {
+  if (-not (Get-Command pm2.cmd -ErrorAction SilentlyContinue) -and -not (Get-Command pm2 -ErrorAction SilentlyContinue)) {
     Write-Step 'Install PM2 globally'
-    Invoke-Step 'npm.cmd' @('install', '-g', 'pm2') $repoRoot
+    Invoke-Step $npmCmd @('install', '-g', 'pm2') $repoRoot
   }
 
-  $pm2Command = (Get-Command pm2).Source
+  $pm2Command = Resolve-CommandPath @('pm2.cmd', 'pm2.exe', 'pm2') 'PM2 installation failed. Try: npm install -g pm2'
 
   Write-Step 'Ensure Windows Firewall allows TCP port 3001'
   $ruleName = 'MATSS Server 3001'
@@ -92,9 +114,9 @@ try {
   Write-Step 'Start or restart the PM2 server'
   $describe = Start-Process -FilePath $pm2Command -ArgumentList @('describe', 'matss-server') -WorkingDirectory $serverDir -NoNewWindow -Wait -PassThru
   if ($describe.ExitCode -eq 0) {
-    Invoke-Step 'npm.cmd' @('run', 'pm2:restart') $serverDir
+    Invoke-Step $npmCmd @('run', 'pm2:restart') $serverDir
   } else {
-    Invoke-Step 'npm.cmd' @('run', 'pm2:start') $serverDir
+    Invoke-Step $npmCmd @('run', 'pm2:start') $serverDir
   }
 
   Write-Step 'Save PM2 process list'
