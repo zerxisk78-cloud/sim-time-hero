@@ -35,16 +35,20 @@ function removeItem(key: string): void {
   apiDelete(key);
 }
 
+function getDefaultCsiValue(simId: string): string {
+  return MRT_SIM_IDS.includes(simId) ? 'UH' : 'CSI';
+}
+
 // Simulator schedules
 export function getSimEntries(simId: string): SimSlot[] {
   const sim = SIMULATORS.find(s => s.id === simId);
   const entries = getItem<SimSlot[]>(`sim_${simId}`, []);
-  const isMrt = MRT_SIM_IDS.includes(simId);
+  const defaultCsi = getDefaultCsiValue(simId);
   if (entries.length === 0 && sim) {
-    return sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: isMrt ? 'UH' : '' }));
+    return sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: defaultCsi }));
   }
   if (entries.length === 0) {
-    return [{ time: '', unit: '', crew: '', csi: isMrt ? 'UH' : '' }];
+    return [{ time: '', unit: '', crew: '', csi: defaultCsi }];
   }
   return entries;
 }
@@ -293,10 +297,9 @@ export async function loadAllData(): Promise<{
   const simData: Record<string, SimSlot[]> = {};
   allSimIds.forEach((id, i) => {
     const entries = simResults[i] as SimSlot[];
-    const isMrt = MRT_SIM_IDS.includes(id);
     if (entries.length === 0) {
       const sim = SIMULATORS.find(s => s.id === id);
-      simData[id] = sim ? sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: isMrt ? 'UH' : '' })) : [];
+      simData[id] = sim ? sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: getDefaultCsiValue(id) })) : [];
     } else {
       simData[id] = entries;
     }

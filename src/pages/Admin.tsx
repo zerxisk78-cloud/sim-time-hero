@@ -32,12 +32,32 @@ import { resetServerCheck } from "@/lib/api";
 
 const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
 
-function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; name: string; timeSlots: string[] }) {
+function SimEditor({ simId }: { simId: string; name: string; timeSlots: string[] }) {
   const isMrt = MRT_SIM_IDS.includes(simId);
   const [entries, setEntries] = useState<SimSlot[]>([]);
   const [lastSaved, setLastSaved] = useState("");
   const [displayName, setDisplayName] = useState(getDisplayName(simId));
   const [editingName, setEditingName] = useState(false);
+
+  const getToggleValue = (value: string) => {
+    if (isMrt) return value === 'AH' ? 'AH' : 'UH';
+    return value === 'Device Operator' ? 'Device Operator' : 'CSI';
+  };
+
+  const getNextToggleValue = (value: string) => {
+    const currentValue = getToggleValue(value);
+    if (isMrt) return currentValue === 'AH' ? 'UH' : 'AH';
+    return currentValue === 'CSI' ? 'Device Operator' : 'CSI';
+  };
+
+  const getToggleClasses = (value: string) => {
+    const currentValue = getToggleValue(value);
+    const activeValue = isMrt ? 'AH' : 'Device Operator';
+
+    return currentValue === activeValue
+      ? 'bg-primary/15 text-primary hover:bg-primary/25'
+      : 'bg-accent text-accent-foreground hover:bg-accent/80';
+  };
 
   useEffect(() => {
     setEntries(getSimEntries(simId));
@@ -49,10 +69,12 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
   };
 
   const focusCell = (row: number, col: number) => {
-    const el = document.querySelector<HTMLInputElement>(
+    const el = document.querySelector<HTMLElement>(
       `[data-sim="${simId}"][data-row="${row}"][data-col="${col}"]`
     );
-    if (el) { el.focus(); el.select(); }
+    if (!el) return;
+    el.focus();
+    if (el instanceof HTMLInputElement) el.select();
   };
 
   const handlePaste = (startRow: number, startCol: number, e: React.ClipboardEvent) => {
@@ -85,18 +107,20 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
         ? (col > 0 ? [row, col - 1] : row > 0 ? [row - 1, FIELD_ORDER.length - 1] : null)
         : (col < FIELD_ORDER.length - 1 ? [row, col + 1] : row < entries.length - 1 ? [row + 1, 0] : null);
       if (next) focusCell(next[0], next[1]);
-    } else if (e.key === 'Enter') {
+    } else if (e.key === 'Enter' && e.currentTarget instanceof HTMLInputElement) {
       e.preventDefault();
       if (row < entries.length - 1) focusCell(row + 1, col);
     } else if (e.key === 'ArrowDown' && row < entries.length - 1) {
-      e.preventDefault(); focusCell(row + 1, col);
+      e.preventDefault();
+      focusCell(row + 1, col);
     } else if (e.key === 'ArrowUp' && row > 0) {
-      e.preventDefault(); focusCell(row - 1, col);
+      e.preventDefault();
+      focusCell(row - 1, col);
     }
   };
 
   const addRow = () => {
-    setEntries(prev => [...prev, { time: '', unit: '', crew: '', csi: '' }]);
+    setEntries(prev => [...prev, { time: '', unit: '', crew: '', csi: isMrt ? 'UH' : 'CSI' }]);
   };
 
   const removeRow = (index: number) => {
@@ -107,7 +131,7 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
   const handleSave = () => {
     const ts = saveSimEntries(simId, entries);
     setLastSaved(ts);
-    toast.success(`${name} saved`);
+    toast.success(`${displayName} saved`);
   };
 
   const handleUndo = () => {
@@ -151,42 +175,44 @@ function SimEditor({ simId, name: defaultName, timeSlots }: { simId: string; nam
       </CardHeader>
       <CardContent className="p-0">
         <div className="border border-border rounded overflow-hidden mx-4 mb-3">
-          {/* Header row */}
-          <div className={`grid ${isMrt ? 'grid-cols-[60px_1fr_1fr_60px_44px]' : 'grid-cols-[60px_1fr_1fr_60px_44px]'} bg-muted`}>
-            {['Time', 'Unit', 'Crew', isMrt ? 'Type' : 'CSI/Sys'].map((h, i) => (
-              <div key={h} className={`px-2 py-1.5 text-xs font-semibold text-muted-foreground border-r border-border last:border-r-0`}>{h}</div>
+          <div className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_120px_44px] bg-muted">
+            {['Time', 'Unit', 'Crew', isMrt ? 'Type' : 'CSI/DO'].map((h) => (
+              <div key={h} className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-r border-border last:border-r-0">
+                {h}
+              </div>
             ))}
             <div />
           </div>
-          {/* Data rows */}
           {entries.map((entry, i) => (
-            <div key={i} className="grid grid-cols-[60px_1fr_1fr_60px_44px] border-t border-border">
+            <div key={i} className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_120px_44px] border-t border-border">
               {FIELD_ORDER.map((field, col) => (
-                field === 'csi' && isMrt ? (
+                field === 'csi' ? (
                   <button
                     key={field}
-                    onClick={() => updateField(i, 'csi', entry.csi === 'AH' ? 'UH' : 'AH')}
-                    className={`flex items-center justify-center text-xs font-bold border-r border-border transition-colors ${
-                      entry.csi === 'AH' 
-                        ? 'bg-red-600/20 text-red-400 hover:bg-red-600/30' 
-                        : 'bg-blue-600/20 text-blue-400 hover:bg-blue-600/30'
-                    }`}
+                    type="button"
+                    value={getToggleValue(entry.csi)}
+                    data-sim={simId}
+                    data-row={i}
+                    data-col={col}
+                    onClick={() => updateField(i, 'csi', getNextToggleValue(entry.csi))}
+                    onKeyDown={(e) => handleKeyDown(i, col, e)}
+                    className={`px-2 py-1 text-xs font-semibold border-r border-border transition-colors focus:bg-accent/30 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-ring ${getToggleClasses(entry.csi)}`}
                   >
-                    {entry.csi || 'UH'}
+                    {getToggleValue(entry.csi)}
                   </button>
                 ) : (
-                <input
-                  key={field}
-                  value={entry[field]}
-                  data-sim={simId}
-                  data-row={i}
-                  data-col={col}
-                  onChange={(e) => updateField(i, field, e.target.value)}
-                  onPaste={(e) => handlePaste(i, col, e)}
-                  onKeyDown={(e) => handleKeyDown(i, col, e)}
-                  onFocus={(e) => e.target.select()}
-                  className={`bg-background px-2 py-1 text-xs border-r border-border outline-none focus:bg-accent/30 focus:ring-1 focus:ring-inset focus:ring-ring ${col === 0 ? 'font-mono' : ''}`}
-                />
+                  <input
+                    key={field}
+                    value={entry[field]}
+                    data-sim={simId}
+                    data-row={i}
+                    data-col={col}
+                    onChange={(e) => updateField(i, field, e.target.value)}
+                    onPaste={(e) => handlePaste(i, col, e)}
+                    onKeyDown={(e) => handleKeyDown(i, col, e)}
+                    onFocus={(e) => e.target.select()}
+                    className={`bg-background px-2 py-1 text-xs border-r border-border outline-none focus:bg-accent/30 focus:ring-1 focus:ring-inset focus:ring-ring ${col === 0 ? 'font-mono' : ''}`}
+                  />
                 )
               ))}
               <button

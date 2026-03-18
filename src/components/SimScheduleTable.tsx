@@ -21,28 +21,31 @@ export function SimScheduleTable({ simId, name, entries }: SimScheduleTableProps
             <TableHead className="text-[hsl(var(--header-foreground))] font-bold w-[92px] py-1 text-xs whitespace-nowrap">{name}</TableHead>
             <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-1 text-xs">Unit</TableHead>
             <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-1 text-xs">Crew</TableHead>
-            <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-1 text-xs whitespace-nowrap">{isMrt ? 'Type' : 'CSI/System'}</TableHead>
+            <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-1 text-xs whitespace-nowrap">{isMrt ? 'Type' : 'CSI/DO'}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {entries.filter(e => e.unit || e.crew || e.csi).map((entry, i) => (
-            <TableRow key={i} className={i % 2 === 0 ? "bg-muted/30" : ""}>
-              <TableCell className="font-mono text-xs py-0.5">{entry.time}</TableCell>
-              <TableCell className="text-xs py-0.5">{entry.unit}</TableCell>
-              <TableCell className="text-xs py-0.5">{entry.crew}</TableCell>
-              <TableCell className="text-xs py-0.5">
-                {isMrt ? (
-                  <span className={`px-2 py-0.5 rounded text-xs font-bold ${
-                    entry.csi === 'AH' 
-                      ? 'bg-red-600/20 text-red-400' 
-                      : 'bg-blue-600/20 text-blue-400'
-                  }`}>
-                    {entry.csi || 'UH'}
+          {entries.filter(e => e.unit || e.crew || e.csi).map((entry, i) => {
+            const role = isMrt
+              ? (entry.csi === 'AH' ? 'AH' : 'UH')
+              : (entry.csi === 'Device Operator' ? 'Device Operator' : 'CSI');
+            const badgeClass = role === (isMrt ? 'AH' : 'Device Operator')
+              ? 'bg-primary/15 text-primary'
+              : 'bg-accent text-accent-foreground';
+
+            return (
+              <TableRow key={i} className={i % 2 === 0 ? "bg-muted/30" : ""}>
+                <TableCell className="font-mono text-xs py-0.5">{entry.time}</TableCell>
+                <TableCell className="text-xs py-0.5">{entry.unit}</TableCell>
+                <TableCell className="text-xs py-0.5">{entry.crew}</TableCell>
+                <TableCell className="text-xs py-0.5">
+                  <span className={`inline-flex min-w-[3.5rem] items-center justify-center rounded px-2 py-0.5 text-xs font-bold ${badgeClass}`}>
+                    {role}
                   </span>
-                ) : entry.csi}
-              </TableCell>
-            </TableRow>
-          ))}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
