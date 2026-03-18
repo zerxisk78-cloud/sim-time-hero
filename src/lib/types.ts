@@ -111,3 +111,5 @@ export interface VisibilitySettings {
   linkedEvents: boolean;
   trainerStatus: boolean;
 }
+
+export type MrtLocationSettings = Record<string, string>;
