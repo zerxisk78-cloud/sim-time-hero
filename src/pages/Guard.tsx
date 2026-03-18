@@ -17,6 +17,7 @@ export default function GuardPage() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [visibility, setVisibility] = useState<VisibilitySettings>({ simulators: {}, classrooms: true, necc: true, linkedEvents: true, trainerStatus: true });
   const [extraSims, setExtraSims] = useState<{ id: string; name: string }[]>([]);
+  const [mrtLocations, setMrtLocations] = useState<MrtLocationSettings>({});
 
   const loadData = useCallback(async () => {
     const data = await loadAllData();
