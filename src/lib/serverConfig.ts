@@ -4,8 +4,14 @@
 const STORAGE_KEY = 'matss_server_url';
 
 function normalizeServerUrl(url: string): string {
-  const cleaned = url.trim().replace(/\/+$/, '').replace(/\/api\/data$/i, '');
-  return cleaned || window.location.origin;
+  const trimmed = url.trim();
+  if (!trimmed) return window.location.origin;
+
+  const withProtocol = /^https?:\/\//i.test(trimmed)
+    ? trimmed
+    : `http://${trimmed}`;
+
+  return withProtocol.replace(/\/+$|\/api\/data$/i, '');
 }
 
 function getDefaultServerUrl(): string {
