@@ -227,6 +227,27 @@ export function saveVisibility(settings: VisibilitySettings): void {
   setItem('visibility', settings);
 }
 
+// MRT Locations
+const DEFAULT_MRT_LOCATIONS: Record<string, string> = Object.fromEntries(
+  MRT_SIM_IDS.map(id => [id, ''])
+);
+
+export function getMrtLocations(): Record<string, string> {
+  const saved = getItem<Record<string, string>>('mrt_locations', DEFAULT_MRT_LOCATIONS);
+  return MRT_SIM_IDS.reduce<Record<string, string>>((acc, id) => {
+    acc[id] = saved[id] ?? '';
+    return acc;
+  }, { ...DEFAULT_MRT_LOCATIONS });
+}
+
+export function saveMrtLocations(locations: Record<string, string>): void {
+  const normalized = MRT_SIM_IDS.reduce<Record<string, string>>((acc, id) => {
+    acc[id] = locations[id] ?? '';
+    return acc;
+  }, {});
+  setItem('mrt_locations', normalized);
+}
+
 // Extra (custom) simulators/trainers
 export interface ExtraSim {
   id: string;
@@ -278,11 +299,12 @@ export async function loadAllData(): Promise<{
   linkedEvents: LinkedEvent[];
   visibility: VisibilitySettings;
   extraSims: ExtraSim[];
+  mrtLocations: Record<string, string>;
 }> {
   const extraSims = await getItemAsync<ExtraSim[]>('extra_sims', []);
   const allSimIds = [...SIMULATORS.map(s => s.id), ...extraSims.map(s => s.id)];
 
-  const [rawStatuses, classrooms, neccEntries, linkedEvents, visibility, ...simResults] = await Promise.all([
+  const [rawStatuses, classrooms, neccEntries, linkedEvents, visibility, mrtLocations, ...simResults] = await Promise.all([
     getItemAsync<TrainerStatus[]>('trainer_statuses', []),
     getItemAsync<ClassroomEntry[]>('classrooms', []),
     getItemAsync<NECCEntry[]>('necc', []),
@@ -291,6 +313,7 @@ export async function loadAllData(): Promise<{
       simulators: Object.fromEntries(SIMULATORS.map(s => [s.id, true])),
       classrooms: true, necc: true, linkedEvents: true, trainerStatus: true,
     }),
+    getItemAsync<Record<string, string>>('mrt_locations', DEFAULT_MRT_LOCATIONS),
     ...allSimIds.map(id => getItemAsync<SimSlot[]>(`sim_${id}`, [])),
   ]);
 
@@ -306,5 +329,5 @@ export async function loadAllData(): Promise<{
   });
 
   const statuses = mergeTrainerStatuses(rawStatuses as TrainerStatus[]);
-  return { simData, statuses, classrooms, neccEntries, linkedEvents, visibility, extraSims };
+  return { simData, statuses, classrooms, neccEntries, linkedEvents, visibility, extraSims, mrtLocations };
 }

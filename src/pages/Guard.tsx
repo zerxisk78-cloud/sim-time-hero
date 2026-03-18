@@ -3,9 +3,10 @@ import { SIMULATORS } from "@/lib/types";
 import { getDisplayName, loadAllData } from "@/lib/store";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
 import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
+import { MrtLocationsPanel } from "@/components/MrtLocationsPanel";
 import { SimScheduleTable } from "@/components/SimScheduleTable";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
+import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings, MrtLocationSettings } from "@/lib/types";
 
 export default function GuardPage() {
   const [simData, setSimData] = useState<Record<string, SimSlot[]>>({});
@@ -16,6 +17,7 @@ export default function GuardPage() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [visibility, setVisibility] = useState<VisibilitySettings>({ simulators: {}, classrooms: true, necc: true, linkedEvents: true, trainerStatus: true });
   const [extraSims, setExtraSims] = useState<{ id: string; name: string }[]>([]);
+  const [mrtLocations, setMrtLocations] = useState<MrtLocationSettings>({});
 
   const loadData = useCallback(async () => {
     const data = await loadAllData();
@@ -26,6 +28,7 @@ export default function GuardPage() {
     setLinkedEvents(data.linkedEvents);
     setVisibility(data.visibility);
     setExtraSims(data.extraSims);
+    setMrtLocations(data.mrtLocations);
     setCurrentTime(new Date());
   }, []);
 
@@ -62,7 +65,8 @@ export default function GuardPage() {
       </div>
 
       <div className="w-72 flex-shrink-0 p-4 space-y-4">
-        {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} />}
+        <MrtLocationsPanel locations={mrtLocations} />
+        {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} simData={simData} />}
 
         {visibility.classrooms && classrooms.length > 0 && (
           <div className="bg-sidebar-background text-sidebar-foreground p-4 rounded-lg">

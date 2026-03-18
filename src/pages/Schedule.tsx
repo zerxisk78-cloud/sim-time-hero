@@ -3,9 +3,10 @@ import { SIMULATORS } from "@/lib/types";
 import { getDisplayName, loadAllData } from "@/lib/store";
 import { DirectorySidebar } from "@/components/DirectorySidebar";
 import { TrainerStatusPanel } from "@/components/TrainerStatusPanel";
+import { MrtLocationsPanel } from "@/components/MrtLocationsPanel";
 import { SimScheduleTable } from "@/components/SimScheduleTable";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings } from "@/lib/types";
+import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings, MrtLocationSettings } from "@/lib/types";
 import matssPatc from "@/assets/matss-patch.png";
 import usmcFlag from "@/assets/usmc-flag.png";
 import { FlyingAircraft } from "@/components/FlyingAircraft";
@@ -29,6 +30,7 @@ export default function SchedulePage() {
   const [activeGroup, setActiveGroup] = useState(0);
   const [visibility, setVisibility] = useState<VisibilitySettings>({ simulators: {}, classrooms: true, necc: true, linkedEvents: true, trainerStatus: true });
   const [extraSims, setExtraSims] = useState<{ id: string; name: string }[]>([]);
+  const [mrtLocations, setMrtLocations] = useState<MrtLocationSettings>({});
 
   const sortByDate = <T extends { dateTime: string }>(items: T[]): T[] =>
     [...items].sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
@@ -42,6 +44,7 @@ export default function SchedulePage() {
     setLinkedEvents(sortByDate(data.linkedEvents));
     setVisibility(data.visibility);
     setExtraSims(data.extraSims);
+    setMrtLocations(data.mrtLocations);
     setCurrentTime(new Date());
   }, []);
 
@@ -183,6 +186,7 @@ export default function SchedulePage() {
       </div>
 
       <div className="w-48 flex-shrink-0 p-1.5 space-y-1.5 overflow-auto">
+        <MrtLocationsPanel locations={mrtLocations} compact />
         {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} simData={simData} />}
       </div>
     </div>
