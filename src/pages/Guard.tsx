@@ -28,6 +28,7 @@ export default function GuardPage() {
     setLinkedEvents(data.linkedEvents);
     setVisibility(data.visibility);
     setExtraSims(data.extraSims);
+    setMrtLocations(data.mrtLocations);
     setCurrentTime(new Date());
   }, []);
 
