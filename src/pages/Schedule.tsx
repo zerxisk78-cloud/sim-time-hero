@@ -44,6 +44,7 @@ export default function SchedulePage() {
     setLinkedEvents(sortByDate(data.linkedEvents));
     setVisibility(data.visibility);
     setExtraSims(data.extraSims);
+    setMrtLocations(data.mrtLocations);
     setCurrentTime(new Date());
   }, []);
 
