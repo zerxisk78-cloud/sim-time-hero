@@ -18,10 +18,10 @@ export function SimScheduleTable({ simId, name, entries }: SimScheduleTableProps
       <Table>
         <TableHeader>
           <TableRow className="bg-[hsl(var(--header-bg))]">
-            <TableHead className="text-[hsl(var(--header-foreground))] font-bold w-[60px] py-1 text-xs">{name}</TableHead>
+            <TableHead className="text-[hsl(var(--header-foreground))] font-bold w-[92px] py-1 text-xs whitespace-nowrap">{name}</TableHead>
             <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-1 text-xs">Unit</TableHead>
             <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-1 text-xs">Crew</TableHead>
-            <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-1 text-xs">{isMrt ? 'Type' : 'CSI/System'}</TableHead>
+            <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-1 text-xs whitespace-nowrap">{isMrt ? 'Type' : 'CSI/System'}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
