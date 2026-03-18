@@ -30,6 +30,7 @@ export default function SchedulePage() {
   const [activeGroup, setActiveGroup] = useState(0);
   const [visibility, setVisibility] = useState<VisibilitySettings>({ simulators: {}, classrooms: true, necc: true, linkedEvents: true, trainerStatus: true });
   const [extraSims, setExtraSims] = useState<{ id: string; name: string }[]>([]);
+  const [mrtLocations, setMrtLocations] = useState<MrtLocationSettings>({});
 
   const sortByDate = <T extends { dateTime: string }>(items: T[]): T[] =>
     [...items].sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
