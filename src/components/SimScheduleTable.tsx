@@ -5,9 +5,10 @@ interface SimScheduleTableProps {
   simId?: string;
   name: string;
   entries: SimSlot[];
+  mrtLocation?: string;
 }
 
-export function SimScheduleTable({ simId, name, entries }: SimScheduleTableProps) {
+export function SimScheduleTable({ simId, name, entries, mrtLocation }: SimScheduleTableProps) {
   const hasData = entries.some(e => e.unit || e.crew || e.csi);
   if (!hasData) return null;
 
@@ -48,6 +49,11 @@ export function SimScheduleTable({ simId, name, entries }: SimScheduleTableProps
           })}
         </TableBody>
       </Table>
+      {isMrt && mrtLocation && (
+        <div className="text-xs text-muted-foreground font-medium px-2 py-1 bg-muted/20 border-t border-border">
+          📍 Location: <span className="font-semibold text-foreground">{mrtLocation}</span>
+        </div>
+      )}
     </div>
   );
 }
