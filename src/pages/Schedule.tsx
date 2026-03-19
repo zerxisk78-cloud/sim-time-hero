@@ -102,10 +102,10 @@ export default function SchedulePage() {
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
           {visibleSims.map(sim => (
-            <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} />
+            <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} />
           ))}
           {visibleExtraSims.map(sim => (
-            <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id) || sim.name} entries={simData[sim.id] || []} />
+            <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id) || sim.name} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} />
           ))}
         </div>
         <p className="text-xs text-muted-foreground mt-2 text-center">*NB = No brief</p>
