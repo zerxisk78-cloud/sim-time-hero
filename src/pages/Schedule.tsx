@@ -185,7 +185,7 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      <div className="w-48 flex-shrink-0 p-1.5 space-y-1.5 overflow-auto">
+      <div className="w-48 flex-shrink-0 p-1.5 space-y-1.5">
         <MrtLocationsPanel locations={mrtLocations} compact />
         {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} simData={simData} />}
       </div>

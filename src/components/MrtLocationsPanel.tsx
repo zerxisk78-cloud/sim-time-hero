@@ -19,7 +19,7 @@ export function MrtLocationsPanel({ locations, className = "", compact = false }
             <span className={`${compact ? "text-xs" : "text-sm"} font-medium`}>
               {getDisplayName(id)}
             </span>
-            <span className={`${compact ? "text-xs" : "text-sm"} font-semibold text-sidebar-primary`}>
+            <span className={`${compact ? "text-xs" : "text-sm"} font-semibold text-amber-200`}>
               {locations[id] || "—"}
             </span>
           </div>
