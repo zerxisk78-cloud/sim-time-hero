@@ -108,7 +108,7 @@ export default function SchedulePage() {
             <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id) || sim.name} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} />
           ))}
         </div>
-        <p className="text-xs text-muted-foreground mt-2 text-center">*NB = No brief</p>
+        <p className="text-sm text-muted-foreground mt-2 text-center">*NB = No brief</p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
           {visibility.classrooms && classrooms.length > 0 && (
