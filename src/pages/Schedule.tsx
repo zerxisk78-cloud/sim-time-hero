@@ -73,7 +73,7 @@ export default function SchedulePage() {
         style={{ backgroundImage: `url(${usmcFlag})` }}
       />
       <FlyingAircraft />
-      <DirectorySidebar className="w-64 min-h-screen flex-shrink-0 rounded-none" />
+      <DirectorySidebar className="w-52 min-h-screen flex-shrink-0 rounded-none" />
       
       <div className="flex-1 p-2 overflow-auto">
         <div className="text-center mb-2">
