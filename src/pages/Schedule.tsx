@@ -73,9 +73,9 @@ export default function SchedulePage() {
         style={{ backgroundImage: `url(${usmcFlag})` }}
       />
       <FlyingAircraft />
-      <DirectorySidebar className="w-64 min-h-screen flex-shrink-0 rounded-none" />
+      <DirectorySidebar className="w-52 min-h-screen flex-shrink-0 rounded-none" />
       
-      <div className="flex-1 p-2 overflow-auto">
+      <div className="flex-1 p-2">
         <div className="text-center mb-2">
           <div className="flex items-center justify-center gap-3">
             <img src={matssPatc} alt="MATSS Official Patch" className="h-28 w-28 object-contain" />
@@ -117,17 +117,17 @@ export default function SchedulePage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-sm py-1.5 text-sidebar-foreground">Unit</TableHead>
-                    <TableHead className="text-sm py-1.5 text-sidebar-foreground">Date/Time</TableHead>
-                    <TableHead className="text-sm py-1.5 text-sidebar-foreground">Location</TableHead>
+                    <TableHead className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">Unit</TableHead>
+                    <TableHead className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">Date/Time</TableHead>
+                    <TableHead className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">Location</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {classrooms.map(c => (
                     <TableRow key={c.id}>
-                      <TableCell className="text-sm py-1.5 text-sidebar-foreground">{c.className}</TableCell>
-                      <TableCell className="text-sm py-1.5 text-sidebar-foreground">{c.dateTime}</TableCell>
-                      <TableCell className="text-sm py-1.5 text-sidebar-foreground">{c.location}</TableCell>
+                      <TableCell className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">{c.className}</TableCell>
+                      <TableCell className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">{c.dateTime}</TableCell>
+                      <TableCell className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">{c.location}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -141,17 +141,17 @@ export default function SchedulePage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-sm py-1.5 text-sidebar-foreground">Unit</TableHead>
-                    <TableHead className="text-sm py-1.5 text-sidebar-foreground">Date/Time</TableHead>
-                    <TableHead className="text-sm py-1.5 text-sidebar-foreground">Notes</TableHead>
+                    <TableHead className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">Unit</TableHead>
+                    <TableHead className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">Date/Time</TableHead>
+                    <TableHead className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">Notes</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {neccEntries.map(e => (
                     <TableRow key={e.id}>
-                      <TableCell className="text-sm py-1.5 text-sidebar-foreground">{e.unit}</TableCell>
-                      <TableCell className="text-sm py-1.5 text-sidebar-foreground">{e.dateTime}</TableCell>
-                      <TableCell className="text-sm py-1.5 text-sidebar-foreground">{e.notes}</TableCell>
+                      <TableCell className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">{e.unit}</TableCell>
+                      <TableCell className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">{e.dateTime}</TableCell>
+                      <TableCell className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">{e.notes}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -165,17 +165,17 @@ export default function SchedulePage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-sm py-1.5 text-sidebar-foreground">Date/Time</TableHead>
-                    <TableHead className="text-sm py-1.5 text-sidebar-foreground">Unit</TableHead>
-                    <TableHead className="text-sm py-1.5 text-sidebar-foreground">System</TableHead>
+                    <TableHead className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">Date/Time</TableHead>
+                    <TableHead className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">Unit</TableHead>
+                    <TableHead className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">System</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {linkedEvents.map(e => (
                     <TableRow key={e.id}>
-                      <TableCell className="text-sm py-1.5 text-sidebar-foreground">{e.dateTime}</TableCell>
-                      <TableCell className="text-sm py-1.5 text-sidebar-foreground">{e.unit}</TableCell>
-                      <TableCell className="text-sm py-1.5 text-sidebar-foreground">{e.system}</TableCell>
+                      <TableCell className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">{e.dateTime}</TableCell>
+                      <TableCell className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">{e.unit}</TableCell>
+                      <TableCell className="text-sm py-1.5 text-sidebar-foreground whitespace-nowrap">{e.system}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -185,7 +185,7 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      <div className="w-48 flex-shrink-0 p-1.5 space-y-1.5 overflow-auto">
+      <div className="w-48 flex-shrink-0 p-1.5 space-y-1.5">
         <MrtLocationsPanel locations={mrtLocations} compact />
         {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} simData={simData} />}
       </div>
