@@ -28,10 +28,9 @@ export function DirectorySidebar({ className, directoryData }: DirectorySidebarP
         <h2 className="text-lg font-bold text-center text-sidebar-foreground">MATSS Directory</h2>
       </div>
       
-      <div className="space-y-1">
-        <p className="font-semibold">MATSS Contact Information:</p>
-        <p>{data.info.line1}</p>
-        <p>{data.info.line2}</p>
+      <div className="text-xs leading-tight">
+        <p className="font-semibold text-xs">MATSS Contact Info:</p>
+        <p>{data.info.line1} • {data.info.line2}</p>
         <p>{data.info.phone}</p>
       </div>
 
