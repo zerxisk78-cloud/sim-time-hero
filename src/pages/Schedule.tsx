@@ -75,7 +75,7 @@ export default function SchedulePage() {
       <FlyingAircraft />
       <DirectorySidebar className="w-52 min-h-screen flex-shrink-0 rounded-none" />
       
-      <div className="flex-1 p-2">
+      <div className="flex-1 p-2 flex flex-col overflow-hidden">
         <div className="text-center mb-2">
           <div className="flex items-center justify-center gap-3">
             <img src={matssPatc} alt="MATSS Official Patch" className="h-28 w-28 object-contain" />
