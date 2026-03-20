@@ -100,7 +100,7 @@ export default function SchedulePage() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-2 flex-1 min-h-0">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-2 flex-1 min-h-0 overflow-auto">
           {visibleSims.map(sim => (
             <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} />
           ))}
