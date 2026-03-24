@@ -70,6 +70,7 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
   }, [simId, refreshKey]);
 
   const updateField = (index: number, field: keyof SimSlot, value: string) => {
+    setDirty(true);
     setEntries(prev => prev.map((e, i) => i === index ? { ...e, [field]: value } : e));
   };
 
