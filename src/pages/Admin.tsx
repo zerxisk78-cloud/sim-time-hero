@@ -514,6 +514,14 @@ export default function AdminPage() {
 
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Initial load: sync from server first, then reload state
+  useEffect(() => {
+    syncFromServer().then(() => {
+      reload();
+      setRefreshKey(k => k + 1);
+    });
+  }, []);
+
   useEffect(() => { reload(); }, [reload]);
 
   // Auto-refresh polling: pull server data every 15 seconds
