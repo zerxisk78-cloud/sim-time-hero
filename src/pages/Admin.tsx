@@ -28,17 +28,18 @@ import { toast } from "sonner";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { resetServerCheck } from "@/lib/api";
+import { resetServerCheck, syncFromServer } from "@/lib/api";
 
 
 const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
 
-function SimEditor({ simId }: { simId: string; name: string; timeSlots: string[] }) {
+function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlots: string[]; refreshKey?: number }) {
   const isMrt = MRT_SIM_IDS.includes(simId);
   const [entries, setEntries] = useState<SimSlot[]>([]);
   const [lastSaved, setLastSaved] = useState("");
   const [displayName, setDisplayName] = useState(getDisplayName(simId));
   const [editingName, setEditingName] = useState(false);
+  const [dirty, setDirty] = useState(false);
 
   const getToggleValue = (value: string) => {
     if (isMrt) return value === 'AH' ? 'AH' : 'UH';
@@ -61,11 +62,15 @@ function SimEditor({ simId }: { simId: string; name: string; timeSlots: string[]
   };
 
   useEffect(() => {
-    setEntries(getSimEntries(simId));
-    setLastSaved(getSimLastSaved(simId));
-  }, [simId]);
+    if (!dirty) {
+      setEntries(getSimEntries(simId));
+      setLastSaved(getSimLastSaved(simId));
+      setDisplayName(getDisplayName(simId));
+    }
+  }, [simId, refreshKey]);
 
   const updateField = (index: number, field: keyof SimSlot, value: string) => {
+    setDirty(true);
     setEntries(prev => prev.map((e, i) => i === index ? { ...e, [field]: value } : e));
   };
 
@@ -83,7 +88,7 @@ function SimEditor({ simId }: { simId: string; name: string; timeSlots: string[]
     const rows = pasteData.split(/\r?\n/).filter(r => r.length > 0);
     if (rows.length <= 1 && !pasteData.includes('\t')) return;
     e.preventDefault();
-
+    setDirty(true);
     setEntries(prev => {
       const updated = [...prev];
       rows.forEach((row, ri) => {
@@ -121,22 +126,26 @@ function SimEditor({ simId }: { simId: string; name: string; timeSlots: string[]
   };
 
   const addRow = () => {
+    setDirty(true);
     setEntries(prev => [...prev, { time: '', unit: '', crew: '', csi: isMrt ? 'UH' : 'CSI' }]);
   };
 
   const removeRow = (index: number) => {
     if (entries.length <= 1) return;
+    setDirty(true);
     setEntries(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSave = () => {
     const ts = saveSimEntries(simId, entries);
     setLastSaved(ts);
+    setDirty(false);
     toast.success(`${displayName} saved`);
   };
 
   const handleUndo = () => {
     setEntries(getSimEntries(simId));
+    setDirty(false);
     toast.info(`${displayName} reverted to last saved`);
   };
 
@@ -503,7 +512,19 @@ export default function AdminPage() {
     setMrtLocations(getMrtLocations());
   }, []);
 
+  const [refreshKey, setRefreshKey] = useState(0);
+
   useEffect(() => { reload(); }, [reload]);
+
+  // Auto-refresh polling: pull server data every 15 seconds
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      await syncFromServer();
+      reload();
+      setRefreshKey(k => k + 1);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [reload]);
 
   const handleTrainerToggle = (id: string) => {
     const updated = trainerStatuses.map(s => s.id === id ? { ...s, isUp: !s.isUp, note: !s.isUp ? '' : s.note } : s);
@@ -538,13 +559,13 @@ export default function AdminPage() {
           {/* Left column: Simulator editors */}
           <div className="space-y-4">
             {SIMULATORS.map(sim => (
-              <SimEditor key={sim.id} simId={sim.id} name={sim.name} timeSlots={sim.timeSlots} />
+              <SimEditor key={sim.id} simId={sim.id} name={sim.name} timeSlots={sim.timeSlots} refreshKey={refreshKey} />
             ))}
             
             {/* Extra custom trainer boxes */}
             {extraSims.map(sim => (
               <div key={sim.id} className="relative">
-                <SimEditor simId={sim.id} name={sim.name} timeSlots={[]} />
+                <SimEditor simId={sim.id} name={sim.name} timeSlots={[]} refreshKey={refreshKey} />
                 <button
                   onClick={() => {
                     const updated = extraSims.filter(s => s.id !== sim.id);
