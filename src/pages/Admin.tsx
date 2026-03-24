@@ -559,7 +559,7 @@ export default function AdminPage() {
           {/* Left column: Simulator editors */}
           <div className="space-y-4">
             {SIMULATORS.map(sim => (
-              <SimEditor key={sim.id} simId={sim.id} name={sim.name} timeSlots={sim.timeSlots} />
+              <SimEditor key={sim.id} simId={sim.id} name={sim.name} timeSlots={sim.timeSlots} refreshKey={refreshKey} />
             ))}
             
             {/* Extra custom trainer boxes */}
