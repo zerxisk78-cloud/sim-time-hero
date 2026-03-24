@@ -126,22 +126,26 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
   };
 
   const addRow = () => {
+    setDirty(true);
     setEntries(prev => [...prev, { time: '', unit: '', crew: '', csi: isMrt ? 'UH' : 'CSI' }]);
   };
 
   const removeRow = (index: number) => {
     if (entries.length <= 1) return;
+    setDirty(true);
     setEntries(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSave = () => {
     const ts = saveSimEntries(simId, entries);
     setLastSaved(ts);
+    setDirty(false);
     toast.success(`${displayName} saved`);
   };
 
   const handleUndo = () => {
     setEntries(getSimEntries(simId));
+    setDirty(false);
     toast.info(`${displayName} reverted to last saved`);
   };
 
