@@ -88,7 +88,7 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
     const rows = pasteData.split(/\r?\n/).filter(r => r.length > 0);
     if (rows.length <= 1 && !pasteData.includes('\t')) return;
     e.preventDefault();
-
+    setDirty(true);
     setEntries(prev => {
       const updated = [...prev];
       rows.forEach((row, ri) => {
