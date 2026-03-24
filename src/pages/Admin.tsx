@@ -565,7 +565,7 @@ export default function AdminPage() {
             {/* Extra custom trainer boxes */}
             {extraSims.map(sim => (
               <div key={sim.id} className="relative">
-                <SimEditor simId={sim.id} name={sim.name} timeSlots={[]} />
+                <SimEditor simId={sim.id} name={sim.name} timeSlots={[]} refreshKey={refreshKey} />
                 <button
                   onClick={() => {
                     const updated = extraSims.filter(s => s.id !== sim.id);
