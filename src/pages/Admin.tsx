@@ -33,12 +33,13 @@ import { resetServerCheck, syncFromServer } from "@/lib/api";
 
 const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
 
-function SimEditor({ simId }: { simId: string; name: string; timeSlots: string[] }) {
+function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlots: string[]; refreshKey?: number }) {
   const isMrt = MRT_SIM_IDS.includes(simId);
   const [entries, setEntries] = useState<SimSlot[]>([]);
   const [lastSaved, setLastSaved] = useState("");
   const [displayName, setDisplayName] = useState(getDisplayName(simId));
   const [editingName, setEditingName] = useState(false);
+  const [dirty, setDirty] = useState(false);
 
   const getToggleValue = (value: string) => {
     if (isMrt) return value === 'AH' ? 'AH' : 'UH';
@@ -61,9 +62,12 @@ function SimEditor({ simId }: { simId: string; name: string; timeSlots: string[]
   };
 
   useEffect(() => {
-    setEntries(getSimEntries(simId));
-    setLastSaved(getSimLastSaved(simId));
-  }, [simId]);
+    if (!dirty) {
+      setEntries(getSimEntries(simId));
+      setLastSaved(getSimLastSaved(simId));
+      setDisplayName(getDisplayName(simId));
+    }
+  }, [simId, refreshKey]);
 
   const updateField = (index: number, field: keyof SimSlot, value: string) => {
     setEntries(prev => prev.map((e, i) => i === index ? { ...e, [field]: value } : e));
