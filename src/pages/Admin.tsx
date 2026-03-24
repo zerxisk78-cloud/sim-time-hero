@@ -512,7 +512,19 @@ export default function AdminPage() {
     setMrtLocations(getMrtLocations());
   }, []);
 
+  const [refreshKey, setRefreshKey] = useState(0);
+
   useEffect(() => { reload(); }, [reload]);
+
+  // Auto-refresh polling: pull server data every 15 seconds
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      await syncFromServer();
+      reload();
+      setRefreshKey(k => k + 1);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [reload]);
 
   const handleTrainerToggle = (id: string) => {
     const updated = trainerStatuses.map(s => s.id === id ? { ...s, isUp: !s.isUp, note: !s.isUp ? '' : s.note } : s);
