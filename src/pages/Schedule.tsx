@@ -111,7 +111,9 @@ export default function SchedulePage() {
         <p className="text-xs text-muted-foreground mt-1 text-center flex-shrink-0">*NB = No brief</p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2 flex-shrink-0">
-          {visibility.classrooms && classrooms.length > 0 && (
+          {visibility.classrooms && classrooms.length > 0 && (() => {
+            const displayClassrooms = classrooms.slice(0, 5);
+            return (
             <div className="bg-sidebar-background text-sidebar-foreground p-3 rounded-lg">
               <h3 className="text-sm font-bold underline mb-1 text-center">Classes</h3>
               <Table>
