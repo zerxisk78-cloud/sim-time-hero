@@ -15,14 +15,14 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation }: SimSched
   const isMrt = simId ? MRT_SIM_IDS.includes(simId) : name.startsWith('MRT');
 
   return (
-    <div className="mb-4">
-      <Table>
+    <div className="mb-1">
+      <Table className="text-[11px]">
         <TableHeader>
           <TableRow className="bg-[hsl(var(--header-bg))]">
-            <TableHead className="text-[hsl(var(--header-foreground))] font-bold w-[92px] py-1 text-xs whitespace-nowrap">{name}</TableHead>
-            <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-1 text-xs">Unit</TableHead>
-            <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-1 text-xs">Crew</TableHead>
-            <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-1 text-xs whitespace-nowrap">{isMrt ? 'Type' : 'CSI/DO'}</TableHead>
+            <TableHead className="text-[hsl(var(--header-foreground))] font-bold w-[80px] py-0.5 text-[11px] whitespace-nowrap">{name}</TableHead>
+            <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-0.5 text-[11px]">Unit</TableHead>
+            <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-0.5 text-[11px]">Crew</TableHead>
+            <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-0.5 text-[11px] whitespace-nowrap">{isMrt ? 'Type' : 'CSI/DO'}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -36,11 +36,11 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation }: SimSched
 
             return (
               <TableRow key={i} className={i % 2 === 0 ? "bg-muted/30" : ""}>
-                <TableCell className="font-mono text-xs py-0.5">{entry.time}</TableCell>
-                <TableCell className="text-xs py-0.5">{entry.unit}</TableCell>
-                <TableCell className="text-xs py-0.5">{entry.crew}</TableCell>
-                <TableCell className="text-xs py-0.5">
-                  <span className={`inline-flex min-w-[3.5rem] items-center justify-center rounded px-2 py-0.5 text-xs font-bold ${badgeClass}`}>
+                <TableCell className="font-mono text-[11px] py-0">{entry.time}</TableCell>
+                <TableCell className="text-[11px] py-0">{entry.unit}</TableCell>
+                <TableCell className="text-[11px] py-0">{entry.crew}</TableCell>
+                <TableCell className="text-[11px] py-0">
+                  <span className={`inline-flex min-w-[3rem] items-center justify-center rounded px-1.5 py-0 text-[10px] font-bold ${badgeClass}`}>
                     {role}
                   </span>
                 </TableCell>
@@ -50,7 +50,7 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation }: SimSched
         </TableBody>
       </Table>
       {isMrt && mrtLocation && (
-        <div className="text-xs text-muted-foreground font-medium px-2 py-1 bg-muted/20 border-t border-border">
+        <div className="text-[10px] text-muted-foreground font-medium px-2 py-0.5 bg-muted/20 border-t border-border">
           📍 Location: <span className="font-semibold text-foreground">{mrtLocation}</span>
         </div>
       )}
