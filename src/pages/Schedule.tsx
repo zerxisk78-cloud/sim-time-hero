@@ -147,7 +147,7 @@ export default function SchedulePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {neccEntries.map(e => (
+                  {neccEntries.slice(0, 5).map(e => (
                     <TableRow key={e.id}>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{e.unit}</TableCell>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{e.dateTime}</TableCell>
