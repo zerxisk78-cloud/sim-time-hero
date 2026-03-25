@@ -171,7 +171,7 @@ export default function SchedulePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {linkedEvents.map(e => (
+                  {linkedEvents.slice(0, 5).map(e => (
                     <TableRow key={e.id}>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{e.dateTime}</TableCell>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{e.unit}</TableCell>
