@@ -111,9 +111,7 @@ export default function SchedulePage() {
         <p className="text-xs text-muted-foreground mt-1 text-center flex-shrink-0">*NB = No brief</p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2 flex-shrink-0">
-          {visibility.classrooms && classrooms.length > 0 && (() => {
-            const displayClassrooms = classrooms.slice(0, 5);
-            return (
+          {visibility.classrooms && classrooms.length > 0 && (
             <div className="bg-sidebar-background text-sidebar-foreground p-3 rounded-lg">
               <h3 className="text-sm font-bold underline mb-1 text-center">Classes</h3>
               <Table>
@@ -125,7 +123,7 @@ export default function SchedulePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {classrooms.map(c => (
+                  {classrooms.slice(0, 5).map(c => (
                     <TableRow key={c.id}>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{c.className}</TableCell>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{c.dateTime}</TableCell>
