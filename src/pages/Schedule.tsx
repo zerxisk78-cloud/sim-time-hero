@@ -123,7 +123,7 @@ export default function SchedulePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {classrooms.map(c => (
+                  {classrooms.slice(0, 5).map(c => (
                     <TableRow key={c.id}>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{c.className}</TableCell>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{c.dateTime}</TableCell>
@@ -147,7 +147,7 @@ export default function SchedulePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {neccEntries.map(e => (
+                  {neccEntries.slice(0, 5).map(e => (
                     <TableRow key={e.id}>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{e.unit}</TableCell>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{e.dateTime}</TableCell>
@@ -171,7 +171,7 @@ export default function SchedulePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {linkedEvents.map(e => (
+                  {linkedEvents.slice(0, 5).map(e => (
                     <TableRow key={e.id}>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{e.dateTime}</TableCell>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{e.unit}</TableCell>
