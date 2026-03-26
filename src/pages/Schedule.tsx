@@ -71,7 +71,7 @@ export default function SchedulePage() {
   const visibleExtraSims = extraSims.filter(s => visibility.simulators[s.id] !== false);
 
   return (
-    <div className="flex h-screen overflow-hidden relative" style={{ backgroundColor: '#8B0000' }}>
+    <div className="flex h-screen overflow-hidden relative">
       <div
         className="absolute inset-0 z-0 opacity-10 pointer-events-none"
         style={{ backgroundColor: '#8B0000', backgroundImage: `url(${usmcFlag})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
