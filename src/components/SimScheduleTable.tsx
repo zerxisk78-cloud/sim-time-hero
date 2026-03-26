@@ -17,7 +17,7 @@ function parseSlotMinutes(time: string): number | null {
   return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
 }
 
-export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHour, larger }: SimScheduleTableProps) {
+export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHour, currentMinute, larger }: SimScheduleTableProps) {
   const hasData = entries.some(e => e.unit || e.crew || e.csi);
   if (!hasData) return null;
 
