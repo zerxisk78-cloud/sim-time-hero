@@ -6,9 +6,16 @@ interface SimScheduleTableProps {
   name: string;
   entries: SimSlot[];
   mrtLocation?: string;
+  currentHour?: number;
 }
 
-export function SimScheduleTable({ simId, name, entries, mrtLocation }: SimScheduleTableProps) {
+function parseSlotHour(time: string): number | null {
+  const match = time.match(/^(\d{1,2})\d{2}$/);
+  if (!match) return null;
+  return parseInt(match[1], 10);
+}
+
+export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHour }: SimScheduleTableProps) {
   const hasData = entries.some(e => e.unit || e.crew || e.csi);
   if (!hasData) return null;
 
@@ -33,9 +40,11 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation }: SimSched
             const badgeClass = role === (isMrt ? 'AH' : 'Device Operator')
               ? 'bg-primary/15 text-primary'
               : 'bg-accent text-accent-foreground';
+            const slotHour = parseSlotHour(entry.time);
+            const isCurrent = currentHour != null && slotHour != null && slotHour === currentHour;
 
             return (
-              <TableRow key={i} className={i % 2 === 0 ? "bg-muted/30" : ""}>
+              <TableRow key={i} className={`${isCurrent ? 'bg-primary/20 font-semibold' : i % 2 === 0 ? 'bg-muted/30' : ''}`}>
                 <TableCell className="font-mono text-[11px] py-0">{entry.time}</TableCell>
                 <TableCell className="text-[11px] py-0">{entry.unit}</TableCell>
                 <TableCell className="text-[11px] py-0">{entry.crew}</TableCell>
