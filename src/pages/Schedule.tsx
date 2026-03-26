@@ -103,12 +103,12 @@ export default function SchedulePage() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-1 flex-1 min-h-0 overflow-auto">
+        <div className={`flex-1 min-h-0 overflow-auto ${activeGroup <= 1 ? 'flex flex-col gap-2' : 'grid grid-cols-1 xl:grid-cols-2 gap-1'}`}>
           {visibleSims.map(sim => (
-            <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} currentHour={pendletonHour} />
+            <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} currentHour={pendletonHour} fullWidth={activeGroup <= 1} />
           ))}
           {visibleExtraSims.map(sim => (
-            <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id) || sim.name} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} currentHour={pendletonHour} />
+            <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id) || sim.name} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} currentHour={pendletonHour} fullWidth={activeGroup <= 1} />
           ))}
         </div>
         <p className="text-xs text-muted-foreground mt-1 text-center flex-shrink-0">*NB = No brief</p>
