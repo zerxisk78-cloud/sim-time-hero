@@ -105,7 +105,7 @@ export default function SchedulePage() {
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-1 flex-1 min-h-0 overflow-auto">
           {visibleSims.map(sim => {
-            const larger = ['ah1z-ftd', 'ah1z-ffs', 'uh1y-ftd', 'uh1y-ffs'].includes(sim.id);
+            const larger = ['ah1z-ftd', 'ah1z-ffs', 'uh1y-ftd', 'uh1y-ffs', 'mrt-1', 'mrt-2', 'mrt-3', 'mrt-4'].includes(sim.id);
             return <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} currentHour={pendletonHour} larger={larger} />;
           })}
           {visibleExtraSims.map(sim => (
