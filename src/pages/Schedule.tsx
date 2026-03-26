@@ -194,6 +194,8 @@ export default function SchedulePage() {
         <MrtLocationsPanel locations={mrtLocations} compact />
         {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} simData={simData} />}
       </div>
+
+      <div className="absolute bottom-1 right-2 text-[10px] text-muted-foreground/60 font-mono">v1.0.0</div>
     </div>
   );
 }
