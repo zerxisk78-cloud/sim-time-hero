@@ -45,7 +45,7 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
             const slotMin = parseSlotMinutes(entry.time);
             const nextEntry = filtered[i + 1];
             const nextMin = nextEntry ? parseSlotMinutes(nextEntry.time) : (slotMin != null ? slotMin + 120 : null);
-            const currentMin = currentHour != null ? currentHour * 60 + new Date().getMinutes() : null;
+            const currentMin = currentHour != null && currentMinute != null ? currentHour * 60 + currentMinute : null;
             const isCurrent = slotMin != null && nextMin != null && currentMin != null && currentMin >= slotMin && currentMin < nextMin;
 
             return (
