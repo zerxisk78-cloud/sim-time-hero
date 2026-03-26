@@ -24,8 +24,8 @@ export function DirectorySidebar({ className, directoryData }: DirectorySidebarP
 
   return (
     <aside className={cn("bg-sidebar-background text-sidebar-foreground p-4 rounded-lg space-y-4 text-sm", className)}>
-      <div className="bg-sidebar-accent px-3 py-2 rounded">
-        <h2 className="text-lg font-bold text-center text-sidebar-foreground">MATSS Directory</h2>
+      <div className="bg-sidebar-accent px-2 py-1 rounded">
+        <h2 className="text-sm font-bold text-center text-sidebar-foreground">MATSS Directory</h2>
       </div>
       
       <div className="text-xs leading-tight">
