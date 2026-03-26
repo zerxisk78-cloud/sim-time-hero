@@ -714,6 +714,7 @@ export default function AdminPage() {
           <div className="space-y-4">
             {/* Server Connection Settings */}
             <ServerSettings />
+            <BackupRestore onRestore={() => { reload(); setRefreshKey(k => k + 1); }} />
 
             <Card className="mb-4">
               <CardHeader className="py-3">
