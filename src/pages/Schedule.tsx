@@ -30,6 +30,7 @@ export default function SchedulePage() {
   const pendletonTime = currentTime.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', hour12: false });
   const pendletonDate = currentTime.toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles' });
   const pendletonHour = Number(currentTime.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', hour12: false }));
+  const pendletonMinute = Number(currentTime.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', minute: 'numeric' }));
   const [activeGroup, setActiveGroup] = useState(0);
   const [visibility, setVisibility] = useState<VisibilitySettings>({ simulators: {}, classrooms: true, necc: true, linkedEvents: true, trainerStatus: true });
   const [extraSims, setExtraSims] = useState<{ id: string; name: string }[]>([]);
