@@ -46,10 +46,10 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
 
             return (
               <TableRow key={i} className={`${isCurrent ? 'bg-yellow-400/40 ring-2 ring-yellow-400 ring-inset font-bold' : i % 2 === 0 ? 'bg-muted/30' : ''}`}>
-                <TableCell className={`font-mono py-0 ${larger ? 'text-[13px] py-0.5' : 'text-[11px]'}`}>{entry.time}</TableCell>
-                <TableCell className={`py-0 ${larger ? 'text-[13px] py-0.5' : 'text-[11px]'}`}>{entry.unit}</TableCell>
-                <TableCell className={`py-0 ${larger ? 'text-[13px] py-0.5' : 'text-[11px]'}`}>{entry.crew}</TableCell>
-                <TableCell className={`py-0 ${larger ? 'text-[13px] py-0.5' : 'text-[11px]'}`}>
+                <TableCell className={`font-mono ${larger ? 'text-[13px] py-1' : 'text-[11px] py-0'}`}>{entry.time}</TableCell>
+                <TableCell className={`${larger ? 'text-[13px] py-1' : 'text-[11px] py-0'}`}>{entry.unit}</TableCell>
+                <TableCell className={`${larger ? 'text-[13px] py-1' : 'text-[11px] py-0'}`}>{entry.crew}</TableCell>
+                <TableCell className={`${larger ? 'text-[13px] py-1' : 'text-[11px] py-0'}`}>
                   <span className={`inline-flex min-w-[3rem] items-center justify-center rounded px-1.5 py-0 font-bold ${larger ? 'text-[11px]' : 'text-[10px]'} ${badgeClass}`}>
                     {role}
                   </span>
