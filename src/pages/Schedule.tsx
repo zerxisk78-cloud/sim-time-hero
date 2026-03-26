@@ -30,6 +30,7 @@ export default function SchedulePage() {
   const pendletonTime = currentTime.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', hour12: false });
   const pendletonDate = currentTime.toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles' });
   const pendletonHour = Number(currentTime.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', hour12: false }));
+  const pendletonMinute = Number(currentTime.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', minute: 'numeric' }));
   const [activeGroup, setActiveGroup] = useState(0);
   const [visibility, setVisibility] = useState<VisibilitySettings>({ simulators: {}, classrooms: true, necc: true, linkedEvents: true, trainerStatus: true });
   const [extraSims, setExtraSims] = useState<{ id: string; name: string }[]>([]);
@@ -106,10 +107,10 @@ export default function SchedulePage() {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-1 flex-1 min-h-0 overflow-auto">
           {visibleSims.map(sim => {
             const larger = ['ah1z-ftd', 'ah1z-ffs', 'uh1y-ftd', 'uh1y-ffs', 'mrt-1', 'mrt-2', 'mrt-3', 'mrt-4'].includes(sim.id);
-            return <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} currentHour={pendletonHour} larger={larger} />;
+            return <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} currentHour={pendletonHour} currentMinute={pendletonMinute} larger={larger} />;
           })}
           {visibleExtraSims.map(sim => (
-            <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id) || sim.name} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} currentHour={pendletonHour} />
+            <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id) || sim.name} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} currentHour={pendletonHour} currentMinute={pendletonMinute} />
           ))}
         </div>
         <p className="text-xs text-muted-foreground mt-1 text-center flex-shrink-0">*NB = No brief</p>
