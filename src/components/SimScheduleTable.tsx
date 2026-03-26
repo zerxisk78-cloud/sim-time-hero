@@ -7,6 +7,7 @@ interface SimScheduleTableProps {
   entries: SimSlot[];
   mrtLocation?: string;
   currentHour?: number;
+  currentMinute?: number;
   larger?: boolean;
 }
 
