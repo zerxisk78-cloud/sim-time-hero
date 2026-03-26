@@ -16,12 +16,60 @@ function parseSlotHour(time: string): number | null {
   return parseInt(match[1], 10);
 }
 
-export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHour }: SimScheduleTableProps) {
+export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHour, fullWidth }: SimScheduleTableProps) {
   const hasData = entries.some(e => e.unit || e.crew || e.csi);
   if (!hasData) return null;
 
   const isMrt = simId ? MRT_SIM_IDS.includes(simId) : name.startsWith('MRT');
+  const textSize = fullWidth ? 'text-sm' : 'text-[11px]';
+  const cellPy = fullWidth ? 'py-1.5' : 'py-0';
+  const badgeSize = fullWidth ? 'text-xs' : 'text-[10px]';
 
+  return (
+    <div className={fullWidth ? 'mb-2 flex-1' : 'mb-1'}>
+      <Table className={textSize}>
+        <TableHeader>
+          <TableRow className="bg-[hsl(var(--header-bg))]">
+            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold w-[80px] ${cellPy} ${textSize} whitespace-nowrap`}>{name}</TableHead>
+            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold ${cellPy} ${textSize}`}>Unit</TableHead>
+            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold ${cellPy} ${textSize}`}>Crew</TableHead>
+            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold ${cellPy} ${textSize} whitespace-nowrap`}>{isMrt ? 'Type' : 'CSI/DO'}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {entries.filter(e => e.unit || e.crew || e.csi).map((entry, i) => {
+            const role = isMrt
+              ? (entry.csi === 'AH' ? 'AH' : 'UH')
+              : (entry.csi === 'Device Operator' ? 'Device Operator' : 'CSI');
+            const badgeClass = role === (isMrt ? 'AH' : 'Device Operator')
+              ? 'bg-amber-500/80 text-black font-extrabold'
+              : 'bg-sky-600/80 text-white font-extrabold';
+            const slotHour = parseSlotHour(entry.time);
+            const isCurrent = currentHour != null && slotHour != null && slotHour === currentHour;
+
+            return (
+              <TableRow key={i} className={`${isCurrent ? 'bg-yellow-400/40 ring-2 ring-yellow-400 ring-inset font-bold' : i % 2 === 0 ? 'bg-muted/30' : ''}`}>
+                <TableCell className={`font-mono ${textSize} ${cellPy}`}>{entry.time}</TableCell>
+                <TableCell className={`${textSize} ${cellPy}`}>{entry.unit}</TableCell>
+                <TableCell className={`${textSize} ${cellPy}`}>{entry.crew}</TableCell>
+                <TableCell className={`${textSize} ${cellPy}`}>
+                  <span className={`inline-flex min-w-[3rem] items-center justify-center rounded px-1.5 py-0 ${badgeSize} font-bold ${badgeClass}`}>
+                    {role}
+                  </span>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+      {isMrt && mrtLocation && (
+        <div className="text-[10px] text-muted-foreground font-medium px-2 py-0.5 bg-muted/20 border-t border-border">
+          📍 Location: <span className="font-semibold text-foreground">{mrtLocation}</span>
+        </div>
+      )}
+    </div>
+  );
+}
   return (
     <div className="mb-1">
       <Table className="text-[11px]">
