@@ -44,7 +44,7 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
             const isCurrent = currentHour != null && slotHour != null && slotHour === currentHour;
 
             return (
-              <TableRow key={i} className={`${isCurrent ? 'bg-primary/20 font-semibold' : i % 2 === 0 ? 'bg-muted/30' : ''}`}>
+              <TableRow key={i} className={`${isCurrent ? 'bg-yellow-400/40 ring-2 ring-yellow-400 ring-inset font-bold' : i % 2 === 0 ? 'bg-muted/30' : ''}`}>
                 <TableCell className="font-mono text-[11px] py-0">{entry.time}</TableCell>
                 <TableCell className="text-[11px] py-0">{entry.unit}</TableCell>
                 <TableCell className="text-[11px] py-0">{entry.crew}</TableCell>
