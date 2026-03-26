@@ -80,31 +80,31 @@ export default function SchedulePage() {
       <FlyingAircraft />
       <DirectorySidebar className="w-52 min-h-screen flex-shrink-0 rounded-none" />
       
-      <div className="flex-1 p-2 flex flex-col overflow-hidden">
-        <div className="text-center mb-2 flex-shrink-0">
-          <div className="flex items-center justify-center gap-3">
-            <img src={matssPatc} alt="MATSS Official Patch" className="h-28 w-28 object-contain" />
+      <div className="flex-1 p-1 flex flex-col overflow-hidden">
+        <div className="text-center mb-1 flex-shrink-0">
+          <div className="flex items-center justify-center gap-2">
+            <img src={matssPatc} alt="MATSS Official Patch" className="h-16 w-16 object-contain" />
             <div>
-              <h1 className="text-xl font-bold leading-tight">Marine Aviation Training System Site</h1>
-              <p className="text-sm text-muted-foreground">MCAS Pendleton</p>
-              <p className="text-lg font-bold font-mono mt-1">{pendletonTime}</p>
-              <p className="text-xs text-muted-foreground">{pendletonDate}</p>
+              <h1 className="text-base font-bold leading-tight">Marine Aviation Training System Site</h1>
+              <p className="text-xs text-muted-foreground">MCAS Pendleton</p>
+              <p className="text-sm font-bold font-mono">{pendletonTime}</p>
+              <p className="text-[10px] text-muted-foreground">{pendletonDate}</p>
             </div>
-            <img src={matssPatc} alt="MATSS Official Patch" className="h-28 w-28 object-contain" />
+            <img src={matssPatc} alt="MATSS Official Patch" className="h-16 w-16 object-contain" />
           </div>
-          <p className="text-sm mt-1">Current Simulator Schedule</p>
+          <p className="text-xs">Current Simulator Schedule</p>
         </div>
 
-        <div className="flex justify-center gap-1.5 mb-2 flex-shrink-0">
+        <div className="flex justify-center gap-1 mb-1 flex-shrink-0">
           {SIM_GROUPS.map((_, i) => (
             <div
               key={i}
-              className={`w-2.5 h-2.5 rounded-full transition-colors ${i === activeGroup ? 'bg-primary' : 'bg-muted'}`}
+              className={`w-2 h-2 rounded-full transition-colors ${i === activeGroup ? 'bg-primary' : 'bg-muted'}`}
             />
           ))}
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-1 flex-1 min-h-0 overflow-auto">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-0.5 flex-1 min-h-0">
           {visibleSims.map(sim => {
             const larger = ['ah1z-ftd', 'ah1z-ffs', 'uh1y-ftd', 'uh1y-ffs', 'mrt-1', 'mrt-2', 'mrt-3', 'mrt-4'].includes(sim.id);
             return <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} currentHour={pendletonHour} currentMinute={pendletonMinute} larger={larger} />;
@@ -195,7 +195,7 @@ export default function SchedulePage() {
         {visibility.trainerStatus && <TrainerStatusPanel statuses={statuses} simData={simData} />}
       </div>
 
-      <div className="absolute bottom-1 right-2 text-[10px] text-muted-foreground/60 font-mono">v1.0.0</div>
+      <div className="absolute bottom-1 right-2 text-[10px] text-muted-foreground/60 font-mono">v1.0.1</div>
     </div>
   );
 }
