@@ -157,15 +157,44 @@ export async function syncFromServer(): Promise<void> {
   }
 }
 
-// Push all localStorage data to server (initial migration)
+// Push localStorage data to server — only keys the server doesn't already have.
+// This prevents a fresh browser (with empty localStorage) from wiping server data.
 export async function pushToServer(): Promise<void> {
   try {
+    // First, fetch what the server already has
+    let serverData: Record<string, unknown> = {};
+    try {
+      const res = await fetch(getApiBase(), {
+        method: 'GET',
+        signal: AbortSignal.timeout(3000),
+      });
+      if (res.ok) {
+        serverData = await res.json();
+        markServerState(true);
+      } else {
+        markServerState(false);
+        return;
+      }
+    } catch {
+      markServerState(false);
+      return;
+    }
+
+    // Only push keys that don't exist on the server yet
     const bulk: Record<string, unknown> = {};
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith(STORAGE_PREFIX)) {
+        // Skip if server already has this key with non-null data
+        if (key in serverData && serverData[key] !== null && serverData[key] !== undefined) {
+          continue;
+        }
         try {
-          bulk[key] = JSON.parse(localStorage.getItem(key)!);
+          const value = JSON.parse(localStorage.getItem(key)!);
+          // Don't push empty arrays/objects — they'd overwrite real data
+          if (Array.isArray(value) && value.length === 0) continue;
+          if (value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) continue;
+          bulk[key] = value;
         } catch {
           // skip malformed values
         }
