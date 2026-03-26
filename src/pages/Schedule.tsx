@@ -73,7 +73,7 @@ export default function SchedulePage() {
   return (
     <div className="flex h-screen overflow-hidden relative">
       <div
-        className="absolute inset-0 z-0 opacity-30 pointer-events-none"
+        className="absolute inset-0 z-0 opacity-20 pointer-events-none"
         style={{ backgroundColor: '#8B0000', backgroundImage: `url(${usmcFlag})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
       />
       <FlyingAircraft />
