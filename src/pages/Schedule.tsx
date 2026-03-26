@@ -8,7 +8,7 @@ import { SimScheduleTable } from "@/components/SimScheduleTable";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { SimSlot, TrainerStatus, ClassroomEntry, NECCEntry, LinkedEvent, VisibilitySettings, MrtLocationSettings } from "@/lib/types";
 import matssPatc from "@/assets/matss-patch.png";
-import usmcFlag from "@/assets/usmc-flag.png";
+import usmcEga from "@/assets/usmc-ega.png";
 import { FlyingAircraft } from "@/components/FlyingAircraft";
 
 // Groups of simulator IDs to rotate through every 10 seconds
@@ -74,7 +74,7 @@ export default function SchedulePage() {
     <div className="flex h-screen overflow-hidden relative">
       <div
         className="absolute inset-0 z-0 opacity-10 pointer-events-none"
-        style={{ backgroundColor: '#8B0000', backgroundImage: `url(${usmcFlag})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+        style={{ backgroundColor: '#8B0000', backgroundImage: `url(${usmcEga})`, backgroundSize: '60%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       />
       <FlyingAircraft />
       <DirectorySidebar className="w-52 min-h-screen flex-shrink-0 rounded-none" />
