@@ -82,14 +82,14 @@ export default function SchedulePage() {
       <div className="flex-1 p-2 flex flex-col overflow-hidden">
         <div className="text-center mb-2 flex-shrink-0">
           <div className="flex items-center justify-center gap-3">
-            <img src={matssPatc} alt="MATSS Official Patch" className="h-36 w-36 object-contain" />
+            <img src={matssPatc} alt="MATSS Official Patch" className="h-28 w-28 object-contain" />
             <div>
               <h1 className="text-xl font-bold leading-tight">Marine Aviation Training System Site</h1>
               <p className="text-sm text-muted-foreground">MCAS Pendleton</p>
               <p className="text-lg font-bold font-mono mt-1">{pendletonTime}</p>
               <p className="text-xs text-muted-foreground">{pendletonDate}</p>
             </div>
-            <img src={matssPatc} alt="MATSS Official Patch" className="h-36 w-36 object-contain" />
+            <img src={matssPatc} alt="MATSS Official Patch" className="h-28 w-28 object-contain" />
           </div>
           <p className="text-sm mt-1">Current Simulator Schedule</p>
         </div>
