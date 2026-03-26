@@ -7,6 +7,7 @@ interface SimScheduleTableProps {
   entries: SimSlot[];
   mrtLocation?: string;
   currentHour?: number;
+  fullWidth?: boolean;
 }
 
 function parseSlotHour(time: string): number | null {
