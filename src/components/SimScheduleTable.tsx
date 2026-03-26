@@ -34,15 +34,18 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
           </TableRow>
         </TableHeader>
         <TableBody>
-          {entries.filter(e => e.unit || e.crew || e.csi).map((entry, i) => {
+          {entries.filter(e => e.unit || e.crew || e.csi).map((entry, i, filtered) => {
             const role = isMrt
               ? (entry.csi === 'AH' ? 'AH' : 'UH')
               : (entry.csi === 'Device Operator' ? 'Device Operator' : 'CSI');
             const badgeClass = role === (isMrt ? 'AH' : 'Device Operator')
               ? 'bg-amber-500/80 text-black font-extrabold'
               : 'bg-sky-600/80 text-white font-extrabold';
-            const slotHour = parseSlotHour(entry.time);
-            const isCurrent = currentHour != null && slotHour != null && slotHour === currentHour;
+            const slotMin = parseSlotMinutes(entry.time);
+            const nextEntry = filtered[i + 1];
+            const nextMin = nextEntry ? parseSlotMinutes(nextEntry.time) : (slotMin != null ? slotMin + 120 : null);
+            const currentMin = currentHour != null ? currentHour * 60 + new Date().getMinutes() : null;
+            const isCurrent = slotMin != null && nextMin != null && currentMin != null && currentMin >= slotMin && currentMin < nextMin;
 
             return (
               <TableRow key={i} className={`${isCurrent ? 'bg-yellow-400/40 ring-2 ring-yellow-400 ring-inset font-bold' : i % 2 === 0 ? 'bg-muted/30' : ''}`}>
