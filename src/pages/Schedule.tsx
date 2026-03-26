@@ -27,7 +27,7 @@ export default function SchedulePage() {
   const [neccEntries, setNeccEntries] = useState<NECCEntry[]>([]);
   const [linkedEvents, setLinkedEvents] = useState<LinkedEvent[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const pendletonTime = currentTime.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit' });
+  const pendletonTime = currentTime.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', hour12: false });
   const pendletonDate = currentTime.toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles' });
   const pendletonHour = Number(currentTime.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', hour12: false }));
   const [activeGroup, setActiveGroup] = useState(0);
