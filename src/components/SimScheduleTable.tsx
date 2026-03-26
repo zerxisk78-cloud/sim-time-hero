@@ -38,8 +38,8 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
               ? (entry.csi === 'AH' ? 'AH' : 'UH')
               : (entry.csi === 'Device Operator' ? 'Device Operator' : 'CSI');
             const badgeClass = role === (isMrt ? 'AH' : 'Device Operator')
-              ? 'bg-primary/15 text-primary'
-              : 'bg-accent text-accent-foreground';
+              ? 'bg-amber-500/80 text-black font-extrabold'
+              : 'bg-sky-600/80 text-white font-extrabold';
             const slotHour = parseSlotHour(entry.time);
             const isCurrent = currentHour != null && slotHour != null && slotHour === currentHour;
 
