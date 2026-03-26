@@ -59,6 +59,7 @@ export default function SchedulePage() {
 
   useEffect(() => {
     const interval = setInterval(() => {
+      setCurrentTime(new Date());
       setActiveGroup(prev => (prev + 1) % SIM_GROUPS.length);
     }, 10000);
     return () => clearInterval(interval);
