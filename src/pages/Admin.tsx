@@ -23,7 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trash2, Undo2, Pencil, Check, GripVertical, Plus, Server, Wifi, WifiOff } from "lucide-react";
+import { Trash2, Undo2, Pencil, Check, GripVertical, Plus, Server, Wifi, WifiOff, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -484,7 +484,88 @@ function ServerSettings() {
   );
 }
 
-// Extra sims now come from shared store
+function BackupRestore({ onRestore }: { onRestore: () => void }) {
+  const STORAGE_PREFIX = 'matss_';
+
+  const handleDownload = () => {
+    const backup: Record<string, unknown> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(STORAGE_PREFIX)) {
+        try {
+          backup[key] = JSON.parse(localStorage.getItem(key)!);
+        } catch {
+          backup[key] = localStorage.getItem(key);
+        }
+      }
+    }
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `matss-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Backup downloaded');
+  };
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result as string);
+        if (typeof data !== 'object' || data === null) {
+          toast.error('Invalid backup file');
+          return;
+        }
+        let count = 0;
+        for (const [key, value] of Object.entries(data)) {
+          if (key.startsWith(STORAGE_PREFIX)) {
+            localStorage.setItem(key, JSON.stringify(value));
+            count++;
+          }
+        }
+        toast.success(`Restored ${count} data keys from backup`);
+        onRestore();
+      } catch {
+        toast.error('Failed to parse backup file');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  return (
+    <Card className="mb-4">
+      <CardHeader className="py-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Download className="h-4 w-4" /> Data Backup & Restore
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Download a snapshot of all schedule data as a JSON file, or restore from a previous backup.
+        </p>
+        <div className="flex gap-2">
+          <Button onClick={handleDownload} size="sm" variant="outline" className="text-xs h-8 gap-1.5">
+            <Download className="h-3.5 w-3.5" /> Download Backup
+          </Button>
+          <label>
+            <Button asChild size="sm" variant="outline" className="text-xs h-8 gap-1.5 cursor-pointer">
+              <span><Upload className="h-3.5 w-3.5" /> Restore from Backup</span>
+            </Button>
+            <input type="file" accept=".json" onChange={handleUpload} className="hidden" />
+          </label>
+        </div>
+        <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded border border-border">
+          <strong>Tip:</strong> Download regular backups to protect against data loss. Restoring a backup will merge data into the current state — it won't delete anything, but will overwrite matching keys.
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function AdminPage() {
   const [trainerStatuses, setTrainerStatuses] = useState<TrainerStatus[]>([]);
