@@ -10,10 +10,10 @@ interface SimScheduleTableProps {
   larger?: boolean;
 }
 
-function parseSlotHour(time: string): number | null {
-  const match = time.match(/^(\d{1,2})\d{2}$/);
+function parseSlotMinutes(time: string): number | null {
+  const match = time.match(/^(\d{1,2})(\d{2})$/);
   if (!match) return null;
-  return parseInt(match[1], 10);
+  return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
 }
 
 export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHour, larger }: SimScheduleTableProps) {
