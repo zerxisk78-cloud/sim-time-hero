@@ -7,6 +7,7 @@ interface SimScheduleTableProps {
   entries: SimSlot[];
   mrtLocation?: string;
   currentHour?: number;
+  larger?: boolean;
 }
 
 function parseSlotHour(time: string): number | null {
@@ -15,7 +16,7 @@ function parseSlotHour(time: string): number | null {
   return parseInt(match[1], 10);
 }
 
-export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHour }: SimScheduleTableProps) {
+export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHour, larger }: SimScheduleTableProps) {
   const hasData = entries.some(e => e.unit || e.crew || e.csi);
   if (!hasData) return null;
 
@@ -23,13 +24,13 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
 
   return (
     <div className="mb-1">
-      <Table className="text-[11px]">
+      <Table className={larger ? "text-[13px]" : "text-[11px]"}>
         <TableHeader>
           <TableRow className="bg-[hsl(var(--header-bg))]">
-            <TableHead className="text-[hsl(var(--header-foreground))] font-bold w-[80px] py-0.5 text-[11px] whitespace-nowrap">{name}</TableHead>
-            <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-0.5 text-[11px]">Unit</TableHead>
-            <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-0.5 text-[11px]">Crew</TableHead>
-            <TableHead className="text-[hsl(var(--header-foreground))] font-bold py-0.5 text-[11px] whitespace-nowrap">{isMrt ? 'Type' : 'CSI/DO'}</TableHead>
+            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold w-[80px] py-0.5 whitespace-nowrap ${larger ? 'text-[13px]' : 'text-[11px]'}`}>{name}</TableHead>
+            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold py-0.5 ${larger ? 'text-[13px]' : 'text-[11px]'}`}>Unit</TableHead>
+            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold py-0.5 ${larger ? 'text-[13px]' : 'text-[11px]'}`}>Crew</TableHead>
+            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold py-0.5 whitespace-nowrap ${larger ? 'text-[13px]' : 'text-[11px]'}`}>{isMrt ? 'Type' : 'CSI/DO'}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -45,11 +46,11 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
 
             return (
               <TableRow key={i} className={`${isCurrent ? 'bg-yellow-400/40 ring-2 ring-yellow-400 ring-inset font-bold' : i % 2 === 0 ? 'bg-muted/30' : ''}`}>
-                <TableCell className="font-mono text-[11px] py-0">{entry.time}</TableCell>
-                <TableCell className="text-[11px] py-0">{entry.unit}</TableCell>
-                <TableCell className="text-[11px] py-0">{entry.crew}</TableCell>
-                <TableCell className="text-[11px] py-0">
-                  <span className={`inline-flex min-w-[3rem] items-center justify-center rounded px-1.5 py-0 text-[10px] font-bold ${badgeClass}`}>
+                <TableCell className={`font-mono py-0 ${larger ? 'text-[13px] py-0.5' : 'text-[11px]'}`}>{entry.time}</TableCell>
+                <TableCell className={`py-0 ${larger ? 'text-[13px] py-0.5' : 'text-[11px]'}`}>{entry.unit}</TableCell>
+                <TableCell className={`py-0 ${larger ? 'text-[13px] py-0.5' : 'text-[11px]'}`}>{entry.crew}</TableCell>
+                <TableCell className={`py-0 ${larger ? 'text-[13px] py-0.5' : 'text-[11px]'}`}>
+                  <span className={`inline-flex min-w-[3rem] items-center justify-center rounded px-1.5 py-0 font-bold ${larger ? 'text-[11px]' : 'text-[10px]'} ${badgeClass}`}>
                     {role}
                   </span>
                 </TableCell>
