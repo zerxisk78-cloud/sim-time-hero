@@ -28,10 +28,10 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
       <Table className={larger ? "text-[13px]" : "text-[11px]"}>
         <TableHeader>
           <TableRow className="bg-[hsl(var(--header-bg))]">
-            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold w-[80px] py-0.5 whitespace-nowrap ${larger ? 'text-[13px]' : 'text-[11px]'}`}>{name}</TableHead>
-            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold py-0.5 ${larger ? 'text-[13px]' : 'text-[11px]'}`}>Unit</TableHead>
-            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold py-0.5 ${larger ? 'text-[13px]' : 'text-[11px]'}`}>Crew</TableHead>
-            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold py-0.5 whitespace-nowrap ${larger ? 'text-[13px]' : 'text-[11px]'}`}>{isMrt ? 'Type' : 'CSI/DO'}</TableHead>
+            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold w-[80px] py-0.5 whitespace-nowrap ${larger ? 'text-sm px-1.5' : 'text-[11px]'}`}>{name}</TableHead>
+            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold py-0.5 ${larger ? 'text-sm px-1.5' : 'text-[11px]'}`}>Unit</TableHead>
+            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold py-0.5 ${larger ? 'text-sm px-1.5' : 'text-[11px]'}`}>Crew</TableHead>
+            <TableHead className={`text-[hsl(var(--header-foreground))] font-bold py-0.5 whitespace-nowrap ${larger ? 'text-sm px-1.5' : 'text-[11px]'}`}>{isMrt ? 'Type' : 'CSI/DO'}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -50,11 +50,11 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
 
             return (
               <TableRow key={i} className={`${isCurrent ? 'bg-yellow-400/40 ring-2 ring-yellow-400 ring-inset font-bold' : i % 2 === 0 ? 'bg-muted/30' : ''}`}>
-                <TableCell className={`font-mono ${larger ? 'text-[13px] py-1' : 'text-[11px] py-0'}`}>{entry.time}</TableCell>
-                <TableCell className={`${larger ? 'text-[13px] py-1' : 'text-[11px] py-0'}`}>{entry.unit}</TableCell>
-                <TableCell className={`${larger ? 'text-[13px] py-1' : 'text-[11px] py-0'}`}>{entry.crew}</TableCell>
-                <TableCell className={`${larger ? 'text-[13px] py-1' : 'text-[11px] py-0'}`}>
-                  <span className={`inline-flex min-w-[3rem] items-center justify-center rounded px-1.5 py-0 font-bold ${larger ? 'text-[11px]' : 'text-[10px]'} ${badgeClass}`}>
+                <TableCell className={`font-mono ${larger ? 'text-sm py-0.5 px-1.5' : 'text-[11px] py-0'}`}>{entry.time}</TableCell>
+                <TableCell className={`${larger ? 'text-sm py-0.5 px-1.5' : 'text-[11px] py-0'}`}>{entry.unit}</TableCell>
+                <TableCell className={`${larger ? 'text-sm py-0.5 px-1.5' : 'text-[11px] py-0'}`}>{entry.crew}</TableCell>
+                <TableCell className={`${larger ? 'text-sm py-0.5 px-1.5' : 'text-[11px] py-0'}`}>
+                  <span className={`inline-flex min-w-[3rem] items-center justify-center rounded px-1.5 py-0 font-bold ${larger ? 'text-xs' : 'text-[10px]'} ${badgeClass}`}>
                     {role}
                   </span>
                 </TableCell>
