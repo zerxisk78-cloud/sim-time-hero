@@ -258,21 +258,34 @@ export function exportSimScheduleExcel(): Blob {
       let status: string;
       let unitVal: string;
       let crewVal: string;
+      let notesVal: string = e.notes || '';
       let ci: string | null = null;
+      let trVal: string | null = e.tr || null;
 
       if (isClosed) {
         status = 'UnOPEN,';
         unitVal = 'CLOSED,';
         crewVal = 'CLOSED,';
+        notesVal = '';
       } else if (isOpen) {
         status = 'OPEN,';
         unitVal = 'OPEN,';
         crewVal = 'OPEN,';
+        notesVal = '';
       } else {
         status = 'Scheduled';
         unitVal = e.unit ? e.unit + ',' : '';
-        crewVal = e.crew ? e.crew + ',' : '';
-        ci = e.csi || null;
+
+        // First pilot in CREW, rest in Notes
+        const pilots = (e.crew || '').split('/').filter(Boolean);
+        crewVal = pilots.length > 0 ? pilots[0] + ',' : '';
+        const extraPilots = pilots.slice(1).join('/');
+        if (extraPilots) {
+          notesVal = notesVal ? extraPilots + '; ' + notesVal : extraPilots;
+        }
+
+        // CI only for FTD sims
+        ci = CI_SIM_IDS.includes(simId) ? (e.csi || null) : null;
       }
 
       allRows.push([
@@ -281,10 +294,10 @@ export function exportSimScheduleExcel(): Blob {
         e.time,
         unitVal,
         null, // Linked Simulators
-        null, // T&R Codes
+        trVal,
         ci,
         crewVal,
-        null, // Notes
+        notesVal || null,
       ]);
     }
   }
