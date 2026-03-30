@@ -791,6 +791,7 @@ export default function AdminPage() {
             {/* Server Connection Settings */}
             <ServerSettings />
             <BackupRestore onRestore={() => { reload(); setRefreshKey(k => k + 1); }} />
+            <MSharpImportExport onImport={() => { reload(); setRefreshKey(k => k + 1); }} />
 
             <Card className="mb-4">
               <CardHeader className="py-3">
