@@ -3,6 +3,8 @@ export interface SimSlot {
   unit: string;
   crew: string;
   csi: string;
+  tr: string;
+  notes: string;
 }
 
 export interface SimSchedule {
