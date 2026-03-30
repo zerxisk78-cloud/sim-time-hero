@@ -226,11 +226,30 @@ export function exportSimScheduleExcel(): Blob {
 
     for (let i = 0; i < entries.length; i++) {
       const e = entries[i];
-      const isEmpty = !e.unit && !e.crew;
-      const status = isEmpty ? 'OPEN,' : 'Scheduled';
-      const unitVal = isEmpty ? 'OPEN,' : (e.unit ? e.unit + ',' : '');
-      const crewVal = isEmpty ? 'OPEN,' : (e.crew ? e.crew + ',' : '');
-      const ci = (!isEmpty && e.csi) ? e.csi : null;
+      const unitUpper = (e.unit || '').toUpperCase();
+      const crewUpper = (e.crew || '').toUpperCase();
+      const isClosed = unitUpper === 'CLOSED' || crewUpper === 'CLOSED';
+      const isOpen = (!e.unit && !e.crew) || unitUpper === 'OPEN' || crewUpper === 'OPEN';
+
+      let status: string;
+      let unitVal: string;
+      let crewVal: string;
+      let ci: string | null = null;
+
+      if (isClosed) {
+        status = 'UnOPEN,';
+        unitVal = 'CLOSED,';
+        crewVal = 'CLOSED,';
+      } else if (isOpen) {
+        status = 'OPEN,';
+        unitVal = 'OPEN,';
+        crewVal = 'OPEN,';
+      } else {
+        status = 'Scheduled';
+        unitVal = e.unit ? e.unit + ',' : '';
+        crewVal = e.crew ? e.crew + ',' : '';
+        ci = e.csi || null;
+      }
 
       allRows.push([
         i === 0 ? desc : null,
