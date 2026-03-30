@@ -71,6 +71,9 @@ export default function SchedulePage() {
   // Custom trainers always visible (not in rotation groups) when toggled on
   const visibleExtraSims = extraSims.filter(s => visibility.simulators[s.id] !== false);
 
+  // Groups 0 and 1 (AH-1Z FTD/FFS, UH-1Y FTD/FFS) go fullscreen
+  const isFullscreen = activeGroup === 0 || activeGroup === 1;
+
   return (
     <div className="flex h-screen overflow-hidden relative">
       <div
