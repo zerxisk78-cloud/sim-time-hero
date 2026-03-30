@@ -322,10 +322,15 @@ export function exportSimScheduleExcel(scheduleDate?: string): Blob {
   const colCount = hasAnyLinkedSims ? 9 : 8;
 
   // Style title row bold + larger
+  // Merge and center title row
+  ws['!merges'] = ws['!merges'] || [];
+  ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: colCount - 1 } });
+  ws['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: colCount - 1 } });
+
   const titleCell = ws['A1'];
-  if (titleCell) titleCell.s = { font: { bold: true, sz: 16, color: { rgb: '1F4E79' } } };
+  if (titleCell) titleCell.s = { font: { bold: true, sz: 16, color: { rgb: '1F4E79' } }, alignment: { horizontal: 'center' } };
   const dateCell = ws['A2'];
-  if (dateCell) dateCell.s = { font: { bold: true, sz: 12, color: { rgb: '1F4E79' } } };
+  if (dateCell) dateCell.s = { font: { bold: true, sz: 12, color: { rgb: '1F4E79' } }, alignment: { horizontal: 'center' } };
 
   // Blue Table Style Medium 9 colors
   const headerStyle = {
