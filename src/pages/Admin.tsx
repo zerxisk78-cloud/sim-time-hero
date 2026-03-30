@@ -23,12 +23,13 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trash2, Undo2, Pencil, Check, GripVertical, Plus, Server, Wifi, WifiOff, Download, Upload } from "lucide-react";
+import { Trash2, Undo2, Pencil, Check, GripVertical, Plus, Server, Wifi, WifiOff, Download, Upload, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { resetServerCheck, syncFromServer } from "@/lib/api";
+import { parseMSharpExcel, exportSimScheduleExcel } from "@/lib/excelImportExport";
 
 
 const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
@@ -567,6 +568,81 @@ function BackupRestore({ onRestore }: { onRestore: () => void }) {
   );
 }
 
+function MSharpImportExport({ onImport }: { onImport: () => void }) {
+  const [importing, setImporting] = useState(false);
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    try {
+      const data = await file.arrayBuffer();
+      const result = parseMSharpExcel(data);
+      let count = 0;
+      for (const [simId, entries] of Object.entries(result.simData)) {
+        saveSimEntries(simId, entries);
+        count++;
+      }
+      toast.success(`Imported ${count} simulators from M-SHARP`);
+      if (result.skipped.length > 0) {
+        toast.info(`Skipped unknown sims: ${result.skipped.join(', ')}`);
+      }
+      onImport();
+    } catch (err) {
+      toast.error(`Import failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+    setImporting(false);
+    e.target.value = '';
+  };
+
+  const handleExport = () => {
+    try {
+      const blob = exportSimScheduleExcel();
+      const now = new Date();
+      const dateStr = `${now.getMonth() + 1}.${now.getDate()}.${now.getFullYear()}`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `SimSchedule${dateStr}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`Exported SimSchedule${dateStr}.xlsx`);
+    } catch (err) {
+      toast.error(`Export failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
+  return (
+    <Card className="mb-4">
+      <CardHeader className="py-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <FileSpreadsheet className="h-4 w-4" /> M-SHARP Import / Export
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Import a raw M-SHARP Simulator Schedule Excel file to auto-populate all sim entries, or export the current schedule as a clean spreadsheet.
+        </p>
+        <div className="flex gap-2">
+          <label>
+            <Button asChild size="sm" variant="outline" className="text-xs h-8 gap-1.5 cursor-pointer" disabled={importing}>
+              <span><Upload className="h-3.5 w-3.5" /> {importing ? 'Importing…' : 'Import from M-SHARP'}</span>
+            </Button>
+            <input type="file" accept=".xlsx,.xls" onChange={handleImport} className="hidden" />
+          </label>
+          <Button onClick={handleExport} size="sm" variant="outline" className="text-xs h-8 gap-1.5">
+            <Download className="h-3.5 w-3.5" /> Export SimSchedule
+          </Button>
+        </div>
+        <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded border border-border">
+          <strong>Import:</strong> Upload the raw M-SHARP file (e.g. SimulatorSchedule_18.xlsx). Time, Unit, and Crew are auto-populated per sim.<br />
+          <strong>Export:</strong> Downloads a cleaned SimSchedule(date).xlsx with empty Linked Sims columns removed.
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminPage() {
   const [trainerStatuses, setTrainerStatuses] = useState<TrainerStatus[]>([]);
   const [classrooms, setClassrooms] = useState<ClassroomEntry[]>([]);
@@ -715,6 +791,7 @@ export default function AdminPage() {
             {/* Server Connection Settings */}
             <ServerSettings />
             <BackupRestore onRestore={() => { reload(); setRefreshKey(k => k + 1); }} />
+            <MSharpImportExport onImport={() => { reload(); setRefreshKey(k => k + 1); }} />
 
             <Card className="mb-4">
               <CardHeader className="py-3">
