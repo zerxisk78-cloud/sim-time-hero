@@ -145,18 +145,33 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
       j++;
     }
 
-    // Clean up unit: remove "MATSS CAMP PENDLETON" for maintenance/unavailable
+    // Determine unit/crew based on M-SHARP status
+    const statusLower = status.toLowerCase();
     let cleanUnit = unit;
-    if (unit.toUpperCase().includes('MATSS') || status === 'Maintenance - Device' || status === 'Unavailable') {
-      cleanUnit = '';
+    let cleanCrew = crewNames.join('/');
+
+    if (statusLower === 'available') {
+      // Available = OPEN
+      cleanUnit = 'OPEN';
+      cleanCrew = 'OPEN';
+    } else if (statusLower === 'maintenance - device' || statusLower === 'unavailable') {
+      // Maintenance/Unavailable = CLOSED
+      cleanUnit = 'CLOSED';
+      cleanCrew = 'CLOSED';
+    } else {
+      // Scheduled/Reserved - clean up unit
+      if (unit.toUpperCase().includes('MATSS')) {
+        cleanUnit = '';
+      }
+      // Remove trailing parenthetical like "(-)"
+      cleanUnit = cleanUnit.replace(/\s*\(.*?\)\s*$/, '').trim();
+      // Leave crew/unit blank if not populated (for manual entry)
     }
-    // Remove trailing parenthetical like "(-)"
-    cleanUnit = cleanUnit.replace(/\s*\(.*?\)\s*$/, '').trim();
 
     simData[currentSimId].push({
       time: etd,
       unit: cleanUnit,
-      crew: crewNames.join('/'),
+      crew: cleanCrew,
       status,
     });
   }
