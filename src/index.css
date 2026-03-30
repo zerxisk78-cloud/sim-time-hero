@@ -50,8 +50,8 @@
     --military-dark: 150 20% 18%;
     --military-medium: 150 15% 30%;
     --military-light: 150 10% 85%;
-    --header-bg: 220 60% 26%;
-    --header-foreground: 0 0% 100%;
+    --header-bg: 220 70% 38%;
+    --header-foreground: 60 100% 95%;
   }
 
   .dark {
