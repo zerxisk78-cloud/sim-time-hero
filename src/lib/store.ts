@@ -45,7 +45,7 @@ export function getSimEntries(simId: string): SimSlot[] {
   const entries = getItem<SimSlot[]>(`sim_${simId}`, []);
   const defaultCsi = getDefaultCsiValue(simId);
   if (entries.length === 0 && sim) {
-    return sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: defaultCsi }));
+    return sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: defaultCsi, tr: '', notes: '' }));
   }
   if (entries.length === 0) {
     return [{ time: '', unit: '', crew: '', csi: defaultCsi }];
