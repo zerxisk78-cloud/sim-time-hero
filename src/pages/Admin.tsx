@@ -32,7 +32,7 @@ import { resetServerCheck, syncFromServer } from "@/lib/api";
 import { parseMSharpExcel, exportSimScheduleExcel } from "@/lib/excelImportExport";
 
 
-const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
+const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi', 'tr', 'notes'];
 
 function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlots: string[]; refreshKey?: number }) {
   const isMrt = MRT_SIM_IDS.includes(simId);
