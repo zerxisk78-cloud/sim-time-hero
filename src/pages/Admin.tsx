@@ -128,7 +128,7 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
 
   const addRow = () => {
     setDirty(true);
-    setEntries(prev => [...prev, { time: '', unit: '', crew: '', csi: isMrt ? 'UH' : 'CSI' }]);
+    setEntries(prev => [...prev, { time: '', unit: '', crew: '', csi: isMrt ? 'UH' : 'CSI', tr: '', notes: '' }]);
   };
 
   const removeRow = (index: number) => {
