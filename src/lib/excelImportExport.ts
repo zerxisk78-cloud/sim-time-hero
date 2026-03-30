@@ -100,7 +100,7 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
     }
   }
 
-  const simData: Record<string, { time: string; unit: string; crew: string; status: string }[]> = {};
+  const simData: Record<string, { time: string; unit: string; crew: string; status: string; tr: string; notes: string }[]> = {};
   const skipped: string[] = [];
   let currentSimId: string | null = null;
   let currentDesc = '';
