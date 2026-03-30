@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 import { SIMULATORS, MRT_SIM_IDS } from './types';
 import type { SimSlot } from './types';
 import { getSimEntries, getDisplayName } from './store';
