@@ -50,9 +50,9 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
 
             return (
               <TableRow key={i} className={`${isCurrent ? 'bg-yellow-400/40 ring-2 ring-yellow-400 ring-inset font-bold' : i % 2 === 0 ? 'bg-muted/30' : ''}`}>
-                <TableCell className={`font-mono ${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>{entry.time}</TableCell>
-                <TableCell className={`${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>{entry.unit}</TableCell>
-                <TableCell className={`${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>{entry.crew}</TableCell>
+                <TableCell className={`font-mono text-white font-semibold ${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>{entry.time}</TableCell>
+                <TableCell className={`text-white font-semibold ${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>{entry.unit}</TableCell>
+                <TableCell className={`text-white font-semibold ${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>{entry.crew}</TableCell>
                 <TableCell className={`${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>
                   <span className={`inline-flex min-w-[3rem] items-center justify-center rounded px-1.5 py-0 font-bold ${larger ? 'text-sm' : 'text-[10px]'} ${badgeClass}`}>
                     {role}
