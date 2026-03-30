@@ -156,14 +156,14 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
     // Determine unit/crew based on M-SHARP status
     const statusLower = status.toLowerCase();
     let cleanUnit = unit;
-    let cleanCrew = crewNames.join('/');
+    let cleanCrew = '';
+    let notes = '';
+    let tr = '';
 
     if (statusLower === 'available') {
-      // Available = OPEN
       cleanUnit = 'OPEN';
       cleanCrew = 'OPEN';
-    } else if (statusLower === 'maintenance - device' || statusLower === 'unavailable') {
-      // Maintenance/Unavailable = CLOSED
+    } else if (statusLower === 'maintenance - device' || statusLower === 'unavailable' || statusLower === 'unopen') {
       cleanUnit = 'CLOSED';
       cleanCrew = 'CLOSED';
     } else {
@@ -171,9 +171,21 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
       if (unit.toUpperCase().includes('MATSS')) {
         cleanUnit = '';
       }
-      // Remove trailing parenthetical like "(-)"
       cleanUnit = cleanUnit.replace(/\s*\(.*?\)\s*$/, '').trim();
-      // Leave crew/unit blank if not populated (for manual entry)
+
+      // Max 2 pilots in crew, rest go to notes
+      if (crewNames.length <= 2) {
+        cleanCrew = crewNames.join('/');
+      } else {
+        cleanCrew = crewNames.slice(0, 2).join('/');
+        notes = crewNames.slice(2).join('/');
+      }
+
+      // Check all crew strings for T&R codes
+      for (const rawCrew of [airCrew, ...crewNames]) {
+        const trCode = extractTRCode(rawCrew);
+        if (trCode) { tr = trCode; break; }
+      }
     }
 
     simData[currentSimId].push({
@@ -181,6 +193,8 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
       unit: cleanUnit,
       crew: cleanCrew,
       status,
+      tr,
+      notes,
     });
   }
 
