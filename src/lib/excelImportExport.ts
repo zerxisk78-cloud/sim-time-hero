@@ -319,21 +319,65 @@ export function exportSimScheduleExcel(scheduleDate?: string): Blob {
     : allRows.map(row => [...row.slice(0, linkedSimsCol), ...row.slice(linkedSimsCol + 1)]);
 
   const ws = XLSX.utils.aoa_to_sheet(finalRows);
+  const colCount = hasAnyLinkedSims ? 9 : 8;
 
   // Style title row bold + larger
   const titleCell = ws['A1'];
-  if (titleCell) titleCell.s = { font: { bold: true, sz: 16 } };
+  if (titleCell) titleCell.s = { font: { bold: true, sz: 16, color: { rgb: '1F4E79' } } };
   const dateCell = ws['A2'];
-  if (dateCell) dateCell.s = { font: { bold: true, sz: 12 } };
+  if (dateCell) dateCell.s = { font: { bold: true, sz: 12, color: { rgb: '1F4E79' } } };
 
-  // Grey fill for sim-block header rows
-  const greyFill = { fill: { fgColor: { rgb: 'D9D9D9' }, patternType: 'solid' }, font: { bold: true } };
-  const colCount = hasAnyLinkedSims ? 9 : 8;
-  for (const rowIdx of headerRowIndices) {
+  // Blue Table Style Medium 9 colors
+  const headerStyle = {
+    fill: { fgColor: { rgb: '4472C4' }, patternType: 'solid' },
+    font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 11 },
+    border: {
+      top: { style: 'thin', color: { rgb: '4472C4' } },
+      bottom: { style: 'thin', color: { rgb: '4472C4' } },
+      left: { style: 'thin', color: { rgb: '4472C4' } },
+      right: { style: 'thin', color: { rgb: '4472C4' } },
+    },
+  };
+  const bandLight = {
+    fill: { fgColor: { rgb: 'D6E4F0' }, patternType: 'solid' },
+    border: {
+      top: { style: 'thin', color: { rgb: '95B3D7' } },
+      bottom: { style: 'thin', color: { rgb: '95B3D7' } },
+      left: { style: 'thin', color: { rgb: '95B3D7' } },
+      right: { style: 'thin', color: { rgb: '95B3D7' } },
+    },
+  };
+  const bandWhite = {
+    fill: { fgColor: { rgb: 'FFFFFF' }, patternType: 'solid' },
+    border: {
+      top: { style: 'thin', color: { rgb: '95B3D7' } },
+      bottom: { style: 'thin', color: { rgb: '95B3D7' } },
+      left: { style: 'thin', color: { rgb: '95B3D7' } },
+      right: { style: 'thin', color: { rgb: '95B3D7' } },
+    },
+  };
+
+  // Apply styles per sim block
+  for (let h = 0; h < headerRowIndices.length; h++) {
+    const hdrRow = headerRowIndices[h];
+    const nextHdrRow = h + 1 < headerRowIndices.length ? headerRowIndices[h + 1] : finalRows.length;
+
+    // Header row: blue bg, white bold text
     for (let c = 0; c < colCount; c++) {
-      const cellAddr = XLSX.utils.encode_cell({ r: rowIdx, c });
-      if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
-      ws[cellAddr].s = greyFill;
+      const addr = XLSX.utils.encode_cell({ r: hdrRow, c });
+      if (!ws[addr]) ws[addr] = { v: '', t: 's' };
+      ws[addr].s = headerStyle;
+    }
+
+    // Data rows: alternating banded rows
+    let bandIdx = 0;
+    for (let r = hdrRow + 1; r < nextHdrRow; r++) {
+      for (let c = 0; c < colCount; c++) {
+        const addr = XLSX.utils.encode_cell({ r, c });
+        if (!ws[addr]) ws[addr] = { v: '', t: 's' };
+        ws[addr].s = bandIdx % 2 === 0 ? bandWhite : bandLight;
+      }
+      bandIdx++;
     }
   }
 
