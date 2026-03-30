@@ -48,7 +48,7 @@ export function getSimEntries(simId: string): SimSlot[] {
     return sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: defaultCsi, tr: '', notes: '' }));
   }
   if (entries.length === 0) {
-    return [{ time: '', unit: '', crew: '', csi: defaultCsi }];
+    return [{ time: '', unit: '', crew: '', csi: defaultCsi, tr: '', notes: '' }];
   }
   return entries;
 }
