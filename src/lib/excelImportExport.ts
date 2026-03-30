@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 import { SIMULATORS, MRT_SIM_IDS } from './types';
 import type { SimSlot } from './types';
 import { getSimEntries, getDisplayName } from './store';
@@ -234,10 +234,16 @@ const SIM_TO_DESC: Record<string, string> = {
   'mrt-4': 'UH-1Y MRT 2F300-4Y',
 };
 
-export function exportSimScheduleExcel(): Blob {
+export function exportSimScheduleExcel(scheduleDate?: string): Blob {
   const wb = XLSX.utils.book_new();
   const allRows: (string | null)[][] = [];
+  const headerRowIndices: number[] = []; // track which rows are sim-block headers for grey fill
   let hasAnyLinkedSims = false;
+
+  // Title rows
+  allRows.push(['Simulator Schedule']);
+  allRows.push([scheduleDate || new Date().toLocaleDateString()]);
+  allRows.push([]); // blank spacer
 
   const simIds = SIMULATORS.map(s => s.id);
 
@@ -245,7 +251,8 @@ export function exportSimScheduleExcel(): Blob {
     const entries = getSimEntries(simId);
     const desc = SIM_TO_DESC[simId] || getDisplayName(simId);
 
-    // Header row for this sim block
+    // Track this header row index
+    headerRowIndices.push(allRows.length);
     allRows.push(['Description', 'Status', 'ETD', 'Unit', 'Linked Simulators', 'T&R Codes', 'CI', 'CREW', 'Notes']);
 
     for (let i = 0; i < entries.length; i++) {
@@ -276,7 +283,6 @@ export function exportSimScheduleExcel(): Blob {
         status = 'Scheduled';
         unitVal = e.unit ? e.unit + ',' : '';
 
-        // First pilot in CREW, rest in Notes
         const pilots = (e.crew || '').split('/').filter(Boolean);
         crewVal = pilots.length > 0 ? pilots[0] + ',' : '';
         const extraPilots = pilots.slice(1).join('/');
@@ -284,7 +290,6 @@ export function exportSimScheduleExcel(): Blob {
           notesVal = notesVal ? extraPilots + '; ' + notesVal : extraPilots;
         }
 
-        // CI only for FTD sims
         ci = CI_SIM_IDS.includes(simId) ? (e.csi || null) : null;
       }
 
@@ -293,7 +298,7 @@ export function exportSimScheduleExcel(): Blob {
         status,
         e.time,
         unitVal,
-        null, // Linked Simulators
+        null,
         trVal,
         ci,
         crewVal,
@@ -305,7 +310,7 @@ export function exportSimScheduleExcel(): Blob {
   // Check if Linked Simulators column is all empty
   const linkedSimsCol = 4;
   hasAnyLinkedSims = allRows.some(row =>
-    row[0] !== 'Description' && row[linkedSimsCol] != null && String(row[linkedSimsCol]).trim() !== ''
+    row[0] !== 'Description' && row[0] !== 'Simulator Schedule' && row[linkedSimsCol] != null && String(row[linkedSimsCol]).trim() !== ''
   );
 
   // Remove Linked Simulators column if all empty
@@ -315,17 +320,34 @@ export function exportSimScheduleExcel(): Blob {
 
   const ws = XLSX.utils.aoa_to_sheet(finalRows);
 
+  // Style title row bold + larger
+  const titleCell = ws['A1'];
+  if (titleCell) titleCell.s = { font: { bold: true, sz: 16 } };
+  const dateCell = ws['A2'];
+  if (dateCell) dateCell.s = { font: { bold: true, sz: 12 } };
+
+  // Grey fill for sim-block header rows
+  const greyFill = { fill: { fgColor: { rgb: 'D9D9D9' }, patternType: 'solid' }, font: { bold: true } };
+  const colCount = hasAnyLinkedSims ? 9 : 8;
+  for (const rowIdx of headerRowIndices) {
+    for (let c = 0; c < colCount; c++) {
+      const cellAddr = XLSX.utils.encode_cell({ r: rowIdx, c });
+      if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
+      ws[cellAddr].s = greyFill;
+    }
+  }
+
   // Set column widths
   ws['!cols'] = [
-    { wch: 24 }, // Description
-    { wch: 12 }, // Status
-    { wch: 6 },  // ETD
-    { wch: 16 }, // Unit
+    { wch: 24 },
+    { wch: 12 },
+    { wch: 6 },
+    { wch: 16 },
     ...(hasAnyLinkedSims ? [{ wch: 16 }] : []),
-    { wch: 10 }, // T&R Codes
-    { wch: 6 },  // CI
-    { wch: 16 }, // CREW
-    { wch: 16 }, // Notes
+    { wch: 10 },
+    { wch: 6 },
+    { wch: 16 },
+    { wch: 16 },
   ];
 
   XLSX.utils.book_append_sheet(wb, ws, 'Schedule');
