@@ -39,10 +39,18 @@ function extractLastName(crewStr: string): string {
 
 function getDefaultCsi(simId: string): string {
   if (MRT_SIM_IDS.includes(simId)) {
-    // Determine AH vs UH from sim id
     return simId === 'mrt-1' || simId === 'mrt-3' ? 'AH' : 'UH';
   }
   return 'CSI';
+}
+
+// Sims that have CI fields (only FTDs)
+const CI_SIM_IDS = ['ah1z-ftd', 'uh1y-ftd'];
+
+// Detect T&R codes: 4 digits optionally followed by a letter (e.g. 1111X, 2301A, 5400)
+function extractTRCode(text: string): string | null {
+  const match = text.match(/\b(\d{4}[A-Za-z]?)\b/);
+  return match ? match[1] : null;
 }
 
 // ---- IMPORT ----
