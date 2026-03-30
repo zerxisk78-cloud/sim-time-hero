@@ -207,6 +207,8 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
       unit: s.unit,
       crew: s.crew,
       csi,
+      tr: s.tr,
+      notes: s.notes,
     }));
   }
 
