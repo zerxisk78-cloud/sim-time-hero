@@ -71,6 +71,9 @@ export default function SchedulePage() {
   // Custom trainers always visible (not in rotation groups) when toggled on
   const visibleExtraSims = extraSims.filter(s => visibility.simulators[s.id] !== false);
 
+  // Groups 0 and 1 (AH-1Z FTD/FFS, UH-1Y FTD/FFS) go fullscreen
+  const isFullscreen = activeGroup === 0 || activeGroup === 1;
+
   return (
     <div className="flex h-screen overflow-hidden relative">
       <div
@@ -78,6 +81,41 @@ export default function SchedulePage() {
         style={{ backgroundColor: '#8B0000', backgroundImage: `url(${usmcFlag})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
       />
       <FlyingAircraft />
+
+      {/* Fullscreen overlay for FTD/FFS groups */}
+      {isFullscreen && (
+        <div className="absolute inset-0 z-30 flex flex-col bg-background/95 backdrop-blur-sm p-4">
+          <div className="text-center mb-2 flex-shrink-0">
+            <div className="flex items-center justify-center gap-2">
+              <img src={matssPatc} alt="MATSS Official Patch" className="h-16 w-16 object-contain" />
+              <div>
+                <h1 className="text-base font-bold leading-tight">Marine Aviation Training System Site</h1>
+                <p className="text-xs text-muted-foreground">MCAS Pendleton</p>
+                <p className="text-sm font-bold font-mono">{pendletonTime}</p>
+                <p className="text-[10px] text-muted-foreground">{pendletonDate}</p>
+              </div>
+              <img src={matssPatc} alt="MATSS Official Patch" className="h-16 w-16 object-contain" />
+            </div>
+            <p className="text-xs">Current Simulator Schedule</p>
+            <div className="flex justify-center gap-1 mt-1">
+              {SIM_GROUPS.map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-2 h-2 rounded-full transition-colors ${i === activeGroup ? 'bg-primary' : 'bg-muted'}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-2 flex-1 min-h-0">
+            {visibleSims.map(sim => (
+              <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} currentHour={pendletonHour} currentMinute={pendletonMinute} larger />
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground mt-1 text-center flex-shrink-0">*NB = No brief</p>
+        </div>
+      )}
+
       <DirectorySidebar className="w-52 min-h-screen flex-shrink-0 rounded-none" />
       
       <div className="flex-1 p-1 flex flex-col overflow-hidden">
