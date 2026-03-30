@@ -45,10 +45,10 @@ export function getSimEntries(simId: string): SimSlot[] {
   const entries = getItem<SimSlot[]>(`sim_${simId}`, []);
   const defaultCsi = getDefaultCsiValue(simId);
   if (entries.length === 0 && sim) {
-    return sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: defaultCsi }));
+    return sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: defaultCsi, tr: '', notes: '' }));
   }
   if (entries.length === 0) {
-    return [{ time: '', unit: '', crew: '', csi: defaultCsi }];
+    return [{ time: '', unit: '', crew: '', csi: defaultCsi, tr: '', notes: '' }];
   }
   return entries;
 }
@@ -322,7 +322,7 @@ export async function loadAllData(): Promise<{
     const entries = simResults[i] as SimSlot[];
     if (entries.length === 0) {
       const sim = SIMULATORS.find(s => s.id === id);
-      simData[id] = sim ? sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: getDefaultCsiValue(id) })) : [];
+      simData[id] = sim ? sim.timeSlots.map(time => ({ time, unit: '', crew: '', csi: getDefaultCsiValue(id), tr: '', notes: '' })) : [];
     } else {
       simData[id] = entries;
     }

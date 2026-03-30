@@ -32,7 +32,7 @@ import { resetServerCheck, syncFromServer } from "@/lib/api";
 import { parseMSharpExcel, exportSimScheduleExcel } from "@/lib/excelImportExport";
 
 
-const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
+const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi', 'tr', 'notes'];
 
 function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlots: string[]; refreshKey?: number }) {
   const isMrt = MRT_SIM_IDS.includes(simId);
@@ -128,7 +128,7 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
 
   const addRow = () => {
     setDirty(true);
-    setEntries(prev => [...prev, { time: '', unit: '', crew: '', csi: isMrt ? 'UH' : 'CSI' }]);
+    setEntries(prev => [...prev, { time: '', unit: '', crew: '', csi: isMrt ? 'UH' : 'CSI', tr: '', notes: '' }]);
   };
 
   const removeRow = (index: number) => {
@@ -186,8 +186,8 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
       </CardHeader>
       <CardContent className="p-0">
         <div className="border border-border rounded overflow-hidden mx-4 mb-3">
-          <div className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_120px_44px] bg-muted">
-            {['Time', 'Unit', 'Crew', isMrt ? 'Type' : 'CSI/DO'].map((h) => (
+          <div className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_100px_80px_minmax(0,1fr)_44px] bg-muted">
+            {['Time', 'Unit', 'Crew', isMrt ? 'Type' : 'CSI/DO', 'T&R', 'Notes'].map((h) => (
               <div key={h} className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-r border-border last:border-r-0">
                 {h}
               </div>
@@ -195,7 +195,7 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
             <div />
           </div>
           {entries.map((entry, i) => (
-            <div key={i} className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_120px_44px] border-t border-border">
+            <div key={i} className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_100px_80px_minmax(0,1fr)_44px] border-t border-border">
               {FIELD_ORDER.map((field, col) => (
                 field === 'csi' ? (
                   <button

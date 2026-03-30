@@ -39,10 +39,18 @@ function extractLastName(crewStr: string): string {
 
 function getDefaultCsi(simId: string): string {
   if (MRT_SIM_IDS.includes(simId)) {
-    // Determine AH vs UH from sim id
     return simId === 'mrt-1' || simId === 'mrt-3' ? 'AH' : 'UH';
   }
   return 'CSI';
+}
+
+// Sims that have CI fields (only FTDs)
+const CI_SIM_IDS = ['ah1z-ftd', 'uh1y-ftd'];
+
+// Detect T&R codes: 4 digits optionally followed by a letter (e.g. 1111X, 2301A, 5400)
+function extractTRCode(text: string): string | null {
+  const match = text.match(/\b(\d{4}[A-Za-z]?)\b/);
+  return match ? match[1] : null;
 }
 
 // ---- IMPORT ----
@@ -92,7 +100,7 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
     }
   }
 
-  const simData: Record<string, { time: string; unit: string; crew: string; status: string }[]> = {};
+  const simData: Record<string, { time: string; unit: string; crew: string; status: string; tr: string; notes: string }[]> = {};
   const skipped: string[] = [];
   let currentSimId: string | null = null;
   let currentDesc = '';
@@ -148,14 +156,14 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
     // Determine unit/crew based on M-SHARP status
     const statusLower = status.toLowerCase();
     let cleanUnit = unit;
-    let cleanCrew = crewNames.join('/');
+    let cleanCrew = '';
+    let notes = '';
+    let tr = '';
 
     if (statusLower === 'available') {
-      // Available = OPEN
       cleanUnit = 'OPEN';
       cleanCrew = 'OPEN';
-    } else if (statusLower === 'maintenance - device' || statusLower === 'unavailable') {
-      // Maintenance/Unavailable = CLOSED
+    } else if (statusLower === 'maintenance - device' || statusLower === 'unavailable' || statusLower === 'unopen') {
       cleanUnit = 'CLOSED';
       cleanCrew = 'CLOSED';
     } else {
@@ -163,9 +171,21 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
       if (unit.toUpperCase().includes('MATSS')) {
         cleanUnit = '';
       }
-      // Remove trailing parenthetical like "(-)"
       cleanUnit = cleanUnit.replace(/\s*\(.*?\)\s*$/, '').trim();
-      // Leave crew/unit blank if not populated (for manual entry)
+
+      // Max 2 pilots in crew, rest go to notes
+      if (crewNames.length <= 2) {
+        cleanCrew = crewNames.join('/');
+      } else {
+        cleanCrew = crewNames.slice(0, 2).join('/');
+        notes = crewNames.slice(2).join('/');
+      }
+
+      // Check all crew strings for T&R codes
+      for (const rawCrew of [airCrew, ...crewNames]) {
+        const trCode = extractTRCode(rawCrew);
+        if (trCode) { tr = trCode; break; }
+      }
     }
 
     simData[currentSimId].push({
@@ -173,6 +193,8 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
       unit: cleanUnit,
       crew: cleanCrew,
       status,
+      tr,
+      notes,
     });
   }
 
@@ -185,6 +207,8 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
       unit: s.unit,
       crew: s.crew,
       csi,
+      tr: s.tr,
+      notes: s.notes,
     }));
   }
 
@@ -234,21 +258,34 @@ export function exportSimScheduleExcel(): Blob {
       let status: string;
       let unitVal: string;
       let crewVal: string;
+      let notesVal: string = e.notes || '';
       let ci: string | null = null;
+      let trVal: string | null = e.tr || null;
 
       if (isClosed) {
         status = 'UnOPEN,';
         unitVal = 'CLOSED,';
         crewVal = 'CLOSED,';
+        notesVal = '';
       } else if (isOpen) {
         status = 'OPEN,';
         unitVal = 'OPEN,';
         crewVal = 'OPEN,';
+        notesVal = '';
       } else {
         status = 'Scheduled';
         unitVal = e.unit ? e.unit + ',' : '';
-        crewVal = e.crew ? e.crew + ',' : '';
-        ci = e.csi || null;
+
+        // First pilot in CREW, rest in Notes
+        const pilots = (e.crew || '').split('/').filter(Boolean);
+        crewVal = pilots.length > 0 ? pilots[0] + ',' : '';
+        const extraPilots = pilots.slice(1).join('/');
+        if (extraPilots) {
+          notesVal = notesVal ? extraPilots + '; ' + notesVal : extraPilots;
+        }
+
+        // CI only for FTD sims
+        ci = CI_SIM_IDS.includes(simId) ? (e.csi || null) : null;
       }
 
       allRows.push([
@@ -257,10 +294,10 @@ export function exportSimScheduleExcel(): Blob {
         e.time,
         unitVal,
         null, // Linked Simulators
-        null, // T&R Codes
+        trVal,
         ci,
         crewVal,
-        null, // Notes
+        notesVal || null,
       ]);
     }
   }
