@@ -187,8 +187,8 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
       </CardHeader>
       <CardContent className="p-0">
         <div className="border border-border rounded overflow-hidden mx-4 mb-3">
-          <div className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_100px_80px_minmax(0,1fr)_44px] bg-muted">
-            {['Time', 'Unit', 'Crew', isMrt ? 'Type' : 'CSI/DO', 'T&R', 'Notes'].map((h) => (
+          <div className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_100px_44px] bg-muted">
+            {['Time', 'Unit', 'Crew', isMrt ? 'Type' : 'CSI/DO'].map((h) => (
               <div key={h} className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-r border-border last:border-r-0">
                 {h}
               </div>
