@@ -106,20 +106,21 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
   const colUnit = headers.indexOf('Unit');
   const colAirCrew = headers.indexOf('Air Crew');
 
-  // Try to extract date from the title row
+  // Capture all pre-header rows as title rows (includes CUI marking, title, date, etc.)
+  const titleRows: string[] = [];
   let date = '';
   for (let i = 0; i < headerIdx; i++) {
     const row = rows[i];
     if (row) {
+      const text = row.map(c => String(c ?? '').trim()).filter(Boolean).join(' ');
+      if (text) titleRows.push(text);
       for (const cell of row) {
         const s = String(cell ?? '');
         const m = s.match(/(\w+day),?\s+(\d{1,2}\s+\w+\s+\d{4})/);
         if (m) { date = m[2]; break; }
-        // Also try "Generated on MM/DD/YYYY"
         const m2 = s.match(/(\d{2}\/\d{2}\/\d{4})/);
         if (m2) { date = m2[1]; break; }
       }
-      if (date) break;
     }
   }
 
