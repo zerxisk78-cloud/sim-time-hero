@@ -358,16 +358,21 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
   const ws = XLSX.utils.aoa_to_sheet(finalRows);
   const colCount = hasAnyLinkedSims ? 9 : 8;
 
-  // Style title row bold + larger
-  // Merge and center title row
+  // Style and merge title rows
   ws['!merges'] = ws['!merges'] || [];
-  ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: colCount - 1 } });
-  ws['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: colCount - 1 } });
-
-  const titleCell = ws['A1'];
-  if (titleCell) titleCell.s = { font: { bold: true, sz: 16, color: { rgb: '1F4E79' } }, alignment: { horizontal: 'center' } };
-  const dateCell = ws['A2'];
-  if (dateCell) dateCell.s = { font: { bold: true, sz: 12, color: { rgb: '1F4E79' } }, alignment: { horizontal: 'center' } };
+  const titleCount = titleRows && titleRows.length > 0 ? titleRows.length : 2;
+  for (let r = 0; r < titleCount; r++) {
+    ws['!merges'].push({ s: { r, c: 0 }, e: { r, c: colCount - 1 } });
+    const addr = XLSX.utils.encode_cell({ r, c: 0 });
+    const cell = ws[addr];
+    if (cell) {
+      const isCui = String(cell.v || '').toUpperCase().includes('CUI');
+      cell.s = {
+        font: { bold: true, sz: isCui ? 11 : (r === 0 && !titleRows ? 16 : 12), color: { rgb: isCui ? 'FF0000' : '1F4E79' } },
+        alignment: { horizontal: 'center' },
+      };
+    }
+  }
 
   // Blue Table Style Medium 9 colors
   const headerStyle = {
