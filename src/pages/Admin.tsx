@@ -32,7 +32,8 @@ import { resetServerCheck, syncFromServer } from "@/lib/api";
 import { parseMSharpExcel, exportSimScheduleExcel } from "@/lib/excelImportExport";
 
 
-const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi', 'tr', 'notes'];
+const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
+const ALL_FIELDS: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi', 'tr', 'notes'];
 
 function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlots: string[]; refreshKey?: number }) {
   const isMrt = MRT_SIM_IDS.includes(simId);
@@ -98,8 +99,8 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
         const cols = row.split('\t');
         cols.forEach((val, ci) => {
           const colIdx = startCol + ci;
-          if (colIdx < FIELD_ORDER.length) {
-            updated[idx] = { ...updated[idx], [FIELD_ORDER[colIdx]]: val.trim() };
+          if (colIdx < ALL_FIELDS.length) {
+            updated[idx] = { ...updated[idx], [ALL_FIELDS[colIdx]]: val.trim() };
           }
         });
       });
@@ -186,8 +187,8 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
       </CardHeader>
       <CardContent className="p-0">
         <div className="border border-border rounded overflow-hidden mx-4 mb-3">
-          <div className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_100px_80px_minmax(0,1fr)_44px] bg-muted">
-            {['Time', 'Unit', 'Crew', isMrt ? 'Type' : 'CSI/DO', 'T&R', 'Notes'].map((h) => (
+          <div className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_100px_44px] bg-muted">
+            {['Time', 'Unit', 'Crew', isMrt ? 'Type' : 'CSI/DO'].map((h) => (
               <div key={h} className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-r border-border last:border-r-0">
                 {h}
               </div>
@@ -195,7 +196,7 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
             <div />
           </div>
           {entries.map((entry, i) => (
-            <div key={i} className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_100px_80px_minmax(0,1fr)_44px] border-t border-border">
+            <div key={i} className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_100px_44px] border-t border-border">
               {FIELD_ORDER.map((field, col) => (
                 field === 'csi' ? (
                   <button
