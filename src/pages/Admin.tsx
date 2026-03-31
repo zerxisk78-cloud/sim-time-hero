@@ -199,19 +199,35 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
             <div key={i} className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_100px_44px] border-t border-border">
               {FIELD_ORDER.map((field, col) => (
                 field === 'csi' ? (
-                  <button
-                    key={field}
-                    type="button"
-                    value={getToggleValue(entry.csi)}
-                    data-sim={simId}
-                    data-row={i}
-                    data-col={col}
-                    onClick={() => updateField(i, 'csi', getNextToggleValue(entry.csi))}
-                    onKeyDown={(e) => handleKeyDown(i, col, e)}
-                    className={`px-2 py-1 text-xs font-semibold border-r border-border transition-colors focus:bg-accent/30 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-ring ${getToggleClasses(entry.csi)}`}
-                  >
-                    {getToggleValue(entry.csi)}
-                  </button>
+                  CI_SIM_IDS.includes(simId) ? (
+                    <input
+                      key={field}
+                      value={entry.csi}
+                      data-sim={simId}
+                      data-row={i}
+                      data-col={col}
+                      onChange={(e) => updateField(i, 'csi', e.target.value)}
+                      onPaste={(e) => handlePaste(i, col, e)}
+                      onKeyDown={(e) => handleKeyDown(i, col, e)}
+                      onFocus={(e) => e.target.select()}
+                      placeholder="0-11"
+                      className="bg-background px-2 py-1 text-xs border-r border-border outline-none focus:bg-accent/30 focus:ring-1 focus:ring-inset focus:ring-ring text-center"
+                    />
+                  ) : (
+                    <button
+                      key={field}
+                      type="button"
+                      value={getToggleValue(entry.csi)}
+                      data-sim={simId}
+                      data-row={i}
+                      data-col={col}
+                      onClick={() => updateField(i, 'csi', getNextToggleValue(entry.csi))}
+                      onKeyDown={(e) => handleKeyDown(i, col, e)}
+                      className={`px-2 py-1 text-xs font-semibold border-r border-border transition-colors focus:bg-accent/30 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-ring ${getToggleClasses(entry.csi)}`}
+                    >
+                      {getToggleValue(entry.csi)}
+                    </button>
+                  )
                 ) : (
                   <input
                     key={field}
