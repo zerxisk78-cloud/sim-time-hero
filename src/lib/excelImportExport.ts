@@ -80,6 +80,7 @@ export interface ImportResult {
   simData: Record<string, SimSlot[]>;
   skipped: string[];
   date: string;
+  titleRows: string[];
 }
 
 export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
@@ -105,20 +106,21 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
   const colUnit = headers.indexOf('Unit');
   const colAirCrew = headers.indexOf('Air Crew');
 
-  // Try to extract date from the title row
+  // Capture all pre-header rows as title rows (includes CUI marking, title, date, etc.)
+  const titleRows: string[] = [];
   let date = '';
   for (let i = 0; i < headerIdx; i++) {
     const row = rows[i];
     if (row) {
+      const text = row.map(c => String(c ?? '').trim()).filter(Boolean).join(' ');
+      if (text) titleRows.push(text);
       for (const cell of row) {
         const s = String(cell ?? '');
         const m = s.match(/(\w+day),?\s+(\d{1,2}\s+\w+\s+\d{4})/);
         if (m) { date = m[2]; break; }
-        // Also try "Generated on MM/DD/YYYY"
         const m2 = s.match(/(\d{2}\/\d{2}\/\d{4})/);
         if (m2) { date = m2[1]; break; }
       }
-      if (date) break;
     }
   }
 
@@ -234,7 +236,7 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
     }));
   }
 
-  return { simData: result, skipped, date };
+  return { simData: result, skipped, date, titleRows };
 }
 
 // ---- EXPORT ----
@@ -256,16 +258,23 @@ const SIM_TO_DESC: Record<string, string> = {
   'mrt-4': 'UH-1Y MRT 2F300-4Y',
 };
 
-export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: string[]): Blob {
+export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: string[], titleRows?: string[]): Blob {
   const wb = XLSX.utils.book_new();
   const allRows: (string | null)[][] = [];
-  const headerRowIndices: number[] = []; // track which rows are sim-block headers for grey fill
+  const headerRowIndices: number[] = [];
   let hasAnyLinkedSims = false;
 
-  // Title rows
-  allRows.push(['Simulator Schedule']);
-  allRows.push([scheduleDate || new Date().toLocaleDateString()]);
-  allRows.push([]); // blank spacer
+  // Title rows from import (CUI marking, title, date, etc.) or defaults
+  if (titleRows && titleRows.length > 0) {
+    for (const row of titleRows) {
+      allRows.push([row]);
+    }
+    allRows.push([]); // blank spacer
+  } else {
+    allRows.push(['Simulator Schedule']);
+    allRows.push([scheduleDate || new Date().toLocaleDateString()]);
+    allRows.push([]); // blank spacer
+  }
 
   const simIds = SIMULATORS.map(s => s.id).filter(id => !includedSimIds || includedSimIds.includes(id));
 
@@ -349,16 +358,21 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
   const ws = XLSX.utils.aoa_to_sheet(finalRows);
   const colCount = hasAnyLinkedSims ? 9 : 8;
 
-  // Style title row bold + larger
-  // Merge and center title row
+  // Style and merge title rows
   ws['!merges'] = ws['!merges'] || [];
-  ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: colCount - 1 } });
-  ws['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: colCount - 1 } });
-
-  const titleCell = ws['A1'];
-  if (titleCell) titleCell.s = { font: { bold: true, sz: 16, color: { rgb: '1F4E79' } }, alignment: { horizontal: 'center' } };
-  const dateCell = ws['A2'];
-  if (dateCell) dateCell.s = { font: { bold: true, sz: 12, color: { rgb: '1F4E79' } }, alignment: { horizontal: 'center' } };
+  const titleCount = titleRows && titleRows.length > 0 ? titleRows.length : 2;
+  for (let r = 0; r < titleCount; r++) {
+    ws['!merges'].push({ s: { r, c: 0 }, e: { r, c: colCount - 1 } });
+    const addr = XLSX.utils.encode_cell({ r, c: 0 });
+    const cell = ws[addr];
+    if (cell) {
+      const isCui = String(cell.v || '').toUpperCase().includes('CUI');
+      cell.s = {
+        font: { bold: true, sz: isCui ? 11 : (r === 0 && !titleRows ? 16 : 12), color: { rgb: isCui ? 'FF0000' : '1F4E79' } },
+        alignment: { horizontal: 'center' },
+      };
+    }
+  }
 
   // Blue Table Style Medium 9 colors
   const headerStyle = {

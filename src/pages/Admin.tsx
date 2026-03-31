@@ -571,6 +571,7 @@ function BackupRestore({ onRestore }: { onRestore: () => void }) {
 
 function MSharpImportExport({ onImport }: { onImport: () => void }) {
   const [importing, setImporting] = useState(false);
+  const [importedTitleRows, setImportedTitleRows] = useState<string[]>([]);
   const [exportToggles, setExportToggles] = useState<Record<string, boolean>>(() => {
     const defaults: Record<string, boolean> = {};
     SIMULATORS.forEach(s => {
@@ -595,6 +596,9 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
         saveSimEntries(simId, entries);
         count++;
       }
+      if (result.titleRows.length > 0) {
+        setImportedTitleRows(result.titleRows);
+      }
       toast.success(`Imported ${count} simulators from M-SHARP`);
       if (result.skipped.length > 0) {
         toast.info(`Skipped unknown sims: ${result.skipped.join(', ')}`);
@@ -610,7 +614,7 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
   const handleExport = () => {
     try {
       const includedIds = Object.entries(exportToggles).filter(([, v]) => v).map(([k]) => k);
-      const blob = exportSimScheduleExcel(undefined, includedIds);
+      const blob = exportSimScheduleExcel(undefined, includedIds, importedTitleRows.length > 0 ? importedTitleRows : undefined);
       const now = new Date();
       const dateStr = `${now.getMonth() + 1}.${now.getDate()}.${now.getFullYear()}`;
       const url = URL.createObjectURL(blob);
