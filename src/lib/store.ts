@@ -36,7 +36,7 @@ function removeItem(key: string): void {
 }
 
 function getDefaultCsiValue(simId: string): string {
-  return MRT_SIM_IDS.includes(simId) ? 'UH' : 'DO';
+  return MRT_SIM_IDS.includes(simId) ? 'UH' : 'CSI';
 }
 
 // Simulator schedules
