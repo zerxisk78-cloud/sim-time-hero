@@ -306,16 +306,11 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
           notesVal = notesVal ? extraPilots + '; ' + notesVal : extraPilots;
         }
 
-        // For FTDs, assign CSI slot numbers from the predefined list
+        // For FTDs, assign CSI slot number based on time
         if (CI_SIM_IDS.includes(simId)) {
-          const csiSlots = FTD_CSI_SLOTS[simId] || [];
-          // Count how many scheduled (non-open/closed) slots we've seen so far
-          const scheduledIndex = entries.slice(0, i).filter(prev => {
-            const pu = (prev.unit || '').toUpperCase();
-            const pc = (prev.crew || '').toUpperCase();
-            return pu !== 'CLOSED' && pc !== 'CLOSED' && pu !== 'OPEN' && pc !== 'OPEN' && (prev.unit || prev.crew);
-          }).length;
-          ci = scheduledIndex < csiSlots.length ? String(csiSlots[scheduledIndex]) : null;
+          const timeKey = (e.time || '').replace(/[^0-9:]/g, '').trim();
+          const slotNum = TIME_TO_CSI_SLOT[timeKey];
+          ci = slotNum !== undefined ? String(slotNum) : null;
         }
       }
 
