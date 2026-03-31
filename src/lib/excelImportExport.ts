@@ -258,16 +258,23 @@ const SIM_TO_DESC: Record<string, string> = {
   'mrt-4': 'UH-1Y MRT 2F300-4Y',
 };
 
-export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: string[]): Blob {
+export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: string[], titleRows?: string[]): Blob {
   const wb = XLSX.utils.book_new();
   const allRows: (string | null)[][] = [];
-  const headerRowIndices: number[] = []; // track which rows are sim-block headers for grey fill
+  const headerRowIndices: number[] = [];
   let hasAnyLinkedSims = false;
 
-  // Title rows
-  allRows.push(['Simulator Schedule']);
-  allRows.push([scheduleDate || new Date().toLocaleDateString()]);
-  allRows.push([]); // blank spacer
+  // Title rows from import (CUI marking, title, date, etc.) or defaults
+  if (titleRows && titleRows.length > 0) {
+    for (const row of titleRows) {
+      allRows.push([row]);
+    }
+    allRows.push([]); // blank spacer
+  } else {
+    allRows.push(['Simulator Schedule']);
+    allRows.push([scheduleDate || new Date().toLocaleDateString()]);
+    allRows.push([]); // blank spacer
+  }
 
   const simIds = SIMULATORS.map(s => s.id).filter(id => !includedSimIds || includedSimIds.includes(id));
 
