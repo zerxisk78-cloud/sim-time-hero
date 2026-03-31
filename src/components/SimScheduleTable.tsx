@@ -38,8 +38,8 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
           {entries.filter(e => e.unit || e.crew || e.csi).map((entry, i, filtered) => {
             const role = isMrt
               ? (entry.csi === 'AH' ? 'AH' : 'UH')
-              : (entry.csi === 'Device Operator' ? 'Device Operator' : 'CSI');
-            const badgeClass = role === (isMrt ? 'AH' : 'Device Operator')
+              : (entry.csi === 'DO' || entry.csi === 'Device Operator' ? 'DO' : 'CSI');
+            const badgeClass = role === (isMrt ? 'AH' : 'DO')
               ? 'bg-amber-500/80 text-black font-extrabold'
               : 'bg-sky-600/80 text-white font-extrabold';
             const slotMin = parseSlotMinutes(entry.time);
