@@ -236,7 +236,7 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
     }));
   }
 
-  return { simData: result, skipped, date };
+  return { simData: result, skipped, date, titleRows };
 }
 
 // ---- EXPORT ----
