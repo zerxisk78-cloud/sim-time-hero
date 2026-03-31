@@ -296,7 +296,17 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
           notesVal = notesVal ? extraPilots + '; ' + notesVal : extraPilots;
         }
 
-        ci = CI_SIM_IDS.includes(simId) ? (e.csi || null) : null;
+        // For FTDs, assign CSI slot numbers from the predefined list
+        if (CI_SIM_IDS.includes(simId)) {
+          const csiSlots = FTD_CSI_SLOTS[simId] || [];
+          // Count how many scheduled (non-open/closed) slots we've seen so far
+          const scheduledIndex = entries.slice(0, i).filter(prev => {
+            const pu = (prev.unit || '').toUpperCase();
+            const pc = (prev.crew || '').toUpperCase();
+            return pu !== 'CLOSED' && pc !== 'CLOSED' && pu !== 'OPEN' && pc !== 'OPEN' && (prev.unit || prev.crew);
+          }).length;
+          ci = scheduledIndex < csiSlots.length ? String(csiSlots[scheduledIndex]) : null;
+        }
       }
 
       allRows.push([
