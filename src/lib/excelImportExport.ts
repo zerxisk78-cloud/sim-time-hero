@@ -312,15 +312,12 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
           notesVal = notesVal ? extraPilots + '; ' + notesVal : extraPilots;
         }
 
-        // For FTDs, assign CSI slot numbers from predefined list in order
+        // For FTDs, map time to CSI slot and only show if it's an allowed slot
         if (CI_SIM_IDS.includes(simId)) {
-          const csiSlots = FTD_CSI_SLOTS[simId] || [];
-          const scheduledIndex = entries.slice(0, i).filter(prev => {
-            const pu = (prev.unit || '').toUpperCase();
-            const pc = (prev.crew || '').toUpperCase();
-            return pu !== 'CLOSED' && pc !== 'CLOSED' && pu !== 'OPEN' && pc !== 'OPEN' && (prev.unit || prev.crew);
-          }).length;
-          ci = scheduledIndex < csiSlots.length ? String(csiSlots[scheduledIndex]) : null;
+          const timeKey = (e.time || '').replace(/[^0-9:]/g, '').trim();
+          const slotNum = TIME_TO_CSI_SLOT[timeKey];
+          const allowed = FTD_ALLOWED_SLOTS[simId] || [];
+          ci = slotNum !== undefined && allowed.includes(slotNum) ? String(slotNum) : null;
         }
       }
 
