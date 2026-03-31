@@ -609,7 +609,8 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
 
   const handleExport = () => {
     try {
-      const blob = exportSimScheduleExcel();
+      const includedIds = Object.entries(exportToggles).filter(([, v]) => v).map(([k]) => k);
+      const blob = exportSimScheduleExcel(undefined, includedIds);
       const now = new Date();
       const dateStr = `${now.getMonth() + 1}.${now.getDate()}.${now.getFullYear()}`;
       const url = URL.createObjectURL(blob);
@@ -646,9 +647,27 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
             <Download className="h-3.5 w-3.5" /> Export SimSchedule
           </Button>
         </div>
+        <div className="text-xs text-muted-foreground">
+          <strong>Include in export:</strong>
+        </div>
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+          {SIMULATORS.map(sim => (
+            <label key={sim.id} className="flex items-center gap-1.5 text-xs cursor-pointer">
+              <input
+                type="checkbox"
+                checked={exportToggles[sim.id] ?? true}
+                onChange={() => toggleExportSim(sim.id)}
+                className="h-3.5 w-3.5 rounded border-border accent-primary"
+              />
+              <span className={exportToggles[sim.id] ? 'text-foreground' : 'text-muted-foreground line-through'}>
+                {sim.name}
+              </span>
+            </label>
+          ))}
+        </div>
         <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded border border-border">
           <strong>Import:</strong> Upload the raw M-SHARP file (e.g. SimulatorSchedule_18.xlsx). Time, Unit, and Crew are auto-populated per sim.<br />
-          <strong>Export:</strong> Downloads a cleaned SimSchedule(date).xlsx with empty Linked Sims columns removed.
+          <strong>Export:</strong> Downloads a cleaned SimSchedule(date).xlsx with only the selected simulators.
         </div>
       </CardContent>
     </Card>
