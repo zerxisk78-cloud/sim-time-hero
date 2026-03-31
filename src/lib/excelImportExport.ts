@@ -47,6 +47,12 @@ function getDefaultCsi(simId: string): string {
 // Sims that have CI fields (only FTDs)
 const CI_SIM_IDS = ['ah1z-ftd', 'uh1y-ftd'];
 
+// Default CSI slot numbers for FTDs (keyed by simId, values are slot numbers assigned in order)
+const FTD_CSI_SLOTS: Record<string, number[]> = {
+  'ah1z-ftd': [1, 3, 4, 5, 7, 9, 11],
+  'uh1y-ftd': [4, 6, 8],
+};
+
 // Detect T&R codes: 4 digits optionally followed by a letter (e.g. 1111X, 2301A, 5400)
 function extractTRCode(text: string): string | null {
   const match = text.match(/\b(\d{4}[A-Za-z]?)\b/);
