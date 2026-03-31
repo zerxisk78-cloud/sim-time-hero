@@ -614,7 +614,7 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
   const handleExport = () => {
     try {
       const includedIds = Object.entries(exportToggles).filter(([, v]) => v).map(([k]) => k);
-      const blob = exportSimScheduleExcel(undefined, includedIds);
+      const blob = exportSimScheduleExcel(undefined, includedIds, importedTitleRows.length > 0 ? importedTitleRows : undefined);
       const now = new Date();
       const dateStr = `${now.getMonth() + 1}.${now.getDate()}.${now.getFullYear()}`;
       const url = URL.createObjectURL(blob);
