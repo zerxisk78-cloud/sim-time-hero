@@ -196,7 +196,7 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
             <div />
           </div>
           {entries.map((entry, i) => (
-            <div key={i} className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_100px_80px_minmax(0,1fr)_44px] border-t border-border">
+            <div key={i} className="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)_100px_44px] border-t border-border">
               {FIELD_ORDER.map((field, col) => (
                 field === 'csi' ? (
                   <button
