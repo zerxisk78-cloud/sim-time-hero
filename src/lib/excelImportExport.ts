@@ -47,8 +47,24 @@ function getDefaultCsi(simId: string): string {
 // Sims that have CI fields (only FTDs)
 const CI_SIM_IDS = ['ah1z-ftd', 'uh1y-ftd'];
 
-// CSI slot numbers assigned in order to scheduled (non-open/closed) entries
-const FTD_CSI_SLOTS: Record<string, number[]> = {
+// Time → CSI slot number mapping
+const TIME_TO_CSI_SLOT: Record<string, number> = {
+  '0530': 0, '05:30': 0,
+  '0700': 1, '07:00': 1,
+  '0830': 2, '08:30': 2,
+  '1000': 3, '10:00': 3,
+  '1130': 4, '11:30': 4,
+  '1300': 5, '13:00': 5,
+  '1430': 6, '14:30': 6,
+  '1600': 7, '16:00': 7,
+  '1730': 8, '17:30': 8,
+  '1900': 9, '19:00': 9,
+  '2030': 10, '20:30': 10,
+  '2200': 11, '22:00': 11,
+};
+
+// Which CSI slots each FTD actually gets contracted instructor support
+const FTD_ALLOWED_SLOTS: Record<string, number[]> = {
   'ah1z-ftd': [1, 3, 4, 5, 7, 9, 11],
   'uh1y-ftd': [4, 6, 8],
 };
