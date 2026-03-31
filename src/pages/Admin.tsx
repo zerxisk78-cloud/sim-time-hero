@@ -32,7 +32,6 @@ import { resetServerCheck, syncFromServer } from "@/lib/api";
 import { parseMSharpExcel, exportSimScheduleExcel } from "@/lib/excelImportExport";
 
 
-const CI_SIM_IDS = ['ah1z-ftd', 'uh1y-ftd'];
 const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
 const ALL_FIELDS: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi', 'tr', 'notes'];
 
