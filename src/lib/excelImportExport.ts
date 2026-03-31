@@ -47,6 +47,12 @@ function getDefaultCsi(simId: string): string {
 // Sims that have CI fields (only FTDs)
 const CI_SIM_IDS = ['ah1z-ftd', 'uh1y-ftd'];
 
+// Default CSI slot numbers for FTDs (keyed by simId, values are slot numbers assigned in order)
+const FTD_CSI_SLOTS: Record<string, number[]> = {
+  'ah1z-ftd': [1, 3, 4, 5, 7, 9, 11],
+  'uh1y-ftd': [4, 6, 8],
+};
+
 // Detect T&R codes: 4 digits optionally followed by a letter (e.g. 1111X, 2301A, 5400)
 function extractTRCode(text: string): string | null {
   const match = text.match(/\b(\d{4}[A-Za-z]?)\b/);
@@ -290,7 +296,17 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
           notesVal = notesVal ? extraPilots + '; ' + notesVal : extraPilots;
         }
 
-        ci = CI_SIM_IDS.includes(simId) ? (e.csi || null) : null;
+        // For FTDs, assign CSI slot numbers from the predefined list
+        if (CI_SIM_IDS.includes(simId)) {
+          const csiSlots = FTD_CSI_SLOTS[simId] || [];
+          // Count how many scheduled (non-open/closed) slots we've seen so far
+          const scheduledIndex = entries.slice(0, i).filter(prev => {
+            const pu = (prev.unit || '').toUpperCase();
+            const pc = (prev.crew || '').toUpperCase();
+            return pu !== 'CLOSED' && pc !== 'CLOSED' && pu !== 'OPEN' && pc !== 'OPEN' && (prev.unit || prev.crew);
+          }).length;
+          ci = scheduledIndex < csiSlots.length ? String(csiSlots[scheduledIndex]) : null;
+        }
       }
 
       allRows.push([
