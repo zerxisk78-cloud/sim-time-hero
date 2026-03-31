@@ -45,18 +45,18 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
 
   const getToggleValue = (value: string) => {
     if (isMrt) return value === 'AH' ? 'AH' : 'UH';
-    return value === 'Device Operator' ? 'Device Operator' : 'CSI';
+    return value === 'DO' || value === 'Device Operator' ? 'DO' : 'CSI';
   };
 
   const getNextToggleValue = (value: string) => {
     const currentValue = getToggleValue(value);
     if (isMrt) return currentValue === 'AH' ? 'UH' : 'AH';
-    return currentValue === 'CSI' ? 'Device Operator' : 'CSI';
+    return currentValue === 'CSI' ? 'DO' : 'CSI';
   };
 
   const getToggleClasses = (value: string) => {
     const currentValue = getToggleValue(value);
-    const activeValue = isMrt ? 'AH' : 'Device Operator';
+    const activeValue = isMrt ? 'AH' : 'DO';
 
     return currentValue === activeValue
       ? 'bg-primary/15 text-primary hover:bg-primary/25'
