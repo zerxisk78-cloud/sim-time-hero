@@ -571,6 +571,7 @@ function BackupRestore({ onRestore }: { onRestore: () => void }) {
 
 function MSharpImportExport({ onImport }: { onImport: () => void }) {
   const [importing, setImporting] = useState(false);
+  const [importedTitleRows, setImportedTitleRows] = useState<string[]>([]);
   const [exportToggles, setExportToggles] = useState<Record<string, boolean>>(() => {
     const defaults: Record<string, boolean> = {};
     SIMULATORS.forEach(s => {
