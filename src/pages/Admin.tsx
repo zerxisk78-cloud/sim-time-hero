@@ -99,8 +99,8 @@ function SimEditor({ simId, refreshKey }: { simId: string; name: string; timeSlo
         const cols = row.split('\t');
         cols.forEach((val, ci) => {
           const colIdx = startCol + ci;
-          if (colIdx < FIELD_ORDER.length) {
-            updated[idx] = { ...updated[idx], [FIELD_ORDER[colIdx]]: val.trim() };
+          if (colIdx < ALL_FIELDS.length) {
+            updated[idx] = { ...updated[idx], [ALL_FIELDS[colIdx]]: val.trim() };
           }
         });
       });
