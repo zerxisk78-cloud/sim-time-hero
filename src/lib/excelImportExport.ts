@@ -80,6 +80,7 @@ export interface ImportResult {
   simData: Record<string, SimSlot[]>;
   skipped: string[];
   date: string;
+  titleRows: string[];
 }
 
 export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
