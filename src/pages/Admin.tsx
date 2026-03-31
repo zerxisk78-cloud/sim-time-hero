@@ -596,6 +596,9 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
         saveSimEntries(simId, entries);
         count++;
       }
+      if (result.titleRows.length > 0) {
+        setImportedTitleRows(result.titleRows);
+      }
       toast.success(`Imported ${count} simulators from M-SHARP`);
       if (result.skipped.length > 0) {
         toast.info(`Skipped unknown sims: ${result.skipped.join(', ')}`);
