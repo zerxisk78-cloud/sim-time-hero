@@ -234,7 +234,7 @@ const SIM_TO_DESC: Record<string, string> = {
   'mrt-4': 'UH-1Y MRT 2F300-4Y',
 };
 
-export function exportSimScheduleExcel(scheduleDate?: string): Blob {
+export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: string[]): Blob {
   const wb = XLSX.utils.book_new();
   const allRows: (string | null)[][] = [];
   const headerRowIndices: number[] = []; // track which rows are sim-block headers for grey fill
@@ -245,7 +245,7 @@ export function exportSimScheduleExcel(scheduleDate?: string): Blob {
   allRows.push([scheduleDate || new Date().toLocaleDateString()]);
   allRows.push([]); // blank spacer
 
-  const simIds = SIMULATORS.map(s => s.id);
+  const simIds = SIMULATORS.map(s => s.id).filter(id => !includedSimIds || includedSimIds.includes(id));
 
   for (const simId of simIds) {
     const entries = getSimEntries(simId);
