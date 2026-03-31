@@ -571,6 +571,17 @@ function BackupRestore({ onRestore }: { onRestore: () => void }) {
 
 function MSharpImportExport({ onImport }: { onImport: () => void }) {
   const [importing, setImporting] = useState(false);
+  const [exportToggles, setExportToggles] = useState<Record<string, boolean>>(() => {
+    const defaults: Record<string, boolean> = {};
+    SIMULATORS.forEach(s => {
+      defaults[s.id] = s.id !== 'mv22-ptt';
+    });
+    return defaults;
+  });
+
+  const toggleExportSim = (simId: string) => {
+    setExportToggles(prev => ({ ...prev, [simId]: !prev[simId] }));
+  };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
