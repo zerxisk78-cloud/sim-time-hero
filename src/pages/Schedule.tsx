@@ -20,6 +20,10 @@ const SIM_GROUPS = [
   ['mrt-1', 'mrt-2', 'mrt-3', 'mrt-4'],
 ];
 
+function group_has_visible(group: string[], visibility: VisibilitySettings): boolean {
+  return group.some(id => visibility.simulators[id] !== false);
+}
+
 export default function SchedulePage() {
   const [simData, setSimData] = useState<Record<string, SimSlot[]>>({});
   const [statuses, setStatuses] = useState<TrainerStatus[]>([]);
