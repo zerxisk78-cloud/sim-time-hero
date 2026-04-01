@@ -58,13 +58,23 @@ export default function SchedulePage() {
     return () => clearInterval(interval);
   }, [loadData]);
 
+  // Build list of non-empty group indices
+  const nonEmptyGroups = SIM_GROUPS.map((group, i) => i).filter(i =>
+    group_has_visible(SIM_GROUPS[i], visibility)
+  );
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(new Date());
-      setActiveGroup(prev => (prev + 1) % SIM_GROUPS.length);
+      setActiveGroup(prev => {
+        if (nonEmptyGroups.length === 0) return prev;
+        const currentIdx = nonEmptyGroups.indexOf(prev);
+        const nextIdx = (currentIdx + 1) % nonEmptyGroups.length;
+        return nonEmptyGroups[nextIdx];
+      });
     }, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [nonEmptyGroups]);
 
   const visibleSimIds = SIM_GROUPS[activeGroup].filter(id => visibility.simulators[id] !== false);
   const visibleSims = SIMULATORS.filter(s => visibleSimIds.includes(s.id));
