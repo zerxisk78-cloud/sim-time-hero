@@ -91,20 +91,19 @@ export default function SchedulePage() {
               <div>
                 <h1 className="text-base font-bold leading-tight">Marine Aviation Training System Site</h1>
                 <p className="text-xs text-muted-foreground">MCAS Pendleton</p>
-                <p className="text-sm font-bold font-mono">{pendletonTime}</p>
-                <p className="text-[10px] text-muted-foreground">{pendletonDate}</p>
-              </div>
-              <img src={matssPatc} alt="MATSS Official Patch" className="h-16 w-16 object-contain" />
+              <p className="text-sm font-bold font-mono">{pendletonTime}</p>
             </div>
-            <p className="text-xs">Current Simulator Schedule</p>
-            <div className="flex justify-center gap-1 mt-1">
-              {SIM_GROUPS.map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-2 h-2 rounded-full transition-colors ${i === activeGroup ? 'bg-primary' : 'bg-muted'}`}
-                />
-              ))}
-            </div>
+            <img src={matssPatc} alt="MATSS Official Patch" className="h-16 w-16 object-contain" />
+          </div>
+          <p className="text-xs">Current Simulator Schedule</p>
+          <div className="flex justify-center gap-1.5 mt-1">
+            {SIM_GROUPS.map((_, i) => (
+              <div
+                key={i}
+                className={`w-2.5 h-2.5 rounded-full transition-colors border ${i === activeGroup ? 'bg-yellow-400 border-yellow-300 shadow-[0_0_6px_rgba(250,204,21,0.7)]' : 'bg-zinc-500 border-zinc-400'}`}
+              />
+            ))}
+          </div>
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-2 flex-1 min-h-0">
