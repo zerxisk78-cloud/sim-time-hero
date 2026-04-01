@@ -50,7 +50,7 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
             const role = isMrt
               ? (entry.csi === 'AH' ? 'AH' : 'UH')
               : (entry.csi === 'DO' || entry.csi === 'Device Operator' ? 'DO' : 'CSI');
-            const badgeClass = role === (isMrt ? 'AH' : 'DO')
+            const badgeClass = role === (isMrt ? 'AH' : 'CSI')
               ? 'bg-amber-500/80 text-black font-extrabold'
               : 'bg-sky-600/80 text-white font-extrabold';
             const slotMin = parseSlotMinutes(entry.time);
@@ -76,13 +76,18 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
                     </span>
                   ) : entry.unit}
                 </TableCell>
-                <TableCell className={`text-white font-semibold ${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>{open ? '' : entry.crew}</TableCell>
-                <TableCell className={`${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>
-                  {!open && (
-                    <span className={`inline-flex min-w-[3rem] items-center justify-center rounded px-1.5 py-0 font-bold ${larger ? 'text-sm' : 'text-[10px]'} ${badgeClass}`}>
-                      {role}
+                <TableCell className={`text-white font-semibold ${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>
+                  {open ? (
+                    <span className="inline-flex items-center gap-0.5 text-emerald-400 font-bold">
+                      <ArrowRight className={larger ? "w-4 h-4" : "w-3 h-3"} />
+                      OPEN
                     </span>
-                  )}
+                  ) : entry.crew}
+                </TableCell>
+                <TableCell className={`${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>
+                  <span className={`inline-flex min-w-[3rem] items-center justify-center rounded px-1.5 py-0 font-bold ${larger ? 'text-sm' : 'text-[10px]'} ${badgeClass}`}>
+                    {role}
+                  </span>
                 </TableCell>
               </TableRow>
             );
