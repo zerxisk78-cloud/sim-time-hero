@@ -217,6 +217,7 @@ const DEFAULT_VISIBILITY: VisibilitySettings = {
   necc: true,
   linkedEvents: true,
   trainerStatus: true,
+  animation: true,
 };
 
 export function getVisibility(): VisibilitySettings {
