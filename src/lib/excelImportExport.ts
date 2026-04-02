@@ -222,15 +222,16 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
     });
   }
 
-  // Convert to SimSlot format
+  // Convert to SimSlot format, preserving existing CSI/DO values from the store
   const result: Record<string, SimSlot[]> = {};
   for (const [simId, slots] of Object.entries(simData)) {
-    const csi = getDefaultCsi(simId);
-    result[simId] = slots.map(s => ({
+    const existing = getSimEntries(simId);
+    const defaultCsi = getDefaultCsi(simId);
+    result[simId] = slots.map((s, i) => ({
       time: s.time,
       unit: s.unit,
       crew: s.crew,
-      csi,
+      csi: existing[i]?.csi || defaultCsi,
       tr: s.tr,
       notes: s.notes,
     }));
