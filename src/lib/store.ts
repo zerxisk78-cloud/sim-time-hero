@@ -312,7 +312,7 @@ export async function loadAllData(): Promise<{
     getItemAsync<LinkedEvent[]>('linked', []),
     getItemAsync<VisibilitySettings>('visibility', {
       simulators: Object.fromEntries(SIMULATORS.map(s => [s.id, true])),
-      classrooms: true, necc: true, linkedEvents: true, trainerStatus: true,
+      classrooms: true, necc: true, linkedEvents: true, trainerStatus: true, animation: true,
     }),
     getItemAsync<Record<string, string>>('mrt_locations', DEFAULT_MRT_LOCATIONS),
     ...allSimIds.map(id => getItemAsync<SimSlot[]>(`sim_${id}`, [])),

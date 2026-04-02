@@ -36,7 +36,7 @@ export default function SchedulePage() {
   const pendletonHour = Number(currentTime.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', hour12: false }));
   const pendletonMinute = Number(currentTime.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', minute: 'numeric' }));
   const [activeGroup, setActiveGroup] = useState(0);
-  const [visibility, setVisibility] = useState<VisibilitySettings>({ simulators: {}, classrooms: true, necc: true, linkedEvents: true, trainerStatus: true });
+  const [visibility, setVisibility] = useState<VisibilitySettings>({ simulators: {}, classrooms: true, necc: true, linkedEvents: true, trainerStatus: true, animation: true });
   const [extraSims, setExtraSims] = useState<{ id: string; name: string }[]>([]);
   const [mrtLocations, setMrtLocations] = useState<MrtLocationSettings>({});
 
