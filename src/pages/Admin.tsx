@@ -900,6 +900,7 @@ export default function AdminPage() {
                       { key: 'necc' as const, label: 'NECC Reservations' },
                       { key: 'linkedEvents' as const, label: 'Linked Events' },
                       { key: 'trainerStatus' as const, label: 'Trainer Status' },
+                      { key: 'animation' as const, label: 'Flyover Animation' },
                     ].map(item => (
                       <div key={item.key} className="flex items-center justify-between">
                         <span className="text-xs font-medium">{item.label}</span>

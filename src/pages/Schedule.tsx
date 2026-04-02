@@ -94,7 +94,7 @@ export default function SchedulePage() {
         className="absolute inset-0 z-0 opacity-[0.15] pointer-events-none"
         style={{ backgroundColor: '#8B0000', backgroundImage: `url(${usmcFlag})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
       />
-      <FlyingAircraft />
+      {visibility.animation !== false && <FlyingAircraft />}
 
       {/* Fullscreen overlay for FTD/FFS groups */}
       {isFullscreen && (

@@ -112,6 +112,7 @@ export interface VisibilitySettings {
   necc: boolean;
   linkedEvents: boolean;
   trainerStatus: boolean;
+  animation: boolean;
 }
 
 export type MrtLocationSettings = Record<string, string>;
