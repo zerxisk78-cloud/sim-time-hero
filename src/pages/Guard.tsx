@@ -15,7 +15,7 @@ export default function GuardPage() {
   const [neccEntries, setNeccEntries] = useState<NECCEntry[]>([]);
   const [linkedEvents, setLinkedEvents] = useState<LinkedEvent[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [visibility, setVisibility] = useState<VisibilitySettings>({ simulators: {}, classrooms: true, necc: true, linkedEvents: true, trainerStatus: true });
+  const [visibility, setVisibility] = useState<VisibilitySettings>({ simulators: {}, classrooms: true, necc: true, linkedEvents: true, trainerStatus: true, animation: true });
   const [extraSims, setExtraSims] = useState<{ id: string; name: string }[]>([]);
   const [mrtLocations, setMrtLocations] = useState<MrtLocationSettings>({});
 
