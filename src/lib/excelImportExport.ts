@@ -41,7 +41,7 @@ function getDefaultCsi(simId: string): string {
   if (MRT_SIM_IDS.includes(simId)) {
     return simId === 'mrt-1' || simId === 'mrt-3' ? 'AH' : 'UH';
   }
-  return 'CSI';
+  return 'DO';
 }
 
 // Sims that have CI fields (only FTDs)
@@ -227,11 +227,16 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
   for (const [simId, slots] of Object.entries(simData)) {
     const existing = getSimEntries(simId);
     const defaultCsi = getDefaultCsi(simId);
+    // Build a lookup by time to preserve CSI/DO from existing store
+    const existingByTime: Record<string, string> = {};
+    for (const e of existing) {
+      if (e.time && e.csi) existingByTime[e.time] = e.csi;
+    }
     result[simId] = slots.map((s, i) => ({
       time: s.time,
       unit: s.unit,
       crew: s.crew,
-      csi: existing[i]?.csi || defaultCsi,
+      csi: existingByTime[s.time] || existing[i]?.csi || defaultCsi,
       tr: s.tr,
       notes: s.notes,
     }));
