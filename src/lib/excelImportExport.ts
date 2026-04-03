@@ -41,7 +41,7 @@ function getDefaultCsi(simId: string): string {
   if (MRT_SIM_IDS.includes(simId)) {
     return simId === 'mrt-1' || simId === 'mrt-3' ? 'AH' : 'UH';
   }
-  return 'CSI';
+  return 'DO';
 }
 
 // Sims that have CI fields (only FTDs)
