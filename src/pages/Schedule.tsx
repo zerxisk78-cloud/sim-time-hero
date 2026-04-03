@@ -54,7 +54,7 @@ export default function SchedulePage() {
     const data = await loadAllData();
     setSimData(data.simData);
     setStatuses(data.statuses);
-    setClassrooms(sortByDate(data.classrooms));
+    setClassrooms(data.classrooms);
     setNeccEntries(sortByDate(data.neccEntries));
     setLinkedEvents(sortByDate(data.linkedEvents));
     setVisibility(data.visibility);
@@ -185,7 +185,7 @@ export default function SchedulePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {classrooms.map(c => (
+                  {classrooms.slice(0, 5).map(c => (
                     <TableRow key={c.id}>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{c.className}</TableCell>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{c.dateTime}</TableCell>
