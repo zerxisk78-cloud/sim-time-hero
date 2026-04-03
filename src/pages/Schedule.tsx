@@ -54,7 +54,7 @@ export default function SchedulePage() {
     const data = await loadAllData();
     setSimData(data.simData);
     setStatuses(data.statuses);
-    setClassrooms(sortByDate(data.classrooms));
+    setClassrooms(data.classrooms);
     setNeccEntries(sortByDate(data.neccEntries));
     setLinkedEvents(sortByDate(data.linkedEvents));
     setVisibility(data.visibility);
