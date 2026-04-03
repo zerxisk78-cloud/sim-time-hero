@@ -41,7 +41,14 @@ export default function SchedulePage() {
   const [mrtLocations, setMrtLocations] = useState<MrtLocationSettings>({});
 
   const sortByDate = <T extends { dateTime: string }>(items: T[]): T[] =>
-    [...items].sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
+    [...items].sort((a, b) => {
+      const da = new Date(a.dateTime).getTime();
+      const db = new Date(b.dateTime).getTime();
+      if (isNaN(da) && isNaN(db)) return 0;
+      if (isNaN(da)) return 1;
+      if (isNaN(db)) return -1;
+      return da - db;
+    });
 
   const loadData = useCallback(async () => {
     const data = await loadAllData();
@@ -178,7 +185,7 @@ export default function SchedulePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {classrooms.slice(0, 5).map(c => (
+                  {classrooms.map(c => (
                     <TableRow key={c.id}>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{c.className}</TableCell>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{c.dateTime}</TableCell>
@@ -202,7 +209,7 @@ export default function SchedulePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {neccEntries.slice(0, 5).map(e => (
+                  {neccEntries.map(e => (
                     <TableRow key={e.id}>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{e.unit}</TableCell>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{e.dateTime}</TableCell>
