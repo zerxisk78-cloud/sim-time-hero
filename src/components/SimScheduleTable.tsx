@@ -35,7 +35,7 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
 
   return (
     <div className="mb-1">
-      <Table className={`font-sans ${larger ? "text-[13px]" : "text-[11px]"}`}>
+      <Table className={larger ? "text-[13px]" : "text-[11px]"}>
         <TableHeader>
           <TableRow className="bg-[hsl(var(--header-bg))]">
             <TableHead className={`text-[hsl(var(--header-foreground))] font-bold w-[80px] py-0.5 whitespace-nowrap ${larger ? 'text-base px-1.5' : 'text-[11px]'}`}>{name}</TableHead>
@@ -67,8 +67,8 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
 
             return (
               <TableRow key={i} className={`${rowBg} border-b border-border/40`}>
-                <TableCell className={`font-mono text-white font-normal ${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>{entry.time}</TableCell>
-                <TableCell className={`text-white font-normal ${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>
+                <TableCell className={`font-mono text-white font-semibold ${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>{entry.time}</TableCell>
+                <TableCell className={`text-white font-semibold ${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>
                   {open ? (
                     <span className="inline-flex items-center gap-0.5 text-emerald-400 font-bold">
                       <ArrowRight className={larger ? "w-4 h-4" : "w-3 h-3"} />
@@ -76,7 +76,7 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
                     </span>
                   ) : entry.unit}
                 </TableCell>
-                <TableCell className={`text-white font-normal ${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>
+                <TableCell className={`text-white font-semibold ${larger ? 'text-base py-0.5 px-1.5' : 'text-[11px] py-0'}`}>
                   {open ? (
                     <span className="inline-flex items-center gap-0.5 text-emerald-400 font-bold">
                       <ArrowRight className={larger ? "w-4 h-4" : "w-3 h-3"} />
