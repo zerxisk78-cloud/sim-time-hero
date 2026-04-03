@@ -167,22 +167,22 @@ export default function SchedulePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2 flex-shrink-0">
           {visibility.classrooms && classrooms.length > 0 && (
-            <div className="bg-sidebar-background text-sidebar-foreground p-3 rounded-lg font-sans">
+            <div className="bg-sidebar-background text-sidebar-foreground p-3 rounded-lg">
               <h3 className="text-sm font-bold underline mb-1 text-center">Classes</h3>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs py-1 font-normal text-sidebar-foreground">Unit</TableHead>
-                    <TableHead className="text-xs py-1 font-normal text-sidebar-foreground">Date/Time</TableHead>
-                    <TableHead className="text-xs py-1 font-normal text-sidebar-foreground">Location</TableHead>
+                    <TableHead className="text-xs py-1 text-sidebar-foreground">Unit</TableHead>
+                    <TableHead className="text-xs py-1 text-sidebar-foreground">Date/Time</TableHead>
+                    <TableHead className="text-xs py-1 text-sidebar-foreground">Location</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {classrooms.slice(0, 5).map(c => (
                     <TableRow key={c.id}>
-                      <TableCell className="text-xs py-1 font-normal text-sidebar-foreground">{c.className}</TableCell>
-                      <TableCell className="text-xs py-1 font-normal text-sidebar-foreground">{c.dateTime}</TableCell>
-                      <TableCell className="text-xs py-1 font-normal text-sidebar-foreground">{c.location}</TableCell>
+                      <TableCell className="text-xs py-1 text-sidebar-foreground">{c.className}</TableCell>
+                      <TableCell className="text-xs py-1 text-sidebar-foreground">{c.dateTime}</TableCell>
+                      <TableCell className="text-xs py-1 text-sidebar-foreground">{c.location}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -191,22 +191,22 @@ export default function SchedulePage() {
           )}
 
           {visibility.necc && neccEntries.length > 0 && (
-            <div className="bg-sidebar-background text-sidebar-foreground p-3 rounded-lg font-sans">
+            <div className="bg-sidebar-background text-sidebar-foreground p-3 rounded-lg">
               <h3 className="text-sm font-bold underline mb-1 text-center">NECC Reservations</h3>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs py-1 font-normal text-sidebar-foreground">Unit</TableHead>
-                    <TableHead className="text-xs py-1 font-normal text-sidebar-foreground">Date/Time</TableHead>
-                    <TableHead className="text-xs py-1 font-normal text-sidebar-foreground">Notes</TableHead>
+                    <TableHead className="text-xs py-1 text-sidebar-foreground">Unit</TableHead>
+                    <TableHead className="text-xs py-1 text-sidebar-foreground">Date/Time</TableHead>
+                    <TableHead className="text-xs py-1 text-sidebar-foreground">Notes</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {neccEntries.slice(0, 5).map(e => (
                     <TableRow key={e.id}>
-                      <TableCell className="text-xs py-1 font-normal text-sidebar-foreground">{e.unit}</TableCell>
-                      <TableCell className="text-xs py-1 font-normal text-sidebar-foreground">{e.dateTime}</TableCell>
-                      <TableCell className="text-xs py-1 font-normal text-sidebar-foreground">{e.notes}</TableCell>
+                      <TableCell className="text-xs py-1 text-sidebar-foreground">{e.unit}</TableCell>
+                      <TableCell className="text-xs py-1 text-sidebar-foreground">{e.dateTime}</TableCell>
+                      <TableCell className="text-xs py-1 text-sidebar-foreground">{e.notes}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -215,22 +215,22 @@ export default function SchedulePage() {
           )}
 
           {visibility.linkedEvents && linkedEvents.length > 0 && (
-            <div className="bg-sidebar-background text-sidebar-foreground p-3 rounded-lg font-sans">
+            <div className="bg-sidebar-background text-sidebar-foreground p-3 rounded-lg">
               <h3 className="text-sm font-bold underline mb-1 text-center">Linked Events</h3>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs py-1 font-normal text-sidebar-foreground">Date/Time</TableHead>
-                    <TableHead className="text-xs py-1 font-normal text-sidebar-foreground">Unit</TableHead>
-                    <TableHead className="text-xs py-1 font-normal text-sidebar-foreground">System</TableHead>
+                    <TableHead className="text-xs py-1 text-sidebar-foreground">Date/Time</TableHead>
+                    <TableHead className="text-xs py-1 text-sidebar-foreground">Unit</TableHead>
+                    <TableHead className="text-xs py-1 text-sidebar-foreground">System</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {linkedEvents.slice(0, 5).map(e => (
                     <TableRow key={e.id}>
-                      <TableCell className="text-xs py-1 font-normal text-sidebar-foreground">{e.dateTime}</TableCell>
-                      <TableCell className="text-xs py-1 font-normal text-sidebar-foreground">{e.unit}</TableCell>
-                      <TableCell className="text-xs py-1 font-normal text-sidebar-foreground">{e.system}</TableCell>
+                      <TableCell className="text-xs py-1 text-sidebar-foreground">{e.dateTime}</TableCell>
+                      <TableCell className="text-xs py-1 text-sidebar-foreground">{e.unit}</TableCell>
+                      <TableCell className="text-xs py-1 text-sidebar-foreground">{e.system}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
