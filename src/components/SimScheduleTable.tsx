@@ -35,7 +35,7 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
 
   return (
     <div className="mb-1">
-      <Table className={larger ? "text-[13px]" : "text-[11px]"}>
+      <Table className={`font-sans ${larger ? "text-[13px]" : "text-[11px]"}`}>
         <TableHeader>
           <TableRow className="bg-[hsl(var(--header-bg))]">
             <TableHead className={`text-[hsl(var(--header-foreground))] font-bold w-[80px] py-0.5 whitespace-nowrap ${larger ? 'text-base px-1.5' : 'text-[11px]'}`}>{name}</TableHead>
