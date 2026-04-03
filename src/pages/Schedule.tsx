@@ -185,7 +185,7 @@ export default function SchedulePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {classrooms.map(c => (
+                  {classrooms.slice(0, 5).map(c => (
                     <TableRow key={c.id}>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{c.className}</TableCell>
                       <TableCell className="text-xs py-1 text-sidebar-foreground">{c.dateTime}</TableCell>
