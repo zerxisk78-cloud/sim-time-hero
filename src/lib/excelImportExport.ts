@@ -349,6 +349,8 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
         notesVal || null,
       ]);
     }
+    // Add blank spacer row between sim blocks
+    allRows.push([]);
   }
 
   // Check if Linked Simulators column is all empty
