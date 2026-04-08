@@ -270,17 +270,18 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
   const headerRowIndices: number[] = [];
   let hasAnyLinkedSims = false;
 
-  // Title rows from import (CUI marking, title, date, etc.) or defaults
+  // Header: CUI marking, title with date
   if (titleRows && titleRows.length > 0) {
+    // Use imported title rows but ensure CUI is present
     for (const row of titleRows) {
       allRows.push([row]);
     }
-    allRows.push([]); // blank spacer
   } else {
-    allRows.push(['Simulator Schedule']);
-    allRows.push([scheduleDate || new Date().toLocaleDateString()]);
-    allRows.push([]); // blank spacer
+    allRows.push(['CUI']);
+    const dateLabel = scheduleDate || new Date().toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles' });
+    allRows.push([`Simulator Schedule - ${dateLabel}`]);
   }
+  allRows.push([]); // blank spacer
 
   const simIds = SIMULATORS.map(s => s.id).filter(id => !includedSimIds || includedSimIds.includes(id));
 
