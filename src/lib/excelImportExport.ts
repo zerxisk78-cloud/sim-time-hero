@@ -439,15 +439,15 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
 
   // Set column widths
   ws['!cols'] = [
-    { wch: 24 },
+    { wch: 28 },
+    { wch: 14 },
+    { wch: 8 },
+    { wch: 18 },
+    ...(hasAnyLinkedSims ? [{ wch: 18 }] : []),
     { wch: 12 },
-    { wch: 6 },
-    { wch: 16 },
-    ...(hasAnyLinkedSims ? [{ wch: 16 }] : []),
-    { wch: 10 },
-    { wch: 6 },
-    { wch: 16 },
-    { wch: 16 },
+    { wch: 8 },
+    { wch: 18 },
+    { wch: 20 },
   ];
 
   XLSX.utils.book_append_sheet(wb, ws, 'Schedule');
