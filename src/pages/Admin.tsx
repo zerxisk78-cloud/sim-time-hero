@@ -638,7 +638,7 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
-          Import a raw M-SHARP Simulator Schedule Excel file to auto-populate all sim entries, or export the current schedule as a clean spreadsheet.
+          Import a raw M-SHARP Excel file or a finished SimSchedule report to auto-populate all sim entries, or export the current schedule as a clean spreadsheet.
         </p>
         <div className="flex gap-2">
           <label>
@@ -670,7 +670,7 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
           ))}
         </div>
         <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded border border-border">
-          <strong>Import:</strong> Upload the raw M-SHARP file (e.g. SimulatorSchedule_18.xlsx). Time, Unit, and Crew are auto-populated per sim.<br />
+          <strong>Import:</strong> Upload a raw M-SHARP file (e.g. SimulatorSchedule_18.xlsx) or a finished SimSchedule report. The format is auto-detected. Time, Unit, Crew, T&amp;R, and Notes are populated per sim.<br />
           <strong>Export:</strong> Downloads a cleaned SimSchedule(date).xlsx with only the selected simulators.
         </div>
       </CardContent>
