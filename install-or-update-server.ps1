@@ -120,6 +120,39 @@ try {
     Invoke-Step $pm2Command @('start', $ecosystemConfig) $serverDir
   }
 
+  Write-Step 'Configure PM2 to start on boot'
+  try {
+    # pm2-startup on Windows uses pm2-startup package or native scheduled task
+    # First try the built-in startup command
+    $startupResult = Start-Process -FilePath $pm2Command -ArgumentList @('startup') -WorkingDirectory $serverDir -NoNewWindow -Wait -PassThru
+    if ($startupResult.ExitCode -ne 0) {
+      Write-Host 'PM2 startup command returned non-zero; creating scheduled task fallback...' -ForegroundColor Yellow
+    }
+  } catch {
+    Write-Host "PM2 startup setup skipped: $($_.Exception.Message)" -ForegroundColor Yellow
+  }
+
+  # Create a Windows scheduled task as a reliable fallback
+  $taskName = 'MATSS PM2 Server'
+  $existingTask = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+  if (-not $existingTask) {
+    $nodeCmd = (Get-Command node -ErrorAction SilentlyContinue).Source
+    if ($nodeCmd) {
+      $pm2Module = Join-Path (Split-Path (Split-Path $nodeCmd)) 'node_modules\pm2\bin\pm2'
+      $ecosystemFull = Join-Path $serverDir 'ecosystem.config.js'
+      $action = New-ScheduledTaskAction -Execute $nodeCmd -Argument "`"$pm2Module`" resurrect"
+      $trigger = New-ScheduledTaskTrigger -AtStartup
+      $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
+      $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest
+      Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal | Out-Null
+      Write-Host "Scheduled task '$taskName' created for boot persistence." -ForegroundColor Green
+    } else {
+      Write-Host 'Could not locate node.exe for scheduled task.' -ForegroundColor Yellow
+    }
+  } else {
+    Write-Host "Scheduled task '$taskName' already exists." -ForegroundColor DarkGray
+  }
+
   Write-Step 'Save PM2 process list'
   Invoke-Step $pm2Command @('save') $serverDir
 
