@@ -83,30 +83,29 @@ export interface ImportResult {
   titleRows: string[];
 }
 
+// Auto-detect format and parse accordingly
 export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
   const wb = XLSX.read(data, { type: 'array' });
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows: (string | number | null)[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
 
-  // Find the header row (contains "ETD" and "Description")
+  // Detect format: look for "Air Crew" (raw M-SHARP) vs "CREW" (finished report)
   let headerIdx = -1;
-  for (let i = 0; i < Math.min(rows.length, 10); i++) {
+  let isFinished = false;
+  for (let i = 0; i < Math.min(rows.length, 15); i++) {
     const row = rows[i];
-    if (row && row.some(c => String(c).trim() === 'ETD') && row.some(c => String(c).trim() === 'Description')) {
+    if (!row) continue;
+    const cells = row.map(c => String(c ?? '').trim());
+    if (cells.includes('ETD') && cells.includes('Description')) {
       headerIdx = i;
+      isFinished = cells.includes('CREW') && !cells.includes('Air Crew');
       break;
     }
   }
+
   if (headerIdx < 0) throw new Error('Could not find header row with ETD/Description columns');
 
-  const headers = rows[headerIdx].map(c => String(c ?? '').trim());
-  const colDesc = headers.indexOf('Description');
-  const colStatus = headers.indexOf('Status');
-  const colETD = headers.indexOf('ETD');
-  const colUnit = headers.indexOf('Unit');
-  const colAirCrew = headers.indexOf('Air Crew');
-
-  // Capture all pre-header rows as title rows (includes CUI marking, title, date, etc.)
+  // Extract title rows and date from pre-header content
   const titleRows: string[] = [];
   let date = '';
   for (let i = 0; i < headerIdx; i++) {
@@ -123,6 +122,147 @@ export function parseMSharpExcel(data: ArrayBuffer): ImportResult {
       }
     }
   }
+
+  if (isFinished) {
+    return parseFinishedReport(rows, headerIdx, date, titleRows);
+  } else {
+    return parseRawMSharp(rows, headerIdx, date, titleRows);
+  }
+}
+
+function parseFinishedReport(
+  rows: (string | number | null)[][],
+  headerIdx: number,
+  date: string,
+  titleRows: string[],
+): ImportResult {
+  const headers = rows[headerIdx].map(c => String(c ?? '').trim());
+  const colDesc = headers.indexOf('Description');
+  const colStatus = headers.indexOf('Status');
+  const colETD = headers.indexOf('ETD');
+  const colUnit = headers.indexOf('Unit');
+  const colTR = headers.indexOf('T&R Codes');
+  const colCI = headers.indexOf('CI');
+  const colCrew = headers.indexOf('CREW');
+  const colNotes = headers.indexOf('Notes');
+
+  const simData: Record<string, SimSlot[]> = {};
+  const skipped: string[] = [];
+  let currentSimId: string | null = null;
+
+  for (let i = headerIdx + 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row) continue;
+
+    // Check if this is a new header row (repeated headers between sim blocks)
+    const firstCell = String(row[0] ?? '').trim();
+    if (firstCell === 'Description') continue; // skip repeated header rows
+
+    const desc = colDesc >= 0 && row[colDesc] != null ? String(row[colDesc]).trim() : '';
+    const etd = colETD >= 0 && row[colETD] != null ? String(row[colETD]).trim() : '';
+    const status = colStatus >= 0 && row[colStatus] != null ? String(row[colStatus]).trim() : '';
+    const unitRaw = colUnit >= 0 && row[colUnit] != null ? String(row[colUnit]).trim() : '';
+    const crewRaw = colCrew >= 0 && row[colCrew] != null ? String(row[colCrew]).trim() : '';
+    const trRaw = colTR >= 0 && row[colTR] != null ? String(row[colTR]).trim() : '';
+    const ciRaw = colCI >= 0 && row[colCI] != null ? String(row[colCI]).trim() : '';
+    const notesRaw = colNotes >= 0 && row[colNotes] != null ? String(row[colNotes]).trim() : '';
+
+    // New sim block if description column has content
+    if (desc) {
+      const mapped = descriptionToSimId(desc);
+      if (mapped) {
+        currentSimId = mapped;
+        if (!simData[currentSimId]) simData[currentSimId] = [];
+      } else {
+        currentSimId = null;
+        if (!skipped.includes(desc)) skipped.push(desc);
+      }
+    }
+
+    if (!currentSimId || !etd) continue;
+
+    // Clean trailing commas from exported values
+    const cleanVal = (v: string) => v.replace(/,\s*$/, '').trim();
+    const unit = cleanVal(unitRaw);
+    const crew = cleanVal(crewRaw);
+
+    // Determine unit/crew
+    const statusLower = status.toLowerCase().replace(/,\s*$/, '');
+    let finalUnit = unit;
+    let finalCrew = crew;
+    let finalNotes = notesRaw;
+
+    if (statusLower === 'open' || unit.toUpperCase() === 'OPEN') {
+      finalUnit = 'OPEN';
+      finalCrew = 'OPEN';
+      finalNotes = '';
+    } else if (statusLower === 'unopen' || statusLower === 'unopen,' || unit.toUpperCase() === 'CLOSED') {
+      finalUnit = 'CLOSED';
+      finalCrew = 'CLOSED';
+      finalNotes = '';
+    } else {
+      // If notes has extra pilots, combine them back into crew
+      if (finalNotes && crew) {
+        // Check if notes start with a name (extra pilots from export)
+        const notesParts = finalNotes.split(';').map(p => p.trim());
+        const extraPilots = notesParts[0];
+        // If extra pilots look like names (no spaces typical of notes), merge into crew
+        if (extraPilots && !extraPilots.includes(' ')) {
+          finalCrew = crew + '/' + extraPilots;
+          finalNotes = notesParts.slice(1).join('; ').trim();
+        }
+      }
+    }
+
+    // Determine CSI from CI column or default
+    let csi = '';
+    if (MRT_SIM_IDS.includes(currentSimId)) {
+      csi = currentSimId === 'mrt-1' || currentSimId === 'mrt-3' ? 'AH' : 'UH';
+    } else if (ciRaw) {
+      csi = 'CSI';
+    } else {
+      csi = 'DO';
+    }
+
+    simData[currentSimId].push({
+      time: etd,
+      unit: finalUnit,
+      crew: finalCrew,
+      csi,
+      tr: trRaw,
+      notes: finalNotes,
+    });
+  }
+
+  // Preserve existing CSI/DO values from store where possible
+  const result: Record<string, SimSlot[]> = {};
+  for (const [simId, slots] of Object.entries(simData)) {
+    const existing = getSimEntries(simId);
+    const existingByTime: Record<string, string> = {};
+    for (const e of existing) {
+      if (e.time && e.csi) existingByTime[e.time] = e.csi;
+    }
+    result[simId] = slots.map((s, i) => ({
+      ...s,
+      csi: existingByTime[s.time] || existing[i]?.csi || s.csi,
+    }));
+  }
+
+  return { simData: result, skipped, date, titleRows };
+}
+
+function parseRawMSharp(
+  rows: (string | number | null)[][],
+  headerIdx: number,
+  date: string,
+  titleRows: string[],
+): ImportResult {
+  const headers = rows[headerIdx].map(c => String(c ?? '').trim());
+  const colDesc = headers.indexOf('Description');
+  const colStatus = headers.indexOf('Status');
+  const colETD = headers.indexOf('ETD');
+  const colUnit = headers.indexOf('Unit');
+  const colAirCrew = headers.indexOf('Air Crew');
 
   const simData: Record<string, { time: string; unit: string; crew: string; status: string; tr: string; notes: string }[]> = {};
   const skipped: string[] = [];
