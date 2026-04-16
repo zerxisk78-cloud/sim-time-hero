@@ -86,6 +86,13 @@ try {
   Write-Step 'Install frontend dependencies'
   Invoke-Step $npmCmd @('install') $repoRoot
 
+  Write-Step 'Audit fix frontend dependencies'
+  try {
+    Invoke-Step $npmCmd @('audit', 'fix') $repoRoot
+  } catch {
+    Write-Host "npm audit fix (frontend) skipped: $($_.Exception.Message)" -ForegroundColor Yellow
+  }
+
   Write-Step 'Build frontend'
   Invoke-Step $npmCmd @('run', 'build') $repoRoot
 
@@ -93,6 +100,13 @@ try {
 
   Write-Step 'Install server dependencies'
   Invoke-Step $npmCmd @('install') $serverDir
+
+  Write-Step 'Audit fix server dependencies'
+  try {
+    Invoke-Step $npmCmd @('audit', 'fix') $serverDir
+  } catch {
+    Write-Host "npm audit fix (server) skipped: $($_.Exception.Message)" -ForegroundColor Yellow
+  }
 
   if (-not (Get-Command pm2.cmd -ErrorAction SilentlyContinue) -and -not (Get-Command pm2 -ErrorAction SilentlyContinue)) {
     Write-Step 'Install PM2 globally'
