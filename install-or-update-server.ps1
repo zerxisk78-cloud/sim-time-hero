@@ -112,11 +112,12 @@ try {
   }
 
   Write-Step 'Start or restart the PM2 server'
+  $ecosystemConfig = Join-Path $serverDir 'ecosystem.config.js'
   $describe = Start-Process -FilePath $pm2Command -ArgumentList @('describe', 'matss-server') -WorkingDirectory $serverDir -NoNewWindow -Wait -PassThru
   if ($describe.ExitCode -eq 0) {
-    Invoke-Step $npmCmd @('run', 'pm2:restart') $serverDir
+    Invoke-Step $pm2Command @('restart', 'matss-server') $serverDir
   } else {
-    Invoke-Step $npmCmd @('run', 'pm2:start') $serverDir
+    Invoke-Step $pm2Command @('start', $ecosystemConfig) $serverDir
   }
 
   Write-Step 'Save PM2 process list'
