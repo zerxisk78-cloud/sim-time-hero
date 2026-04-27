@@ -548,21 +548,23 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
   const ws = XLSX.utils.aoa_to_sheet(finalRows);
   const colCount = hasAnyLinkedSims ? 9 : 8;
 
-  // Style and merge title rows
+  // Style and merge title row (single row)
   ws['!merges'] = ws['!merges'] || [];
-  const titleCount = titleRows && titleRows.length > 0 ? titleRows.length : 2;
+  const titleCount = 1;
   for (let r = 0; r < titleCount; r++) {
     ws['!merges'].push({ s: { r, c: 0 }, e: { r, c: colCount - 1 } });
     const addr = XLSX.utils.encode_cell({ r, c: 0 });
     const cell = ws[addr];
     if (cell) {
-      const isCui = String(cell.v || '').toUpperCase().includes('CUI');
       cell.s = {
-        font: { bold: true, sz: isCui ? 11 : (r === 0 && !titleRows ? 16 : 12), color: { rgb: isCui ? 'FF0000' : '1F4E79' } },
-        alignment: { horizontal: 'center' },
+        font: { bold: true, sz: 12, color: { rgb: 'FF0000' } },
+        alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
       };
     }
   }
+  // Make title row tall enough to display the long single-line text
+  ws['!rows'] = ws['!rows'] || [];
+  ws['!rows'][0] = { hpt: 22 };
 
   // Blue Table Style Medium 9 colors
   const headerStyle = {
