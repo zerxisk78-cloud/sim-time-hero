@@ -459,7 +459,8 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
         notesVal = '';
       } else {
         status = 'Scheduled';
-        unitVal = e.unit ? e.unit + ',' : '';
+        const unitClean = (e.unit || '').replace(/,\s*$/, '').trim();
+        unitVal = unitClean ? unitClean + ',' : '';
 
         // Combine crew + notes for token extraction
         const rawCrew = e.crew || '';
