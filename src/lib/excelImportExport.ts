@@ -410,18 +410,18 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
   const headerRowIndices: number[] = [];
   let hasAnyLinkedSims = false;
 
-  // Header: CUI marking, title with date
-  if (titleRows && titleRows.length > 0) {
-    // Use imported title rows but ensure CUI is present
-    for (const row of titleRows) {
-      allRows.push([row]);
-    }
-  } else {
-    allRows.push(['CUI']);
-    const dateLabel = scheduleDate || new Date().toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles' });
-    allRows.push([`Simulator Schedule - ${dateLabel}`]);
+  // Header: single-line CUI title (no generated date/time, no spacer row)
+  const dateLabel = scheduleDate || new Date().toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles' });
+  // Format date for title: "Monday, 27 April 2026"
+  let formattedDate = dateLabel;
+  const parsed = new Date(dateLabel);
+  if (!isNaN(parsed.getTime())) {
+    formattedDate = parsed.toLocaleDateString('en-US', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+      timeZone: 'America/Los_Angeles',
+    });
   }
-  allRows.push([]); // blank spacer
+  allRows.push([`CUI MATSS CAMP PENDLETON Simulator Schedule For ${formattedDate}`]);
 
   const simIds = SIMULATORS.map(s => s.id).filter(id => !includedSimIds || includedSimIds.includes(id));
 
