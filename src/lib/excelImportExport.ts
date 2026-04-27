@@ -461,12 +461,54 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
         status = 'Scheduled';
         unitVal = e.unit ? e.unit + ',' : '';
 
-        const pilots = (e.crew || '').split('/').filter(Boolean);
-        crewVal = pilots.length > 0 ? pilots[0] + ',' : '';
-        const extraPilots = pilots.slice(1).join('/');
-        if (extraPilots) {
-          notesVal = notesVal ? extraPilots + '; ' + notesVal : extraPilots;
-        }
+        // Combine crew + notes for token extraction
+        const rawCrew = e.crew || '';
+        const rawNotes = e.notes || '';
+
+        // Regex: 4-digit T&R code with optional trailing letter (e.g. 1114X, 2801, 6200X)
+        const trRe = /\b(\d{4}[A-Za-z]?)\b/g;
+        // Regex: 3-char alphanumeric short code like 1F1, 1A1, 1E9, 2L4 (digit-letter-digit)
+        const shortCodeRe = /\b(\d[A-Za-z]\d)\b/g;
+
+        const trCodes: string[] = [];
+        const shortCodes: string[] = [];
+        const extraPilots: string[] = [];
+
+        // Split crew by '/' to get pilot list
+        const crewPilots = rawCrew.split('/').map(p => p.trim()).filter(Boolean);
+        const firstPilotRaw = crewPilots[0] || '';
+        const restPilots = crewPilots.slice(1);
+
+        // Extract codes from first pilot field
+        let firstPilotName = firstPilotRaw;
+        firstPilotName = firstPilotName.replace(trRe, (m) => { trCodes.push(m); return ''; });
+        firstPilotName = firstPilotName.replace(shortCodeRe, (m) => { shortCodes.push(m); return ''; });
+        firstPilotName = firstPilotName.replace(/\s{2,}/g, ' ').replace(/[,\s]+$/, '').trim();
+
+        // Process remaining crew pilots and notes for codes + extra names
+        const processChunk = (chunk: string) => {
+          let s = chunk;
+          s = s.replace(trRe, (m) => { trCodes.push(m); return ''; });
+          s = s.replace(shortCodeRe, (m) => { shortCodes.push(m); return ''; });
+          // Split by common separators and keep name-like tokens (letters/uppercase)
+          s.split(/[;,/]+/).forEach(tok => {
+            const t = tok.trim();
+            if (t && /[A-Za-z]/.test(t)) extraPilots.push(t);
+          });
+        };
+        restPilots.forEach(processChunk);
+        if (rawNotes) processChunk(rawNotes);
+
+        // Compose CREW: first pilot name + short codes after, comma terminated
+        const shortPart = shortCodes.length ? '  ' + shortCodes.join(' ') : '';
+        crewVal = firstPilotName ? firstPilotName + ',' + shortPart : shortPart.trim();
+        if (crewVal && !crewVal.endsWith(',')) crewVal += '';
+
+        // Compose Notes: extra pilot names, space-separated (no trailing comma)
+        notesVal = extraPilots.join(' ');
+
+        // T&R column: prefer extracted code; fall back to stored e.tr
+        if (trCodes.length) trVal = trCodes.join(' ');
 
         // For FTDs, map time to CSI slot and only show if it's an allowed slot
         if (CI_SIM_IDS.includes(simId)) {
@@ -489,8 +531,7 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
         notesVal || null,
       ]);
     }
-    // Add blank spacer row between sim blocks
-    allRows.push([]);
+    // No blank spacer row between sim blocks (next header follows immediately)
   }
 
   // Check if Linked Simulators column is all empty
