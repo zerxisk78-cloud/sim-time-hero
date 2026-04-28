@@ -470,6 +470,8 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
         const trRe = /\b(\d{4}[A-Za-z]?)\b/g;
         // Regex: 3-char alphanumeric short code like 1F1, 1A1, 1E9, 2L4 (digit-letter-digit)
         const shortCodeRe = /\b(\d[A-Za-z]\d)\b/g;
+        // NOFS / Practice indicator in notes
+        const nofsRe = /\b(nofs|prac|practice)\b/i;
 
         const trCodes: string[] = [];
         const shortCodes: string[] = [];
@@ -486,6 +488,9 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
         firstPilotName = firstPilotName.replace(shortCodeRe, (m) => { shortCodes.push(m); return ''; });
         firstPilotName = firstPilotName.replace(/\s{2,}/g, ' ').replace(/[,\s]+$/, '').trim();
 
+        // Also scan unit for T&R codes (sometimes stored there)
+        unitClean.replace(trRe, (m) => { trCodes.push(m); return m; });
+
         // Process remaining crew pilots and notes for codes + extra names
         const processChunk = (chunk: string) => {
           let s = chunk;
@@ -494,22 +499,47 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
           // Split by common separators and keep name-like tokens (letters/uppercase)
           s.split(/[;,/]+/).forEach(tok => {
             const t = tok.trim();
-            if (t && /[A-Za-z]/.test(t)) extraPilots.push(t);
+            if (t && /[A-Za-z]/.test(t) && !nofsRe.test(t)) extraPilots.push(t);
           });
         };
         restPilots.forEach(processChunk);
         if (rawNotes) processChunk(rawNotes);
 
-        // Compose CREW: first pilot name + short codes after, comma terminated
-        const shortPart = shortCodes.length ? '  ' + shortCodes.join(' ') : '';
-        crewVal = firstPilotName ? firstPilotName + ',' + shortPart : shortPart.trim();
-        if (crewVal && !crewVal.endsWith(',')) crewVal += '';
+        // Detect NOFS/Practice case
+        const isNofs = nofsRe.test(rawNotes);
 
-        // Compose Notes: extra pilot names, space-separated (no trailing comma)
-        notesVal = extraPilots.join(' ');
+        if (isNofs) {
+          // Use first pilot name; if absent fall back to unit's reserving pilot name
+          let nofsName = firstPilotName;
+          if (!nofsName) {
+            // Try to pull a name-like token from unit (skip pure-digit/code tokens)
+            const unitTokens = unitClean.split(/[;,/]+/).map(t => t.trim()).filter(Boolean);
+            for (const tok of unitTokens) {
+              const cleaned = tok.replace(trRe, '').replace(shortCodeRe, '').trim();
+              if (cleaned && /[A-Za-z]{2,}/.test(cleaned) && !/MATSS/i.test(cleaned)) {
+                nofsName = cleaned;
+                break;
+              }
+            }
+          }
+          // Also check extra pilots as last resort
+          if (!nofsName && extraPilots.length) {
+            nofsName = extraPilots.shift() || '';
+          }
+          crewVal = nofsName ? `${nofsName}, NOFS` : 'NOFS';
+          notesVal = '';
+        } else {
+          // Compose CREW: first pilot name + short codes after, comma terminated
+          const shortPart = shortCodes.length ? '  ' + shortCodes.join(' ') : '';
+          crewVal = firstPilotName ? firstPilotName + ',' + shortPart : shortPart.trim();
+          if (crewVal && !crewVal.endsWith(',')) crewVal += '';
+
+          // Compose Notes: extra pilot names, space-separated (no trailing comma)
+          notesVal = extraPilots.join(' ');
+        }
 
         // T&R column: prefer extracted code; fall back to stored e.tr
-        if (trCodes.length) trVal = trCodes.join(' ');
+        if (trCodes.length) trVal = Array.from(new Set(trCodes)).join(' ');
 
         // For FTDs, map time to CSI slot and only show if it's an allowed slot
         if (CI_SIM_IDS.includes(simId)) {
