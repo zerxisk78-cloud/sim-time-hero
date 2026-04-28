@@ -607,7 +607,13 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
             return '';
           });
           // Cleanup leftover punctuation/whitespace
-          return remaining.replace(/\s{2,}/g, ' ').replace(/\s*[,;/]\s*[,;/]+/g, ', ').replace(/^[\s,;/]+|[\s,;/]+$/g, '').trim();
+          return remaining
+            .replace(/\s{2,}/g, ' ')
+            .replace(/\s*\.\s*\.+/g, '.')
+            .replace(/\s*[,;/]\s*[,;/]+/g, ', ')
+            .replace(/\s+([.,;])/g, '$1')
+            .replace(/^[\s,;/.]+|[\s,;/]+$/g, '')
+            .trim();
         };
 
         notesVal = scanForLinked(notesVal);
