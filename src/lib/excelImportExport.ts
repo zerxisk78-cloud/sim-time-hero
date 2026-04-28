@@ -263,6 +263,10 @@ function parseRawMSharp(
   const colETD = headers.indexOf('ETD');
   const colUnit = headers.indexOf('Unit');
   const colAirCrew = headers.indexOf('Air Crew');
+  const colLinked = headers.indexOf('Linked Simulators');
+  const colNetwork = headers.indexOf('Network Simulators');
+  const colFlightNote = headers.indexOf('Flight Note');
+  const colNotesSrc = headers.indexOf('Notes');
 
   const simData: Record<string, { time: string; unit: string; crew: string; status: string; tr: string; notes: string }[]> = {};
   const skipped: string[] = [];
