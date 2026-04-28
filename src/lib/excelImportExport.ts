@@ -446,6 +446,7 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
       let notesVal: string = e.notes || '';
       let ci: string | null = null;
       let trVal: string | null = e.tr || null;
+      let linkedVal: string | null = null;
 
       if (isClosed) {
         status = 'UnOPEN,';
