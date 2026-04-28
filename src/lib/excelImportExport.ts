@@ -263,6 +263,10 @@ function parseRawMSharp(
   const colETD = headers.indexOf('ETD');
   const colUnit = headers.indexOf('Unit');
   const colAirCrew = headers.indexOf('Air Crew');
+  const colLinked = headers.indexOf('Linked Simulators');
+  const colNetwork = headers.indexOf('Network Simulators');
+  const colFlightNote = headers.indexOf('Flight Note');
+  const colNotesSrc = headers.indexOf('Notes');
 
   const simData: Record<string, { time: string; unit: string; crew: string; status: string; tr: string; notes: string }[]> = {};
   const skipped: string[] = [];
@@ -278,6 +282,10 @@ function parseRawMSharp(
     const status = row[colStatus] != null ? String(row[colStatus]).trim() : '';
     const unit = row[colUnit] != null ? String(row[colUnit]).trim() : '';
     const airCrew = row[colAirCrew] != null ? String(row[colAirCrew]).trim() : '';
+    const linkedSrc = colLinked >= 0 && row[colLinked] != null ? String(row[colLinked]).trim() : '';
+    const networkSrc = colNetwork >= 0 && row[colNetwork] != null ? String(row[colNetwork]).trim() : '';
+    const flightNoteSrc = colFlightNote >= 0 && row[colFlightNote] != null ? String(row[colFlightNote]).trim() : '';
+    const notesSrc = colNotesSrc >= 0 && row[colNotesSrc] != null ? String(row[colNotesSrc]).trim() : '';
 
     // New sim block?
     if (desc && desc !== currentDesc) {
@@ -343,6 +351,16 @@ function parseRawMSharp(
       } else {
         cleanCrew = crewNames.slice(0, 2).join('/');
         notes = crewNames.slice(2).join('/');
+      }
+
+      // Merge source-side note/linked-sim fields into notes so export can extract them
+      const extraBits: string[] = [];
+      if (linkedSrc) extraBits.push(linkedSrc);
+      if (networkSrc) extraBits.push(networkSrc);
+      if (flightNoteSrc) extraBits.push(flightNoteSrc);
+      if (notesSrc) extraBits.push(notesSrc);
+      if (extraBits.length) {
+        notes = [notes, ...extraBits].filter(Boolean).join(' ; ');
       }
 
       // Check all crew strings for T&R codes
@@ -550,44 +568,52 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
         const normalizeSimRef = (raw: string): string | null => {
           const s = raw.toUpperCase().replace(/\s+/g, ' ').trim();
           // MV-22 variants
-          if (/MV[-\s]?22B?.*?[-\s]14\b/.test(s) || /\b14\b.*MV[-\s]?22/.test(s)) return 'MV-22B-14';
-          if (/MV[-\s]?22B?.*?[-\s]13\b/.test(s) || /\b13\b.*MV[-\s]?22/.test(s)) return 'MV-22B-13';
-          // UH/AH FTD/FFS — ignore trailing 5-digit code
-          if (/AH[-\s]?1Z[-\s]?FTD/.test(s)) return 'AH-1Z-FTD';
-          if (/AH[-\s]?1Z[-\s]?FFS/.test(s)) return 'AH-1Z-FFS';
-          if (/UH[-\s]?1Y[-\s]?FTD/.test(s)) return 'UH-1Y-FTD';
-          if (/UH[-\s]?1Y[-\s]?FFS/.test(s)) return 'UH-1Y-FFS';
+          if (/MV[-\s]*22B?.*?[-\s]14\b/.test(s) || /\b14\b.*MV[-\s]*22/.test(s)) return 'MV-22B-14';
+          if (/MV[-\s]*22B?.*?[-\s]13\b/.test(s) || /\b13\b.*MV[-\s]*22/.test(s)) return 'MV-22B-13';
+          // UH/AH FTD/FFS — ignore trailing 5-digit code; allow whitespace around dashes
+          if (/AH[-\s]*1Z[-\s]*FTD/.test(s)) return 'AH-1Z-FTD';
+          if (/AH[-\s]*1Z[-\s]*FFS/.test(s)) return 'AH-1Z-FFS';
+          if (/UH[-\s]*1Y[-\s]*FTD/.test(s)) return 'UH-1Y-FTD';
+          if (/UH[-\s]*1Y[-\s]*FFS/.test(s)) return 'UH-1Y-FFS';
+          // Shorthand "UH FTD" / "AH FTD" / "UH FFS" / "AH FFS"
+          if (/\bAH[-\s]*FTD\b/.test(s)) return 'AH-1Z-FTD';
+          if (/\bAH[-\s]*FFS\b/.test(s)) return 'AH-1Z-FFS';
+          if (/\bUH[-\s]*FTD\b/.test(s)) return 'UH-1Y-FTD';
+          if (/\bUH[-\s]*FFS\b/.test(s)) return 'UH-1Y-FFS';
           // Bare "Y-FTD" / "Z-FFS" etc. (often used after "link")
-          if (/\bZ[-\s]?FTD\b/.test(s)) return 'AH-1Z-FTD';
-          if (/\bZ[-\s]?FFS\b/.test(s)) return 'AH-1Z-FFS';
-          if (/\bY[-\s]?FTD\b/.test(s)) return 'UH-1Y-FTD';
-          if (/\bY[-\s]?FFS\b/.test(s)) return 'UH-1Y-FFS';
-          // Bare "Y" or "Z" after "link" — assume FTD as default sim type? Too ambiguous.
-          // Only handle when paired with FTD/FFS designation above.
-          if (/\bZ\b/.test(s) && !/\bY\b/.test(s)) return 'AH-1Z';
-          if (/\bY\b/.test(s) && !/\bZ\b/.test(s)) return 'UH-1Y';
+          if (/\bZ[-\s]*FTD\b/.test(s)) return 'AH-1Z-FTD';
+          if (/\bZ[-\s]*FFS\b/.test(s)) return 'AH-1Z-FFS';
+          if (/\bY[-\s]*FTD\b/.test(s)) return 'UH-1Y-FTD';
+          if (/\bY[-\s]*FFS\b/.test(s)) return 'UH-1Y-FFS';
+          // Bare "Y" or "Z" after "link" — too ambiguous; skip
           return null;
         };
 
         const scanForLinked = (text: string): string => {
           if (!text) return text;
           let remaining = text;
-          // Match "link" / "linked" optionally followed by simulator descriptor up to next separator
-          const linkRe = /\b(linked|link)\b[^,;/\n]*/gi;
+          // Match "link" / "linked" optionally followed by simulator descriptor up to next sentence break
+          const linkRe = /\b(linked|link)\b[^,;.\n]*/gi;
           remaining = remaining.replace(linkRe, (match) => {
             const ref = normalizeSimRef(match.replace(/\b(linked|link)\b/gi, ''));
             if (ref && !linkedSims.includes(ref)) linkedSims.push(ref);
-            return '';
+            return ref ? '' : match; // keep text if we couldn't extract a ref
           });
-          // Also pick up bare full simulator designators (without "link" prefix)
-          const bareRe = /\b(?:MV[-\s]?22B?[^,;/\n]*?[-\s](?:13|14)|AH[-\s]?1Z[-\s]?(?:FTD|FFS)(?:\s*\d[A-Z0-9-]*)?|UH[-\s]?1Y[-\s]?(?:FTD|FFS)(?:\s*\d[A-Z0-9-]*)?)\b/gi;
+          // Also pick up bare full simulator designators (without "link" prefix), allow spaces around dashes
+          const bareRe = /\b(?:MV[-\s]*22B?[^,;.\n]*?[-\s](?:13|14)|AH[-\s]*1Z[-\s]*(?:FTD|FFS)(?:[-\s]*[A-Z0-9-]+)?|UH[-\s]*1Y[-\s]*(?:FTD|FFS)(?:[-\s]*[A-Z0-9-]+)?)\b/gi;
           remaining = remaining.replace(bareRe, (match) => {
             const ref = normalizeSimRef(match);
             if (ref && !linkedSims.includes(ref)) linkedSims.push(ref);
             return '';
           });
           // Cleanup leftover punctuation/whitespace
-          return remaining.replace(/\s{2,}/g, ' ').replace(/\s*[,;/]\s*[,;/]+/g, ', ').replace(/^[\s,;/]+|[\s,;/]+$/g, '').trim();
+          return remaining
+            .replace(/\s{2,}/g, ' ')
+            .replace(/\s*\.\s*\.+/g, '.')
+            .replace(/\s*[,;/]\s*[,;/]+/g, ', ')
+            .replace(/\s+([.,;])/g, '$1')
+            .replace(/^[\s,;/.]+|[\s,;/]+$/g, '')
+            .trim();
         };
 
         notesVal = scanForLinked(notesVal);
