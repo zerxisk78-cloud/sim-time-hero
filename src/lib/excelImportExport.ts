@@ -627,16 +627,21 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
     },
   };
 
+  // CI column index in finalRows (header label is 'CI')
+  const ciColIdx = hasAnyLinkedSims ? 6 : 5;
+
   // Apply styles per sim block
   for (let h = 0; h < headerRowIndices.length; h++) {
     const hdrRow = headerRowIndices[h];
     const nextHdrRow = h + 1 < headerRowIndices.length ? headerRowIndices[h + 1] : finalRows.length;
 
-    // Header row: blue bg, white bold text
+    // Header row: blue bg, white bold text (CI header centered)
     for (let c = 0; c < colCount; c++) {
       const addr = XLSX.utils.encode_cell({ r: hdrRow, c });
       if (!ws[addr]) ws[addr] = { v: '', t: 's' };
-      ws[addr].s = headerStyle;
+      ws[addr].s = c === ciColIdx
+        ? { ...headerStyle, alignment: { horizontal: 'center', vertical: 'center' } }
+        : headerStyle;
     }
 
     // Data rows: alternating banded rows
@@ -645,13 +650,16 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
       for (let c = 0; c < colCount; c++) {
         const addr = XLSX.utils.encode_cell({ r, c });
         if (!ws[addr]) ws[addr] = { v: '', t: 's' };
-        ws[addr].s = bandIdx % 2 === 0 ? bandWhite : bandLight;
+        const base = bandIdx % 2 === 0 ? bandWhite : bandLight;
+        ws[addr].s = c === ciColIdx
+          ? { ...base, alignment: { horizontal: 'center', vertical: 'center', shrinkToFit: true } }
+          : base;
       }
       bandIdx++;
     }
   }
 
-  // Set column widths
+  // Set column widths (CI column shrunk to fit single/double digits)
   ws['!cols'] = [
     { wch: 28 },
     { wch: 14 },
@@ -659,7 +667,7 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
     { wch: 18 },
     ...(hasAnyLinkedSims ? [{ wch: 18 }] : []),
     { wch: 12 },
-    { wch: 8 },
+    { wch: 5 },
     { wch: 18 },
     { wch: 20 },
   ];
