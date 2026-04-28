@@ -446,6 +446,7 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
       let notesVal: string = e.notes || '';
       let ci: string | null = null;
       let trVal: string | null = e.tr || null;
+      let linkedVal: string | null = null;
 
       if (isClosed) {
         status = 'UnOPEN,';
@@ -541,6 +542,58 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
         // T&R column: prefer extracted code; fall back to stored e.tr
         if (trCodes.length) trVal = Array.from(new Set(trCodes)).join(' ');
 
+        // ---- Linked Simulators detection ----
+        // Scan unit, crew, and notes for simulator references and "link/linked X" tokens.
+        // Abbreviate per spec and move them to the Linked Simulators column.
+        const linkedSims: string[] = [];
+
+        const normalizeSimRef = (raw: string): string | null => {
+          const s = raw.toUpperCase().replace(/\s+/g, ' ').trim();
+          // MV-22 variants
+          if (/MV[-\s]?22B?.*?[-\s]14\b/.test(s) || /\b14\b.*MV[-\s]?22/.test(s)) return 'MV-22B-14';
+          if (/MV[-\s]?22B?.*?[-\s]13\b/.test(s) || /\b13\b.*MV[-\s]?22/.test(s)) return 'MV-22B-13';
+          // UH/AH FTD/FFS — ignore trailing 5-digit code
+          if (/AH[-\s]?1Z[-\s]?FTD/.test(s)) return 'AH-1Z-FTD';
+          if (/AH[-\s]?1Z[-\s]?FFS/.test(s)) return 'AH-1Z-FFS';
+          if (/UH[-\s]?1Y[-\s]?FTD/.test(s)) return 'UH-1Y-FTD';
+          if (/UH[-\s]?1Y[-\s]?FFS/.test(s)) return 'UH-1Y-FFS';
+          // Bare "Y-FTD" / "Z-FFS" etc. (often used after "link")
+          if (/\bZ[-\s]?FTD\b/.test(s)) return 'AH-1Z-FTD';
+          if (/\bZ[-\s]?FFS\b/.test(s)) return 'AH-1Z-FFS';
+          if (/\bY[-\s]?FTD\b/.test(s)) return 'UH-1Y-FTD';
+          if (/\bY[-\s]?FFS\b/.test(s)) return 'UH-1Y-FFS';
+          // Bare "Y" or "Z" after "link" — assume FTD as default sim type? Too ambiguous.
+          // Only handle when paired with FTD/FFS designation above.
+          if (/\bZ\b/.test(s) && !/\bY\b/.test(s)) return 'AH-1Z';
+          if (/\bY\b/.test(s) && !/\bZ\b/.test(s)) return 'UH-1Y';
+          return null;
+        };
+
+        const scanForLinked = (text: string): string => {
+          if (!text) return text;
+          let remaining = text;
+          // Match "link" / "linked" optionally followed by simulator descriptor up to next separator
+          const linkRe = /\b(linked|link)\b[^,;/\n]*/gi;
+          remaining = remaining.replace(linkRe, (match) => {
+            const ref = normalizeSimRef(match.replace(/\b(linked|link)\b/gi, ''));
+            if (ref && !linkedSims.includes(ref)) linkedSims.push(ref);
+            return '';
+          });
+          // Also pick up bare full simulator designators (without "link" prefix)
+          const bareRe = /\b(?:MV[-\s]?22B?[^,;/\n]*?[-\s](?:13|14)|AH[-\s]?1Z[-\s]?(?:FTD|FFS)(?:\s*\d[A-Z0-9-]*)?|UH[-\s]?1Y[-\s]?(?:FTD|FFS)(?:\s*\d[A-Z0-9-]*)?)\b/gi;
+          remaining = remaining.replace(bareRe, (match) => {
+            const ref = normalizeSimRef(match);
+            if (ref && !linkedSims.includes(ref)) linkedSims.push(ref);
+            return '';
+          });
+          // Cleanup leftover punctuation/whitespace
+          return remaining.replace(/\s{2,}/g, ' ').replace(/\s*[,;/]\s*[,;/]+/g, ', ').replace(/^[\s,;/]+|[\s,;/]+$/g, '').trim();
+        };
+
+        notesVal = scanForLinked(notesVal);
+        crewVal = scanForLinked(crewVal);
+        linkedVal = linkedSims.length ? linkedSims.join(', ') : null;
+
         // For FTDs, map time to CSI slot and only show if it's an allowed slot
         if (CI_SIM_IDS.includes(simId)) {
           const timeKey = (e.time || '').replace(/[^0-9:]/g, '').trim();
@@ -555,7 +608,7 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
         status,
         e.time,
         unitVal,
-        null,
+        linkedVal,
         trVal,
         ci,
         crewVal,
