@@ -353,6 +353,16 @@ function parseRawMSharp(
         notes = crewNames.slice(2).join('/');
       }
 
+      // Merge source-side note/linked-sim fields into notes so export can extract them
+      const extraBits: string[] = [];
+      if (linkedSrc) extraBits.push(linkedSrc);
+      if (networkSrc) extraBits.push(networkSrc);
+      if (flightNoteSrc) extraBits.push(flightNoteSrc);
+      if (notesSrc) extraBits.push(notesSrc);
+      if (extraBits.length) {
+        notes = [notes, ...extraBits].filter(Boolean).join(' ; ');
+      }
+
       // Check all crew strings for T&R codes
       for (const rawCrew of [airCrew, ...crewNames]) {
         const trCode = extractTRCode(rawCrew);
