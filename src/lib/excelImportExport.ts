@@ -592,7 +592,10 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
 
         notesVal = scanForLinked(notesVal);
         crewVal = scanForLinked(crewVal);
-        linkedVal = linkedSims.length ? linkedSims.join(', ') : null;
+        // Also scan unit field — sometimes linked sim references appear there
+        const cleanedUnit = scanForLinked(unitVal.replace(/,\s*$/, ''));
+        unitVal = cleanedUnit ? cleanedUnit + ',' : '';
+        linkedVal = linkedSims.length ? Array.from(new Set(linkedSims)).join(', ') : null;
 
         // For FTDs, map time to CSI slot and only show if it's an allowed slot
         if (CI_SIM_IDS.includes(simId)) {
