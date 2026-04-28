@@ -282,6 +282,10 @@ function parseRawMSharp(
     const status = row[colStatus] != null ? String(row[colStatus]).trim() : '';
     const unit = row[colUnit] != null ? String(row[colUnit]).trim() : '';
     const airCrew = row[colAirCrew] != null ? String(row[colAirCrew]).trim() : '';
+    const linkedSrc = colLinked >= 0 && row[colLinked] != null ? String(row[colLinked]).trim() : '';
+    const networkSrc = colNetwork >= 0 && row[colNetwork] != null ? String(row[colNetwork]).trim() : '';
+    const flightNoteSrc = colFlightNote >= 0 && row[colFlightNote] != null ? String(row[colFlightNote]).trim() : '';
+    const notesSrc = colNotesSrc >= 0 && row[colNotesSrc] != null ? String(row[colNotesSrc]).trim() : '';
 
     // New sim block?
     if (desc && desc !== currentDesc) {
