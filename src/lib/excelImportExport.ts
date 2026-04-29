@@ -557,8 +557,8 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
           notesVal = extraPilots.join(' ');
         }
 
-        // T&R column: prefer extracted code; fall back to stored e.tr
-        if (trCodes.length) trVal = Array.from(new Set(trCodes)).join(' ');
+        // T&R column: prefer extracted code; fall back to stored e.tr (only one code)
+        if (trCodes.length) trVal = Array.from(new Set(trCodes))[0];
 
         // ---- Linked Simulators detection ----
         // Scan unit, crew, and notes for simulator references and "link/linked X" tokens.
