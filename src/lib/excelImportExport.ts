@@ -557,8 +557,8 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
           notesVal = extraPilots.join(' ');
         }
 
-        // T&R column: prefer extracted code; fall back to stored e.tr
-        if (trCodes.length) trVal = Array.from(new Set(trCodes)).join(' ');
+        // T&R column: prefer extracted code; fall back to stored e.tr (only one code)
+        if (trCodes.length) trVal = Array.from(new Set(trCodes))[0];
 
         // ---- Linked Simulators detection ----
         // Scan unit, crew, and notes for simulator references and "link/linked X" tokens.
@@ -711,17 +711,19 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
 
   // CI column index in finalRows (header label is 'CI')
   const ciColIdx = hasAnyLinkedSims ? 6 : 5;
+  // T&R column index in finalRows
+  const trColIdx = hasAnyLinkedSims ? 5 : 4;
 
   // Apply styles per sim block
   for (let h = 0; h < headerRowIndices.length; h++) {
     const hdrRow = headerRowIndices[h];
     const nextHdrRow = h + 1 < headerRowIndices.length ? headerRowIndices[h + 1] : finalRows.length;
 
-    // Header row: blue bg, white bold text (CI header centered)
+    // Header row: blue bg, white bold text (CI & T&R headers centered)
     for (let c = 0; c < colCount; c++) {
       const addr = XLSX.utils.encode_cell({ r: hdrRow, c });
       if (!ws[addr]) ws[addr] = { v: '', t: 's' };
-      ws[addr].s = c === ciColIdx
+      ws[addr].s = (c === ciColIdx || c === trColIdx)
         ? { ...headerStyle, alignment: { horizontal: 'center', vertical: 'center' } }
         : headerStyle;
     }
@@ -733,7 +735,7 @@ export function exportSimScheduleExcel(scheduleDate?: string, includedSimIds?: s
         const addr = XLSX.utils.encode_cell({ r, c });
         if (!ws[addr]) ws[addr] = { v: '', t: 's' };
         const base = bandIdx % 2 === 0 ? bandWhite : bandLight;
-        ws[addr].s = c === ciColIdx
+        ws[addr].s = (c === ciColIdx || c === trColIdx)
           ? { ...base, alignment: { horizontal: 'center', vertical: 'center', shrinkToFit: true } }
           : base;
       }
