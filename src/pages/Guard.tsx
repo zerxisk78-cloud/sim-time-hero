@@ -39,7 +39,21 @@ export default function GuardPage() {
   }, [loadData]);
 
   const allSims = [...SIMULATORS, ...extraSims.map(s => ({ ...s, shortName: s.name, timeSlots: [] as string[] }))];
-  const visibleSims = allSims.filter(s => visibility.simulators[s.id] !== false);
+  // Guard-view custom grouping order:
+  // AH-1Z FFS/FTD, UH-1Y FFS/FTD, MCAT + MV-22 13/14, MRTs, then PTT + CPTs at bottom
+  const guardOrder = [
+    'ah1z-ffs', 'ah1z-ftd',
+    'uh1y-ffs', 'uh1y-ftd',
+    'mcat', 'mv22-13',
+    'mv22-14',
+    'mrt-1', 'mrt-2', 'mrt-3', 'mrt-4',
+    'mv22-ptt', 'ah1z-cpt', 'uh1y-cpt',
+  ];
+  const orderedSims = [
+    ...guardOrder.map(id => allSims.find(s => s.id === id)).filter((s): s is typeof allSims[number] => !!s),
+    ...allSims.filter(s => !guardOrder.includes(s.id)),
+  ];
+  const visibleSims = orderedSims.filter(s => visibility.simulators[s.id] !== false);
 
   return (
     <div className="flex min-h-screen">
