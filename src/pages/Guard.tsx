@@ -44,10 +44,12 @@ export default function GuardPage() {
   const guardOrder = [
     'ah1z-ffs', 'ah1z-ftd',
     'uh1y-ffs', 'uh1y-ftd',
-    'mcat', 'mv22-13',
-    'mv22-14',
-    'mrt-1', 'mrt-2', 'mrt-3', 'mrt-4',
-    'mv22-ptt', 'ah1z-cpt', 'uh1y-cpt',
+    'mrt-1', 'mrt-2',
+    'mrt-3', 'mrt-4',
+    'mv22-13', 'mv22-14',
+    'mcat',
+    'mv22-ptt',
+    'ah1z-cpt', 'uh1y-cpt',
   ];
   const orderedSims = [
     ...guardOrder.map(id => allSims.find(s => s.id === id)).filter((s): s is typeof allSims[number] => !!s),
