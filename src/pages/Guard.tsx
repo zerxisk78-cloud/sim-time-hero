@@ -44,10 +44,12 @@ export default function GuardPage() {
   const guardOrder = [
     'ah1z-ffs', 'ah1z-ftd',
     'uh1y-ffs', 'uh1y-ftd',
-    'mcat', 'mv22-13',
-    'mv22-14',
-    'mrt-1', 'mrt-2', 'mrt-3', 'mrt-4',
-    'mv22-ptt', 'ah1z-cpt', 'uh1y-cpt',
+    'mrt-1', 'mrt-2',
+    'mrt-3', 'mrt-4',
+    'mv22-13', 'mv22-14',
+    'mcat',
+    'mv22-ptt',
+    'ah1z-cpt', 'uh1y-cpt',
   ];
   const orderedSims = [
     ...guardOrder.map(id => allSims.find(s => s.id === id)).filter((s): s is typeof allSims[number] => !!s),
@@ -71,7 +73,9 @@ export default function GuardPage() {
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           {visibleSims.map(sim => (
-            <SimScheduleTable key={sim.id} simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} currentHour={new Date().getHours()} currentMinute={new Date().getMinutes()} larger />
+            <div key={sim.id} className={sim.id === 'mcat' || sim.id === 'mv22-ptt' ? 'xl:col-span-2' : ''}>
+              <SimScheduleTable simId={sim.id} name={getDisplayName(sim.id)} entries={simData[sim.id] || []} mrtLocation={mrtLocations[sim.id]} currentHour={new Date().getHours()} currentMinute={new Date().getMinutes()} larger />
+            </div>
           ))}
         </div>
 
