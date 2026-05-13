@@ -95,6 +95,13 @@ try {
   Write-Step 'Install frontend dependencies'
   Invoke-Step $npmCmd @('install') $repoRoot
 
+  Write-Step 'Update frontend dependencies (npm update)'
+  try {
+    Invoke-Step $npmCmd @('update') $repoRoot
+  } catch {
+    Write-Host "npm update (frontend) skipped: $($_.Exception.Message)" -ForegroundColor Yellow
+  }
+
   Write-Step 'Audit fix frontend dependencies'
   try {
     Invoke-Step $npmCmd @('audit', 'fix') $repoRoot
@@ -109,6 +116,13 @@ try {
 
   Write-Step 'Install server dependencies'
   Invoke-Step $npmCmd @('install') $serverDir
+
+  Write-Step 'Update server dependencies (npm update)'
+  try {
+    Invoke-Step $npmCmd @('update') $serverDir
+  } catch {
+    Write-Host "npm update (server) skipped: $($_.Exception.Message)" -ForegroundColor Yellow
+  }
 
   Write-Step 'Audit fix server dependencies'
   try {
