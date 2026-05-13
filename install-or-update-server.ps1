@@ -155,28 +155,36 @@ try {
     Write-Host "PM2 startup setup skipped: $($_.Exception.Message)" -ForegroundColor Yellow
   }
 
-  # Create a Windows scheduled task as a reliable fallback
+  # Create/verify a Windows scheduled task for reliable boot persistence
   $taskName = 'MATSS PM2 Server'
-  $existingTask = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
-  if (-not $existingTask) {
-    $nodeCmd = (Get-Command node -ErrorAction SilentlyContinue).Source
-    if ($nodeCmd) {
-      $pm2Module = Join-Path (Split-Path (Split-Path $nodeCmd)) 'node_modules\pm2\bin\pm2'
-      $ecosystemFull = Join-Path $serverDir 'ecosystem.config.js'
-      $action = New-ScheduledTaskAction -Execute $nodeCmd -Argument "`"$pm2Module`" resurrect"
-      $trigger = New-ScheduledTaskTrigger -AtStartup
-      $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
-      $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest
-      Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal | Out-Null
-      Write-Host "Scheduled task '$taskName' created for boot persistence." -ForegroundColor Green
-    } else {
-      Write-Host 'Could not locate node.exe for scheduled task.' -ForegroundColor Yellow
+  $nodeCmd = (Get-Command node -ErrorAction SilentlyContinue).Source
+  if ($nodeCmd) {
+    $pm2Module = Join-Path (Split-Path (Split-Path $nodeCmd)) 'node_modules\pm2\bin\pm2'
+    $action = New-ScheduledTaskAction -Execute $nodeCmd -Argument "`"$pm2Module`" resurrect"
+    $trigger = New-ScheduledTaskTrigger -AtStartup
+    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
+    $taskPrincipal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest
+
+    $existingTask = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+    if ($existingTask) {
+      # Re-register to ensure it points to the current node/pm2 paths after Windows/Node updates
+      Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
+      Write-Host "Refreshing scheduled task '$taskName' to use current paths." -ForegroundColor DarkGray
+    }
+    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Principal $taskPrincipal | Out-Null
+    Write-Host "Scheduled task '$taskName' registered for boot persistence." -ForegroundColor Green
+
+    # Verify it is enabled and ready
+    $verify = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+    if ($verify -and $verify.State -eq 'Disabled') {
+      Enable-ScheduledTask -TaskName $taskName | Out-Null
+      Write-Host 'Scheduled task was disabled; re-enabled.' -ForegroundColor Yellow
     }
   } else {
-    Write-Host "Scheduled task '$taskName' already exists." -ForegroundColor DarkGray
+    Write-Host 'Could not locate node.exe for scheduled task.' -ForegroundColor Yellow
   }
 
-  Write-Step 'Save PM2 process list'
+  Write-Step 'Save PM2 process list (so resurrect can restore on boot)'
   Invoke-Step $pm2Command @('save') $serverDir
 
   Write-Step 'Completed successfully'
