@@ -70,6 +70,15 @@ try {
 
   Require-Command 'node' 'Install Node.js LTS first: https://nodejs.org/'
 
+  Write-Step 'Update npm to the latest version'
+  try {
+    Invoke-Step $npmCmd @('install', '-g', 'npm@latest') $repoRoot
+    # Re-resolve npm path in case the global update relocated the shim
+    $npmCmd = Resolve-CommandPath @('npm.cmd', 'npm') 'npm not found after update.'
+  } catch {
+    Write-Host "npm self-update skipped: $($_.Exception.Message)" -ForegroundColor Yellow
+  }
+
   if ((Test-Path (Join-Path $repoRoot '.git')) -and (-not $SkipGitPull)) {
     if ($gitCmd) {
       Write-Step 'Pull latest code from Git'
