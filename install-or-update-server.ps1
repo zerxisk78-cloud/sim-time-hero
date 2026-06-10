@@ -150,10 +150,28 @@ try {
 
   Write-Step 'Start or restart the PM2 server'
   $ecosystemConfig = Join-Path $serverDir 'ecosystem.config.js'
-  $describe = Start-Process -FilePath $pm2Command -ArgumentList @('describe', 'matss-server') -WorkingDirectory $serverDir -NoNewWindow -Wait -PassThru
-  if ($describe.ExitCode -eq 0) {
-    Invoke-Step $pm2Command @('restart', 'matss-server') $serverDir
+
+  # Robust check: inspect `pm2 jlist` stdout for the matss-server process name
+  # rather than relying on `pm2 describe` exit codes (which are inconsistent across versions)
+  $processExists = $false
+  try {
+    $jlistOutput = & $pm2Command jlist 2>$null | Out-String
+    if ($jlistOutput -and $jlistOutput.Trim().StartsWith('[')) {
+      $processes = $jlistOutput | ConvertFrom-Json
+      if ($processes | Where-Object { $_.name -eq 'matss-server' }) {
+        $processExists = $true
+      }
+    }
+  } catch {
+    Write-Host "pm2 jlist parse failed, falling back to fresh start: $($_.Exception.Message)" -ForegroundColor Yellow
+    $processExists = $false
+  }
+
+  if ($processExists) {
+    Write-Host "Existing matss-server process detected; restarting." -ForegroundColor DarkGray
+    Invoke-Step $pm2Command @('restart', 'matss-server', '--update-env') $serverDir
   } else {
+    Write-Host "No existing matss-server process; starting fresh from ecosystem config." -ForegroundColor DarkGray
     Invoke-Step $pm2Command @('start', $ecosystemConfig) $serverDir
   }
 
