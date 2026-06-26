@@ -76,11 +76,19 @@ function extractTRCode(text: string): string | null {
 }
 
 // ---- IMPORT ----
+export interface ImportRowError {
+  rowNumber: number; // 1-based Excel row number
+  simId?: string;
+  field: string;
+  message: string;
+  snippet?: string;
+}
 export interface ImportResult {
   simData: Record<string, SimSlot[]>;
   skipped: string[];
   date: string;
   titleRows: string[];
+  rowErrors: ImportRowError[];
 }
 
 // Auto-detect format and parse accordingly
