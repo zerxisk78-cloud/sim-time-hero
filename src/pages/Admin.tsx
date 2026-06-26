@@ -746,6 +746,16 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
           <Button onClick={handleExport} size="sm" variant="outline" className="text-xs h-8 gap-1.5">
             <Download className="h-3.5 w-3.5" /> Export SimSchedule
           </Button>
+          {report && (
+            <Button
+              onClick={() => setReport(r => r && { ...r })}
+              size="sm"
+              variant={report.hasIssues ? 'destructive' : 'secondary'}
+              className="text-xs h-8 gap-1.5"
+            >
+              {report.hasIssues ? '⚠ View Import Status' : '✓ View Import Status'}
+            </Button>
+          )}
         </div>
         <div className="text-xs text-muted-foreground">
           <strong>Include in export:</strong>
