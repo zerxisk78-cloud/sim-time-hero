@@ -581,6 +581,15 @@ type ImportSimReport = {
   missingTimes: string[];
 };
 
+type ImportRowErrorView = {
+  rowNumber: number;
+  simId?: string;
+  simName?: string;
+  field: string;
+  message: string;
+  snippet?: string;
+};
+
 type ImportReport = {
   fileName: string;
   date: string;
@@ -588,6 +597,7 @@ type ImportReport = {
   skipped: string[];
   missingSims: string[];
   sims: ImportSimReport[];
+  rowErrors: ImportRowErrorView[];
   hasIssues: boolean;
   error?: string;
 };
