@@ -570,9 +570,32 @@ function BackupRestore({ onRestore }: { onRestore: () => void }) {
   );
 }
 
+type ImportSimReport = {
+  simId: string;
+  name: string;
+  totalSlots: number;
+  filledSlots: number;
+  openSlots: number;
+  closedSlots: number;
+  emptyTimes: string[];
+  missingTimes: string[];
+};
+
+type ImportReport = {
+  fileName: string;
+  date: string;
+  importedCount: number;
+  skipped: string[];
+  missingSims: string[];
+  sims: ImportSimReport[];
+  hasIssues: boolean;
+  error?: string;
+};
+
 function MSharpImportExport({ onImport }: { onImport: () => void }) {
   const [importing, setImporting] = useState(false);
   const [importedTitleRows, setImportedTitleRows] = useState<string[]>([]);
+  const [report, setReport] = useState<ImportReport | null>(null);
   const [exportToggles, setExportToggles] = useState<Record<string, boolean>>(() => {
     const defaults: Record<string, boolean> = {};
     SIMULATORS.forEach(s => {
@@ -589,28 +612,100 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
     const file = e.target.files?.[0];
     if (!file) return;
     setImporting(true);
+    const fileName = file.name;
     try {
       const data = await file.arrayBuffer();
       const result = parseMSharpExcel(data);
-      let count = 0;
+
+      // Build per-sim report BEFORE saving so we can compare expected slots
+      const sims: ImportSimReport[] = [];
+      let importedCount = 0;
       for (const [simId, entries] of Object.entries(result.simData)) {
+        const simMeta = SIMULATORS.find(s => s.id === simId);
+        const expectedTimes = simMeta?.timeSlots ?? [];
+        const importedTimes = entries.map(e => (e.time || '').trim());
+
+        let filled = 0, open = 0, closed = 0;
+        const emptyTimes: string[] = [];
+        for (const slot of entries) {
+          const u = (slot.unit || '').toUpperCase();
+          const c = (slot.crew || '').toUpperCase();
+          if (u === 'OPEN' || c === 'OPEN') open++;
+          else if (u === 'CLOSED' || c === 'CLOSED') closed++;
+          else if ((slot.unit && slot.unit.trim()) || (slot.crew && slot.crew.trim())) filled++;
+          else emptyTimes.push(slot.time || '(no time)');
+        }
+
+        const missingTimes = expectedTimes.filter(t => !importedTimes.includes(t));
+
+        sims.push({
+          simId,
+          name: getDisplayName(simId),
+          totalSlots: entries.length,
+          filledSlots: filled,
+          openSlots: open,
+          closedSlots: closed,
+          emptyTimes,
+          missingTimes,
+        });
+
         saveSimEntries(simId, entries);
-        count++;
+        importedCount++;
       }
+
+      // Sims known to the system that weren't found in the file at all
+      const importedIds = new Set(Object.keys(result.simData));
+      const missingSims = SIMULATORS
+        .filter(s => !importedIds.has(s.id) && s.id !== 'mv22-ptt')
+        .map(s => s.name);
+
       if (result.titleRows.length > 0) {
         setImportedTitleRows(result.titleRows);
       }
-      toast.success(`Imported ${count} simulators from M-SHARP`);
-      if (result.skipped.length > 0) {
-        toast.info(`Skipped unknown sims: ${result.skipped.join(', ')}`);
+
+      const hasIssues =
+        importedCount === 0 ||
+        result.skipped.length > 0 ||
+        missingSims.length > 0 ||
+        sims.some(s => s.totalSlots === 0 || s.missingTimes.length > 0 || s.emptyTimes.length > 0);
+
+      const rpt: ImportReport = {
+        fileName,
+        date: result.date,
+        importedCount,
+        skipped: result.skipped,
+        missingSims,
+        sims: sims.sort((a, b) => a.name.localeCompare(b.name)),
+        hasIssues,
+      };
+      setReport(rpt);
+
+      if (importedCount === 0) {
+        toast.error('Import finished but NO simulators were populated — check the status report.');
+      } else if (hasIssues) {
+        toast.warning(`Imported ${importedCount} simulators with issues — see status report.`);
+      } else {
+        toast.success(`Imported ${importedCount} simulators from M-SHARP — all slots populated.`);
       }
       onImport();
     } catch (err) {
-      toast.error(`Import failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast.error(`Import failed: ${msg}`);
+      setReport({
+        fileName,
+        date: '',
+        importedCount: 0,
+        skipped: [],
+        missingSims: [],
+        sims: [],
+        hasIssues: true,
+        error: msg,
+      });
     }
     setImporting(false);
     e.target.value = '';
   };
+
 
   const handleExport = () => {
     try {
