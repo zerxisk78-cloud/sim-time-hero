@@ -30,6 +30,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, v
 import { CSS } from "@dnd-kit/utilities";
 import { resetServerCheck, syncFromServer } from "@/lib/api";
 import { parseMSharpExcel, exportSimScheduleExcel } from "@/lib/excelImportExport";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 
 const FIELD_ORDER: (keyof SimSlot)[] = ['time', 'unit', 'crew', 'csi'];
