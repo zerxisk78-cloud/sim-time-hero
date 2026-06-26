@@ -844,6 +844,44 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
                 </div>
               )}
 
+              {report.rowErrors.length > 0 && (
+                <div className="p-2 rounded border border-destructive/40 bg-destructive/10 text-xs">
+                  <div className="mb-1">
+                    <strong>Row-level issues ({report.rowErrors.length}):</strong>{' '}
+                    <span className="text-muted-foreground">Excel row # is shown so you can jump to it in the source file.</span>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto border border-border rounded">
+                    <table className="w-full text-[11px]">
+                      <thead className="bg-muted/50 sticky top-0">
+                        <tr>
+                          <th className="text-left p-1.5 w-14">Row</th>
+                          <th className="text-left p-1.5">Simulator</th>
+                          <th className="text-left p-1.5 w-24">Field</th>
+                          <th className="text-left p-1.5">Issue</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {report.rowErrors.map((e, idx) => (
+                          <tr key={`${e.rowNumber}-${idx}`} className="border-t border-border">
+                            <td className="p-1.5 font-mono">{e.rowNumber}</td>
+                            <td className="p-1.5">{e.simName || <span className="text-muted-foreground">—</span>}</td>
+                            <td className="p-1.5 font-mono">{e.field}</td>
+                            <td className="p-1.5">
+                              <div>{e.message}</div>
+                              {e.snippet && (
+                                <div className="text-muted-foreground font-mono mt-0.5 truncate" title={e.snippet}>
+                                  {e.snippet}
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
               {report.sims.length > 0 && (
                 <div className="border border-border rounded overflow-hidden">
                   <table className="w-full text-xs">
