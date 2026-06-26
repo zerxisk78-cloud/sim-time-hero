@@ -680,6 +680,7 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
         hasIssues,
       };
       setReport(rpt);
+      setReportOpen(true);
 
       if (importedCount === 0) {
         toast.error('Import finished but NO simulators were populated — check the status report.');
