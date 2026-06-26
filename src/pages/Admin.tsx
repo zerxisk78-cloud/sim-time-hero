@@ -783,6 +783,104 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
           <strong>Export:</strong> Downloads a cleaned SimSchedule(date).xlsx with only the selected simulators.
         </div>
       </CardContent>
+      <Dialog open={reportOpen} onOpenChange={setReportOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {report?.hasIssues ? '⚠ Import Status — Issues Found' : '✓ Import Status — Success'}
+            </DialogTitle>
+          </DialogHeader>
+          {report && (
+            <div className="space-y-3 text-sm">
+              <div className="text-xs text-muted-foreground">
+                <div><strong>File:</strong> {report.fileName}</div>
+                {report.date && <div><strong>Date detected:</strong> {report.date}</div>}
+                <div><strong>Simulators imported:</strong> {report.importedCount}</div>
+              </div>
+
+              {report.error && (
+                <div className="p-2 rounded border border-destructive bg-destructive/10 text-destructive text-xs">
+                  <strong>Parse error:</strong> {report.error}
+                </div>
+              )}
+
+              {report.skipped.length > 0 && (
+                <div className="p-2 rounded border border-amber-500/40 bg-amber-500/10 text-xs">
+                  <strong>Skipped (unknown sim names in file):</strong>
+                  <ul className="list-disc list-inside mt-1">
+                    {report.skipped.map(s => <li key={s}>{s}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {report.missingSims.length > 0 && (
+                <div className="p-2 rounded border border-amber-500/40 bg-amber-500/10 text-xs">
+                  <strong>Simulators NOT found in this file:</strong>
+                  <ul className="list-disc list-inside mt-1">
+                    {report.missingSims.map(s => <li key={s}>{s}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {report.sims.length > 0 && (
+                <div className="border border-border rounded overflow-hidden">
+                  <table className="w-full text-xs">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="text-left p-2">Simulator</th>
+                        <th className="text-center p-2">Slots</th>
+                        <th className="text-center p-2">Filled</th>
+                        <th className="text-center p-2">Open</th>
+                        <th className="text-center p-2">Closed</th>
+                        <th className="text-left p-2">Issues</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {report.sims.map(s => {
+                        const hasIssue = s.totalSlots === 0 || s.missingTimes.length > 0;
+                        return (
+                          <tr key={s.simId} className={`border-t border-border ${hasIssue ? 'bg-destructive/5' : ''}`}>
+                            <td className="p-2 font-medium">{s.name}</td>
+                            <td className="p-2 text-center">{s.totalSlots}</td>
+                            <td className="p-2 text-center">{s.filledSlots}</td>
+                            <td className="p-2 text-center">{s.openSlots}</td>
+                            <td className="p-2 text-center">{s.closedSlots}</td>
+                            <td className="p-2 text-xs">
+                              {s.totalSlots === 0 && <span className="text-destructive">No data imported. </span>}
+                              {s.missingTimes.length > 0 && (
+                                <span className="text-amber-600 dark:text-amber-400">
+                                  Missing times: {s.missingTimes.join(', ')}.{' '}
+                                </span>
+                              )}
+                              {s.emptyTimes.length > 0 && (
+                                <span className="text-muted-foreground">
+                                  Empty: {s.emptyTimes.join(', ')}.
+                                </span>
+                              )}
+                              {!hasIssue && s.emptyTimes.length === 0 && (
+                                <span className="text-green-600 dark:text-green-400">OK</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {!report.hasIssues && (
+                <div className="p-2 rounded border border-green-500/40 bg-green-500/10 text-xs">
+                  All recognized simulators were imported and every expected time slot was populated.
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button size="sm" onClick={() => setReportOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
