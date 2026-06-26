@@ -674,10 +674,20 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
         setImportedTitleRows(result.titleRows);
       }
 
+      const rowErrors: ImportRowErrorView[] = (result.rowErrors || []).map(re => ({
+        rowNumber: re.rowNumber,
+        simId: re.simId,
+        simName: re.simId ? getDisplayName(re.simId) : undefined,
+        field: re.field,
+        message: re.message,
+        snippet: re.snippet,
+      }));
+
       const hasIssues =
         importedCount === 0 ||
         result.skipped.length > 0 ||
         missingSims.length > 0 ||
+        rowErrors.length > 0 ||
         sims.some(s => s.totalSlots === 0 || s.missingTimes.length > 0 || s.emptyTimes.length > 0);
 
       const rpt: ImportReport = {
@@ -687,6 +697,7 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
         skipped: result.skipped,
         missingSims,
         sims: sims.sort((a, b) => a.name.localeCompare(b.name)),
+        rowErrors,
         hasIssues,
       };
       setReport(rpt);
@@ -695,7 +706,7 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
       if (importedCount === 0) {
         toast.error('Import finished but NO simulators were populated — check the status report.');
       } else if (hasIssues) {
-        toast.warning(`Imported ${importedCount} simulators with issues — see status report.`);
+        toast.warning(`Imported ${importedCount} simulators with ${rowErrors.length} row issue(s) — see status report.`);
       } else {
         toast.success(`Imported ${importedCount} simulators from M-SHARP — all slots populated.`);
       }
@@ -710,6 +721,7 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
         skipped: [],
         missingSims: [],
         sims: [],
+        rowErrors: [],
         hasIssues: true,
         error: msg,
       });
