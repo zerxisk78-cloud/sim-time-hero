@@ -297,7 +297,7 @@ function parseFinishedReport(
     }));
   }
 
-  return { simData: result, skipped, date, titleRows };
+  return { simData: result, skipped, date, titleRows, rowErrors };
 }
 
 function parseRawMSharp(
