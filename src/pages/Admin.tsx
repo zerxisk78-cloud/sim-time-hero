@@ -751,7 +751,7 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
           </Button>
           {report && (
             <Button
-              onClick={() => setReport(r => r && { ...r })}
+              onClick={() => setReportOpen(true)}
               size="sm"
               variant={report.hasIssues ? 'destructive' : 'secondary'}
               className="text-xs h-8 gap-1.5"
