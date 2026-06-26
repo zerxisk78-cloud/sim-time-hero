@@ -581,6 +581,15 @@ type ImportSimReport = {
   missingTimes: string[];
 };
 
+type ImportRowErrorView = {
+  rowNumber: number;
+  simId?: string;
+  simName?: string;
+  field: string;
+  message: string;
+  snippet?: string;
+};
+
 type ImportReport = {
   fileName: string;
   date: string;
@@ -588,6 +597,7 @@ type ImportReport = {
   skipped: string[];
   missingSims: string[];
   sims: ImportSimReport[];
+  rowErrors: ImportRowErrorView[];
   hasIssues: boolean;
   error?: string;
 };
@@ -664,10 +674,20 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
         setImportedTitleRows(result.titleRows);
       }
 
+      const rowErrors: ImportRowErrorView[] = (result.rowErrors || []).map(re => ({
+        rowNumber: re.rowNumber,
+        simId: re.simId,
+        simName: re.simId ? getDisplayName(re.simId) : undefined,
+        field: re.field,
+        message: re.message,
+        snippet: re.snippet,
+      }));
+
       const hasIssues =
         importedCount === 0 ||
         result.skipped.length > 0 ||
         missingSims.length > 0 ||
+        rowErrors.length > 0 ||
         sims.some(s => s.totalSlots === 0 || s.missingTimes.length > 0 || s.emptyTimes.length > 0);
 
       const rpt: ImportReport = {
@@ -677,6 +697,7 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
         skipped: result.skipped,
         missingSims,
         sims: sims.sort((a, b) => a.name.localeCompare(b.name)),
+        rowErrors,
         hasIssues,
       };
       setReport(rpt);
@@ -685,7 +706,7 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
       if (importedCount === 0) {
         toast.error('Import finished but NO simulators were populated — check the status report.');
       } else if (hasIssues) {
-        toast.warning(`Imported ${importedCount} simulators with issues — see status report.`);
+        toast.warning(`Imported ${importedCount} simulators with ${rowErrors.length} row issue(s) — see status report.`);
       } else {
         toast.success(`Imported ${importedCount} simulators from M-SHARP — all slots populated.`);
       }
@@ -700,6 +721,7 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
         skipped: [],
         missingSims: [],
         sims: [],
+        rowErrors: [],
         hasIssues: true,
         error: msg,
       });
@@ -819,6 +841,44 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
                   <ul className="list-disc list-inside mt-1">
                     {report.missingSims.map(s => <li key={s}>{s}</li>)}
                   </ul>
+                </div>
+              )}
+
+              {report.rowErrors.length > 0 && (
+                <div className="p-2 rounded border border-destructive/40 bg-destructive/10 text-xs">
+                  <div className="mb-1">
+                    <strong>Row-level issues ({report.rowErrors.length}):</strong>{' '}
+                    <span className="text-muted-foreground">Excel row # is shown so you can jump to it in the source file.</span>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto border border-border rounded">
+                    <table className="w-full text-[11px]">
+                      <thead className="bg-muted/50 sticky top-0">
+                        <tr>
+                          <th className="text-left p-1.5 w-14">Row</th>
+                          <th className="text-left p-1.5">Simulator</th>
+                          <th className="text-left p-1.5 w-24">Field</th>
+                          <th className="text-left p-1.5">Issue</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {report.rowErrors.map((e, idx) => (
+                          <tr key={`${e.rowNumber}-${idx}`} className="border-t border-border">
+                            <td className="p-1.5 font-mono">{e.rowNumber}</td>
+                            <td className="p-1.5">{e.simName || <span className="text-muted-foreground">—</span>}</td>
+                            <td className="p-1.5 font-mono">{e.field}</td>
+                            <td className="p-1.5">
+                              <div>{e.message}</div>
+                              {e.snippet && (
+                                <div className="text-muted-foreground font-mono mt-0.5 truncate" title={e.snippet}>
+                                  {e.snippet}
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
 
