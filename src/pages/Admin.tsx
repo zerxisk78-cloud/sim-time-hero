@@ -703,6 +703,7 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
         hasIssues: true,
         error: msg,
       });
+      setReportOpen(true);
     }
     setImporting(false);
     e.target.value = '';
