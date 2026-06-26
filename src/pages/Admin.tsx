@@ -596,6 +596,7 @@ function MSharpImportExport({ onImport }: { onImport: () => void }) {
   const [importing, setImporting] = useState(false);
   const [importedTitleRows, setImportedTitleRows] = useState<string[]>([]);
   const [report, setReport] = useState<ImportReport | null>(null);
+  const [reportOpen, setReportOpen] = useState(false);
   const [exportToggles, setExportToggles] = useState<Record<string, boolean>>(() => {
     const defaults: Record<string, boolean> = {};
     SIMULATORS.forEach(s => {
