@@ -319,114 +319,161 @@ function parseRawMSharp(
 
   const simData: Record<string, { time: string; unit: string; crew: string; status: string; tr: string; notes: string }[]> = {};
   const skipped: string[] = [];
+  const rowErrors: ImportRowError[] = [];
   let currentSimId: string | null = null;
   let currentDesc = '';
 
+  // Validate required columns
+  const required: [string, number][] = [
+    ['Description', colDesc], ['ETD', colETD], ['Unit', colUnit], ['Air Crew', colAirCrew],
+  ];
+  for (const [name, idx] of required) {
+    if (idx < 0) {
+      rowErrors.push({
+        rowNumber: headerIdx + 1,
+        field: name,
+        message: `Required column "${name}" not found in header row`,
+      });
+    }
+  }
+
   for (let i = headerIdx + 1; i < rows.length; i++) {
+    const excelRow = i + 1;
     const row = rows[i];
     if (!row) continue;
 
-    const desc = row[colDesc] != null ? String(row[colDesc]).trim() : '';
-    const etd = row[colETD] != null ? String(row[colETD]).trim() : '';
-    const status = row[colStatus] != null ? String(row[colStatus]).trim() : '';
-    const unit = row[colUnit] != null ? String(row[colUnit]).trim() : '';
-    const airCrew = row[colAirCrew] != null ? String(row[colAirCrew]).trim() : '';
-    const linkedSrc = colLinked >= 0 && row[colLinked] != null ? String(row[colLinked]).trim() : '';
-    const networkSrc = colNetwork >= 0 && row[colNetwork] != null ? String(row[colNetwork]).trim() : '';
-    const flightNoteSrc = colFlightNote >= 0 && row[colFlightNote] != null ? String(row[colFlightNote]).trim() : '';
-    const notesSrc = colNotesSrc >= 0 && row[colNotesSrc] != null ? String(row[colNotesSrc]).trim() : '';
+    try {
+      const desc = colDesc >= 0 && row[colDesc] != null ? String(row[colDesc]).trim() : '';
+      const etd = colETD >= 0 && row[colETD] != null ? String(row[colETD]).trim() : '';
+      const status = colStatus >= 0 && row[colStatus] != null ? String(row[colStatus]).trim() : '';
+      const unit = colUnit >= 0 && row[colUnit] != null ? String(row[colUnit]).trim() : '';
+      const airCrew = colAirCrew >= 0 && row[colAirCrew] != null ? String(row[colAirCrew]).trim() : '';
+      const linkedSrc = colLinked >= 0 && row[colLinked] != null ? String(row[colLinked]).trim() : '';
+      const networkSrc = colNetwork >= 0 && row[colNetwork] != null ? String(row[colNetwork]).trim() : '';
+      const flightNoteSrc = colFlightNote >= 0 && row[colFlightNote] != null ? String(row[colFlightNote]).trim() : '';
+      const notesSrc = colNotesSrc >= 0 && row[colNotesSrc] != null ? String(row[colNotesSrc]).trim() : '';
 
-    // New sim block?
-    if (desc && desc !== currentDesc) {
-      currentDesc = desc;
-      const mapped = descriptionToSimId(desc);
-      if (mapped) {
-        currentSimId = mapped;
-        if (!simData[currentSimId]) simData[currentSimId] = [];
+      // New sim block?
+      if (desc && desc !== currentDesc) {
+        currentDesc = desc;
+        const mapped = descriptionToSimId(desc);
+        if (mapped) {
+          currentSimId = mapped;
+          if (!simData[currentSimId]) simData[currentSimId] = [];
+        } else {
+          currentSimId = null;
+          if (!skipped.includes(desc)) skipped.push(desc);
+          rowErrors.push({
+            rowNumber: excelRow,
+            field: 'Description',
+            message: `Unrecognized simulator description — rows under this block skipped until the next recognized block`,
+            snippet: desc,
+          });
+        }
+      }
+
+      if (!currentSimId) continue;
+
+      // Only process rows that have an ETD (time slot rows)
+      if (!etd) continue;
+
+      // Collect crew names for this time slot
+      const crewNames: string[] = [];
+      if (airCrew) crewNames.push(extractLastName(airCrew));
+
+      // Look ahead for continuation rows (no ETD = extra crew for same slot)
+      let j = i + 1;
+      while (j < rows.length) {
+        const nextRow = rows[j];
+        if (!nextRow) { j++; continue; }
+        const nextDesc = nextRow[colDesc] != null ? String(nextRow[colDesc]).trim() : '';
+        const nextEtd = nextRow[colETD] != null ? String(nextRow[colETD]).trim() : '';
+        if (nextDesc || nextEtd) break;
+        const nextCrew = nextRow[colAirCrew] != null ? String(nextRow[colAirCrew]).trim() : '';
+        if (nextCrew) {
+          const name = extractLastName(nextCrew);
+          if (name && !crewNames.includes(name)) crewNames.push(name);
+        }
+        j++;
+      }
+
+      const statusLower = status.toLowerCase();
+      let cleanUnit = unit;
+      let cleanCrew = '';
+      let notes = '';
+      let tr = '';
+
+      if (statusLower === 'available') {
+        cleanUnit = 'OPEN';
+        cleanCrew = 'OPEN';
+      } else if (statusLower === 'maintenance - device' || statusLower === 'unavailable' || statusLower === 'unopen') {
+        cleanUnit = 'CLOSED';
+        cleanCrew = 'CLOSED';
       } else {
-        currentSimId = null;
-        if (!skipped.includes(desc)) skipped.push(desc);
+        if (unit.toUpperCase().includes('MATSS')) {
+          cleanUnit = '';
+        }
+        cleanUnit = cleanUnit.replace(/\s*\(.*?\)\s*$/, '').trim();
+
+        if (crewNames.length <= 2) {
+          cleanCrew = crewNames.join('/');
+        } else {
+          cleanCrew = crewNames.slice(0, 2).join('/');
+          notes = crewNames.slice(2).join('/');
+        }
+
+        const extraBits: string[] = [];
+        if (linkedSrc) extraBits.push(linkedSrc);
+        if (networkSrc) extraBits.push(networkSrc);
+        if (flightNoteSrc) extraBits.push(flightNoteSrc);
+        if (notesSrc) extraBits.push(notesSrc);
+        if (extraBits.length) {
+          notes = [notes, ...extraBits].filter(Boolean).join(' ; ');
+        }
+
+        for (const rawCrew of [airCrew, ...crewNames]) {
+          const trCode = extractTRCode(rawCrew);
+          if (trCode) { tr = trCode; break; }
+        }
+
+        // Sanity warnings (non-fatal)
+        if (!cleanUnit && cleanCrew) {
+          rowErrors.push({
+            rowNumber: excelRow,
+            simId: currentSimId,
+            field: 'Unit',
+            message: 'Crew present but Unit is empty after cleanup',
+            snippet: `unit="${unit}" crew="${airCrew}"`,
+          });
+        }
+        if (cleanUnit && !cleanCrew && status && statusLower !== 'available') {
+          rowErrors.push({
+            rowNumber: excelRow,
+            simId: currentSimId,
+            field: 'Air Crew',
+            message: 'Unit present but no crew names parsed',
+            snippet: `unit="${unit}" airCrew="${airCrew}"`,
+          });
+        }
       }
+
+      simData[currentSimId].push({
+        time: etd,
+        unit: cleanUnit,
+        crew: cleanCrew,
+        status,
+        tr,
+        notes,
+      });
+    } catch (err) {
+      rowErrors.push({
+        rowNumber: excelRow,
+        simId: currentSimId ?? undefined,
+        field: 'row',
+        message: err instanceof Error ? err.message : String(err),
+        snippet: row.map(c => String(c ?? '')).join(' | ').slice(0, 120),
+      });
     }
-
-    if (!currentSimId) continue;
-
-    // Only process rows that have an ETD (time slot rows)
-    if (!etd) continue;
-
-    // Collect crew names for this time slot
-    const crewNames: string[] = [];
-    if (airCrew) crewNames.push(extractLastName(airCrew));
-
-    // Look ahead for continuation rows (no ETD = extra crew for same slot)
-    let j = i + 1;
-    while (j < rows.length) {
-      const nextRow = rows[j];
-      if (!nextRow) { j++; continue; }
-      const nextDesc = nextRow[colDesc] != null ? String(nextRow[colDesc]).trim() : '';
-      const nextEtd = nextRow[colETD] != null ? String(nextRow[colETD]).trim() : '';
-      if (nextDesc || nextEtd) break; // new block or new time slot
-      const nextCrew = nextRow[colAirCrew] != null ? String(nextRow[colAirCrew]).trim() : '';
-      if (nextCrew) {
-        const name = extractLastName(nextCrew);
-        if (name && !crewNames.includes(name)) crewNames.push(name);
-      }
-      j++;
-    }
-
-    // Determine unit/crew based on M-SHARP status
-    const statusLower = status.toLowerCase();
-    let cleanUnit = unit;
-    let cleanCrew = '';
-    let notes = '';
-    let tr = '';
-
-    if (statusLower === 'available') {
-      cleanUnit = 'OPEN';
-      cleanCrew = 'OPEN';
-    } else if (statusLower === 'maintenance - device' || statusLower === 'unavailable' || statusLower === 'unopen') {
-      cleanUnit = 'CLOSED';
-      cleanCrew = 'CLOSED';
-    } else {
-      // Scheduled/Reserved - clean up unit
-      if (unit.toUpperCase().includes('MATSS')) {
-        cleanUnit = '';
-      }
-      cleanUnit = cleanUnit.replace(/\s*\(.*?\)\s*$/, '').trim();
-
-      // Max 2 pilots in crew, rest go to notes
-      if (crewNames.length <= 2) {
-        cleanCrew = crewNames.join('/');
-      } else {
-        cleanCrew = crewNames.slice(0, 2).join('/');
-        notes = crewNames.slice(2).join('/');
-      }
-
-      // Merge source-side note/linked-sim fields into notes so export can extract them
-      const extraBits: string[] = [];
-      if (linkedSrc) extraBits.push(linkedSrc);
-      if (networkSrc) extraBits.push(networkSrc);
-      if (flightNoteSrc) extraBits.push(flightNoteSrc);
-      if (notesSrc) extraBits.push(notesSrc);
-      if (extraBits.length) {
-        notes = [notes, ...extraBits].filter(Boolean).join(' ; ');
-      }
-
-      // Check all crew strings for T&R codes
-      for (const rawCrew of [airCrew, ...crewNames]) {
-        const trCode = extractTRCode(rawCrew);
-        if (trCode) { tr = trCode; break; }
-      }
-    }
-
-    simData[currentSimId].push({
-      time: etd,
-      unit: cleanUnit,
-      crew: cleanCrew,
-      status,
-      tr,
-      notes,
-    });
   }
 
   // Convert to SimSlot format, preserving existing CSI/DO values from the store
@@ -434,7 +481,6 @@ function parseRawMSharp(
   for (const [simId, slots] of Object.entries(simData)) {
     const existing = getSimEntries(simId);
     const defaultCsi = getDefaultCsi(simId);
-    // Build a lookup by time to preserve CSI/DO from existing store
     const existingByTime: Record<string, string> = {};
     for (const e of existing) {
       if (e.time && e.csi) existingByTime[e.time] = e.csi;
@@ -449,7 +495,7 @@ function parseRawMSharp(
     }));
   }
 
-  return { simData: result, skipped, date, titleRows };
+  return { simData: result, skipped, date, titleRows, rowErrors };
 }
 
 // ---- EXPORT ----
