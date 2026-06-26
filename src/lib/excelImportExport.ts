@@ -156,91 +156,132 @@ function parseFinishedReport(
 
   const simData: Record<string, SimSlot[]> = {};
   const skipped: string[] = [];
+  const rowErrors: ImportRowError[] = [];
   let currentSimId: string | null = null;
 
+  // Validate required columns
+  const required: [string, number][] = [['Description', colDesc], ['ETD', colETD]];
+  for (const [name, idx] of required) {
+    if (idx < 0) {
+      rowErrors.push({
+        rowNumber: headerIdx + 1,
+        field: name,
+        message: `Required column "${name}" not found in header row`,
+      });
+    }
+  }
+
   for (let i = headerIdx + 1; i < rows.length; i++) {
+    const excelRow = i + 1; // 1-based Excel row number
     const row = rows[i];
     if (!row) continue;
 
-    // Check if this is a new header row (repeated headers between sim blocks)
-    const firstCell = String(row[0] ?? '').trim();
-    if (firstCell === 'Description') continue; // skip repeated header rows
+    try {
+      // Check if this is a new header row (repeated headers between sim blocks)
+      const firstCell = String(row[0] ?? '').trim();
+      if (firstCell === 'Description') continue; // skip repeated header rows
 
-    const desc = colDesc >= 0 && row[colDesc] != null ? String(row[colDesc]).trim() : '';
-    const etd = colETD >= 0 && row[colETD] != null ? String(row[colETD]).trim() : '';
-    const status = colStatus >= 0 && row[colStatus] != null ? String(row[colStatus]).trim() : '';
-    const unitRaw = colUnit >= 0 && row[colUnit] != null ? String(row[colUnit]).trim() : '';
-    const crewRaw = colCrew >= 0 && row[colCrew] != null ? String(row[colCrew]).trim() : '';
-    const trRaw = colTR >= 0 && row[colTR] != null ? String(row[colTR]).trim() : '';
-    const ciRaw = colCI >= 0 && row[colCI] != null ? String(row[colCI]).trim() : '';
-    const notesRaw = colNotes >= 0 && row[colNotes] != null ? String(row[colNotes]).trim() : '';
+      const desc = colDesc >= 0 && row[colDesc] != null ? String(row[colDesc]).trim() : '';
+      const etd = colETD >= 0 && row[colETD] != null ? String(row[colETD]).trim() : '';
+      const status = colStatus >= 0 && row[colStatus] != null ? String(row[colStatus]).trim() : '';
+      const unitRaw = colUnit >= 0 && row[colUnit] != null ? String(row[colUnit]).trim() : '';
+      const crewRaw = colCrew >= 0 && row[colCrew] != null ? String(row[colCrew]).trim() : '';
+      const trRaw = colTR >= 0 && row[colTR] != null ? String(row[colTR]).trim() : '';
+      const ciRaw = colCI >= 0 && row[colCI] != null ? String(row[colCI]).trim() : '';
+      const notesRaw = colNotes >= 0 && row[colNotes] != null ? String(row[colNotes]).trim() : '';
 
-    // New sim block if description column has content
-    if (desc) {
-      const mapped = descriptionToSimId(desc);
-      if (mapped) {
-        currentSimId = mapped;
-        if (!simData[currentSimId]) simData[currentSimId] = [];
-      } else {
-        currentSimId = null;
-        if (!skipped.includes(desc)) skipped.push(desc);
-      }
-    }
-
-    if (!currentSimId || !etd) continue;
-
-    // Clean trailing commas from exported values
-    const cleanVal = (v: string) => v.replace(/,\s*$/, '').trim();
-    const unit = cleanVal(unitRaw);
-    const crew = cleanVal(crewRaw);
-
-    // Determine unit/crew
-    const statusLower = status.toLowerCase().replace(/,\s*$/, '');
-    let finalUnit = unit;
-    let finalCrew = crew;
-    let finalNotes = notesRaw;
-
-    if (statusLower === 'open' || unit.toUpperCase() === 'OPEN') {
-      finalUnit = 'OPEN';
-      finalCrew = 'OPEN';
-      finalNotes = '';
-    } else if (statusLower === 'unopen' || statusLower === 'unopen,' || unit.toUpperCase() === 'CLOSED') {
-      finalUnit = 'CLOSED';
-      finalCrew = 'CLOSED';
-      finalNotes = '';
-    } else {
-      // If notes has extra pilots, combine them back into crew
-      if (finalNotes && crew) {
-        // Check if notes start with a name (extra pilots from export)
-        const notesParts = finalNotes.split(';').map(p => p.trim());
-        const extraPilots = notesParts[0];
-        // If extra pilots look like names (no spaces typical of notes), merge into crew
-        if (extraPilots && !extraPilots.includes(' ')) {
-          finalCrew = crew + '/' + extraPilots;
-          finalNotes = notesParts.slice(1).join('; ').trim();
+      // New sim block if description column has content
+      if (desc) {
+        const mapped = descriptionToSimId(desc);
+        if (mapped) {
+          currentSimId = mapped;
+          if (!simData[currentSimId]) simData[currentSimId] = [];
+        } else {
+          currentSimId = null;
+          if (!skipped.includes(desc)) skipped.push(desc);
+          rowErrors.push({
+            rowNumber: excelRow,
+            field: 'Description',
+            message: `Unrecognized simulator description — row & all rows below until next block were skipped`,
+            snippet: desc,
+          });
         }
       }
-    }
 
-    // Determine CSI from CI column or default
-    let csi = '';
-    if (MRT_SIM_IDS.includes(currentSimId)) {
-      csi = currentSimId === 'mrt-1' || currentSimId === 'mrt-3' ? 'AH' : 'UH';
-    } else if (ciRaw) {
-      csi = 'CSI';
-    } else {
-      csi = 'DO';
-    }
+      if (!currentSimId) continue;
+      if (!etd) {
+        // Row inside a sim block but no time — flag if it has any other content
+        const hasContent = unitRaw || crewRaw || trRaw || notesRaw;
+        if (hasContent) {
+          rowErrors.push({
+            rowNumber: excelRow,
+            simId: currentSimId,
+            field: 'ETD',
+            message: 'Row has data but no time — skipped',
+            snippet: [unitRaw, crewRaw, notesRaw].filter(Boolean).join(' | ').slice(0, 80),
+          });
+        }
+        continue;
+      }
 
-    simData[currentSimId].push({
-      time: etd,
-      unit: finalUnit,
-      crew: finalCrew,
-      csi,
-      tr: trRaw,
-      notes: finalNotes,
-    });
+      // Clean trailing commas from exported values
+      const cleanVal = (v: string) => v.replace(/,\s*$/, '').trim();
+      const unit = cleanVal(unitRaw);
+      const crew = cleanVal(crewRaw);
+
+      // Determine unit/crew
+      const statusLower = status.toLowerCase().replace(/,\s*$/, '');
+      let finalUnit = unit;
+      let finalCrew = crew;
+      let finalNotes = notesRaw;
+
+      if (statusLower === 'open' || unit.toUpperCase() === 'OPEN') {
+        finalUnit = 'OPEN';
+        finalCrew = 'OPEN';
+        finalNotes = '';
+      } else if (statusLower === 'unopen' || statusLower === 'unopen,' || unit.toUpperCase() === 'CLOSED') {
+        finalUnit = 'CLOSED';
+        finalCrew = 'CLOSED';
+        finalNotes = '';
+      } else {
+        if (finalNotes && crew) {
+          const notesParts = finalNotes.split(';').map(p => p.trim());
+          const extraPilots = notesParts[0];
+          if (extraPilots && !extraPilots.includes(' ')) {
+            finalCrew = crew + '/' + extraPilots;
+            finalNotes = notesParts.slice(1).join('; ').trim();
+          }
+        }
+      }
+
+      let csi = '';
+      if (MRT_SIM_IDS.includes(currentSimId)) {
+        csi = currentSimId === 'mrt-1' || currentSimId === 'mrt-3' ? 'AH' : 'UH';
+      } else if (ciRaw) {
+        csi = 'CSI';
+      } else {
+        csi = 'DO';
+      }
+
+      simData[currentSimId].push({
+        time: etd,
+        unit: finalUnit,
+        crew: finalCrew,
+        csi,
+        tr: trRaw,
+        notes: finalNotes,
+      });
+    } catch (err) {
+      rowErrors.push({
+        rowNumber: excelRow,
+        simId: currentSimId ?? undefined,
+        field: 'row',
+        message: err instanceof Error ? err.message : String(err),
+        snippet: row.map(c => String(c ?? '')).join(' | ').slice(0, 120),
+      });
+    }
   }
+
 
   // Preserve existing CSI/DO values from store where possible
   const result: Record<string, SimSlot[]> = {};
