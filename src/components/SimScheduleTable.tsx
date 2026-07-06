@@ -2,8 +2,6 @@ import { SimSlot, MRT_SIM_IDS } from "@/lib/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowRight } from "lucide-react";
 
-const FTD_FFS_IDS = ['ah1z-ftd', 'ah1z-ffs', 'uh1y-ftd', 'uh1y-ffs'];
-
 interface SimScheduleTableProps {
   simId?: string;
   name: string;
@@ -20,10 +18,17 @@ function parseSlotMinutes(time: string): number | null {
   return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
 }
 
+// Tolerant of casing, trailing punctuation/whitespace ("OPEN,", " open ")
+function normalizeCell(v: string): string {
+  return (v || '').replace(/[,;.\s]+$/g, '').trim().toUpperCase();
+}
+
 function isOpenSlot(entry: SimSlot): boolean {
-  const u = (entry.unit || '').toUpperCase().trim();
-  const c = (entry.crew || '').toUpperCase().trim();
-  return (u === 'OPEN' || c === 'OPEN') || (!u && !c && !entry.csi);
+  const u = normalizeCell(entry.unit);
+  const c = normalizeCell(entry.crew);
+  if (u === 'OPEN' || c === 'OPEN') return true;
+  // Fully-empty slot with no CSI role assigned is also treated as open
+  return !u && !c && !entry.csi;
 }
 
 export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHour, currentMinute, larger }: SimScheduleTableProps) {
