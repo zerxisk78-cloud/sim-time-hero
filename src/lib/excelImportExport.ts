@@ -4,28 +4,38 @@ import type { SimSlot } from './types';
 import { getSimEntries, getDisplayName } from './store';
 
 // ---- Description → simId mapping ----
-const DESC_TO_SIM: Record<string, string> = {
-  'AH-1Z CPT': 'ah1z-cpt',
-  'AH-1Z FFS': 'ah1z-ffs',
-  'AH-1Z FTD': 'ah1z-ftd',
-  'UH-1Y CPT': 'uh1y-cpt',
-  'UH-1Y FFS': 'uh1y-ffs',
-  'UH-1Y FTD': 'uh1y-ftd',
-  'MV-22B CFTD 2F200-13': 'mv22-13',
-  'MV-22B CFTD 2F200-14': 'mv22-14',
-  'MV-22 PTT': 'mv22-ptt',
-  'MCAT': 'mcat',
-  'MRT 2F300-1Z': 'mrt-1',
-  'MRT 2F300-2Y': 'mrt-2',
-  'MRT 2F300-3Z': 'mrt-3',
-  'MRT 2F300-4Y': 'mrt-4',
-};
+// Ordered longest-key-first so more-specific patterns win (e.g. "MV-22B CFTD 2F200-13" before "MV-22").
+// Add multiple aliases per sim so slight description variations still map.
+const DESC_TO_SIM: [string, string][] = [
+  ['MV-22B CFTD 2F200-13', 'mv22-13'],
+  ['MV-22B CFTD 2F200-14', 'mv22-14'],
+  ['MV-22 PTT', 'mv22-ptt'],
+  ['MRT 2F300-1Z', 'mrt-1'],
+  ['MRT 2F300-2Y', 'mrt-2'],
+  ['MRT 2F300-3Z', 'mrt-3'],
+  ['MRT 2F300-4Y', 'mrt-4'],
+  ['AH-1Z FTD', 'ah1z-ftd'],
+  ['AH-1Z FFS', 'ah1z-ffs'],
+  ['AH-1Z CPT', 'ah1z-cpt'],
+  ['UH-1Y FTD', 'uh1y-ftd'],
+  ['UH-1Y FFS', 'uh1y-ffs'],
+  ['UH-1Y CPT', 'uh1y-cpt'],
+  // Fallback aliases (no AH-/UH- prefix, or extra spacing)
+  ['1Z FTD', 'ah1z-ftd'],
+  ['1Z FFS', 'ah1z-ffs'],
+  ['1Z CPT', 'ah1z-cpt'],
+  ['1Y FTD', 'uh1y-ftd'],
+  ['1Y FFS', 'uh1y-ffs'],
+  ['1Y CPT', 'uh1y-cpt'],
+  ['MCAT', 'mcat'],
+];
 
 function descriptionToSimId(desc: string): string | null {
-  const d = desc.trim();
-  // Try specific long matches first (MV-22 13 vs 14)
-  for (const [key, simId] of Object.entries(DESC_TO_SIM)) {
-    if (d.includes(key)) return simId;
+  // Normalize: collapse whitespace, uppercase for case-insensitive comparison
+  const d = desc.replace(/\s+/g, ' ').trim().toUpperCase();
+  if (!d) return null;
+  for (const [key, simId] of DESC_TO_SIM) {
+    if (d.includes(key.toUpperCase())) return simId;
   }
   return null;
 }
