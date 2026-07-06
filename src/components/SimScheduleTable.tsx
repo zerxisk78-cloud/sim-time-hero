@@ -50,7 +50,7 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
         </TableHeader>
         <TableBody>
           {entries.filter(e => e.unit || e.crew || e.csi).map((entry, i, filtered) => {
-            const open = isFtdFfs && isOpenSlot(entry);
+            const open = !isMrt && isOpenSlot(entry);
             const role = isMrt
               ? (entry.csi === 'AH' ? 'AH' : 'UH')
               : (entry.csi === 'DO' || entry.csi === 'Device Operator' ? 'DO' : 'CSI');
