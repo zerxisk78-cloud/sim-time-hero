@@ -36,7 +36,6 @@ export function SimScheduleTable({ simId, name, entries, mrtLocation, currentHou
   if (!hasData) return null;
 
   const isMrt = simId ? MRT_SIM_IDS.includes(simId) : name.startsWith('MRT');
-  const isFtdFfs = simId ? FTD_FFS_IDS.includes(simId) : false;
 
   return (
     <div className="mb-1">
