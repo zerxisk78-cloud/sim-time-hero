@@ -47,6 +47,22 @@ function extractLastName(crewStr: string): string {
   return crewStr.trim();
 }
 
+function cleanImportedValue(value: string): string {
+  return value.replace(/[,;\s]+$/g, '').trim();
+}
+
+function isRepeatedHeaderRow(row: (string | number | null)[], headers: string[]): boolean {
+  const cells = row.map(c => String(c ?? '').trim());
+  const descIdx = headers.indexOf('Description');
+  const etdIdx = headers.indexOf('ETD');
+  return (
+    descIdx >= 0 &&
+    etdIdx >= 0 &&
+    cells[descIdx] === 'Description' &&
+    cells[etdIdx] === 'ETD'
+  );
+}
+
 function getDefaultCsi(simId: string): string {
   if (MRT_SIM_IDS.includes(simId)) {
     return simId === 'mrt-1' || simId === 'mrt-3' ? 'AH' : 'UH';
@@ -187,9 +203,8 @@ function parseFinishedReport(
     if (!row) continue;
 
     try {
-      // Check if this is a new header row (repeated headers between sim blocks)
-      const firstCell = String(row[0] ?? '').trim();
-      if (firstCell === 'Description') continue; // skip repeated header rows
+      // Finished reports repeat the header row before each simulator block.
+      if (isRepeatedHeaderRow(row, headers)) continue;
 
       const desc = colDesc >= 0 && row[colDesc] != null ? String(row[colDesc]).trim() : '';
       const etd = colETD >= 0 && row[colETD] != null ? String(row[colETD]).trim() : '';
@@ -234,13 +249,12 @@ function parseFinishedReport(
         continue;
       }
 
-      // Clean trailing commas from exported values
-      const cleanVal = (v: string) => v.replace(/,\s*$/, '').trim();
-      const unit = cleanVal(unitRaw);
-      const crew = cleanVal(crewRaw);
+      const unit = cleanImportedValue(unitRaw);
+      const crew = cleanImportedValue(crewRaw);
+      const statusClean = cleanImportedValue(status);
 
       // Determine unit/crew
-      const statusLower = status.toLowerCase().replace(/,\s*$/, '');
+      const statusLower = statusClean.toLowerCase();
       let finalUnit = unit;
       let finalCrew = crew;
       let finalNotes = notesRaw;
@@ -249,7 +263,7 @@ function parseFinishedReport(
         finalUnit = 'OPEN';
         finalCrew = 'OPEN';
         finalNotes = '';
-      } else if (statusLower === 'unopen' || statusLower === 'unopen,' || unit.toUpperCase() === 'CLOSED') {
+      } else if (statusLower === 'unopen' || statusLower === 'unavailable' || unit.toUpperCase() === 'CLOSED') {
         finalUnit = 'CLOSED';
         finalCrew = 'CLOSED';
         finalNotes = '';
