@@ -30,12 +30,32 @@ const DESC_TO_SIM: [string, string][] = [
   ['MCAT', 'mcat'],
 ];
 
+// Fallback identifiers for FTDs when the primary AH-1Z / UH-1Y prefix is missing
+// or slightly malformed on the spreadsheet (model numbers, hyphenated shorthand,
+// spacing variants). Tried only after the primary DESC_TO_SIM pass fails.
+const FTD_FALLBACK_PATTERNS: [RegExp, string][] = [
+  // AH-1Z FTD alternates
+  [/\b2F\s*197(?:\s*-\s*1)?\b/i, 'ah1z-ftd'],
+  [/\bZ\s*[-\s]\s*FTD\b/i, 'ah1z-ftd'],
+  [/\bAH\s*[-\s]?\s*FTD\b/i, 'ah1z-ftd'],
+  [/\bAH\s*1Z[^A-Z0-9]*FTD\b/i, 'ah1z-ftd'],
+  // UH-1Y FTD alternates
+  [/\b2F\s*196B?(?:\s*-\s*2)?\b/i, 'uh1y-ftd'],
+  [/\bY\s*[-\s]\s*FTD\b/i, 'uh1y-ftd'],
+  [/\bUH\s*[-\s]?\s*FTD\b/i, 'uh1y-ftd'],
+  [/\bUH\s*1Y[^A-Z0-9]*FTD\b/i, 'uh1y-ftd'],
+];
+
 function descriptionToSimId(desc: string): string | null {
   // Normalize: collapse whitespace, uppercase for case-insensitive comparison
   const d = desc.replace(/\s+/g, ' ').trim().toUpperCase();
   if (!d) return null;
   for (const [key, simId] of DESC_TO_SIM) {
     if (d.includes(key.toUpperCase())) return simId;
+  }
+  // Fallback: try alternate Y-FTD / Z-FTD identifiers (model numbers, shorthand)
+  for (const [pattern, simId] of FTD_FALLBACK_PATTERNS) {
+    if (pattern.test(d)) return simId;
   }
   return null;
 }
